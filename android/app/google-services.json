@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "875575096455",
+    "project_id": "mediwise-68008",
+    "storage_bucket": "mediwise-68008.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875575096455:android:d8ba7d4c602fa5a22b7422",
+        "android_client_info": {
+          "package_name": "com.example.medlink"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "875575096455-o52od8em2eeu9s6sle2qp6rih73rs71a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfNng2wc2-tbSy3z_ETN6QwciUTMX7aWk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "875575096455-o52od8em2eeu9s6sle2qp6rih73rs71a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
