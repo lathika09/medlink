@@ -89,7 +89,11 @@ class SignupPage extends StatelessWidget {
                                 borderSide: BorderSide(
                                   color: Color(0xFFBDBDBD),
                                 ),
-                              )
+                              ),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Color(0xFFBDBDBD), // Adjust the color as needed
+                            ),
                           ),
                         ),
                         SizedBox(height:10),
@@ -117,7 +121,11 @@ class SignupPage extends StatelessWidget {
                                 borderSide: BorderSide(
                                   color: Color(0xFFBDBDBD),
                                 ),
-                              )
+                              ),
+                            prefixIcon: Icon(
+                              Icons.email,
+                              color: Color(0xFFBDBDBD), // Adjust the color as needed
+                            ),
                           ),
                           controller:_email,
                         ),
@@ -146,7 +154,11 @@ class SignupPage extends StatelessWidget {
                                 borderSide: BorderSide(
                                   color: Color(0xFFBDBDBD),
                                 ),
-                              )
+                              ),
+                            prefixIcon: Icon(
+                              Icons.phone,
+                              color: Color(0xFFBDBDBD), // Adjust the color as needed
+                            ),
                           ),
                         ),
                         SizedBox(height:10),
@@ -160,23 +172,7 @@ class SignupPage extends StatelessWidget {
                           style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
                         ),
                         const SizedBox(height:3),
-                        TextField(
-                          obscureText: true,
-                          controller:_pswd,
-                          decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              )
-                          ),
-                        ),
+                        PasswordTextField(controller: _pswd),
                         SizedBox(height:10),
                       ],
                     ),
@@ -188,25 +184,8 @@ class SignupPage extends StatelessWidget {
                           style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
                         ),
                         const SizedBox(height:3),
-                        TextField(
-
-                          obscureText: true,
-                          controller: _conpswd,
-                          decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              )
-                          ),
-                        ),
-                        SizedBox(height:10),
+                        PasswordTextField(controller: _conpswd),
+                        const SizedBox(height:10),
                       ],
                     ),
 
@@ -346,6 +325,53 @@ class SignupPage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+}
+
+
+class PasswordTextField extends StatefulWidget {
+  final TextEditingController controller;
+
+  PasswordTextField({required this.controller});
+
+  @override
+  _PasswordTextFieldState createState() => _PasswordTextFieldState();
+}
+
+class _PasswordTextFieldState extends State<PasswordTextField> {
+  bool _isObscured = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      obscureText: _isObscured,
+      controller: widget.controller,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color(0xFFBDBDBD),
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color(0xFFBDBDBD),
+          ),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _isObscured ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _isObscured = !_isObscured;
+            });
+          },
+        ),
+      ),
     );
   }
 }

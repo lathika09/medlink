@@ -68,6 +68,7 @@ class LoginPage extends StatelessWidget {
                     TextField(
                       controller: login_email,
                       obscureText: false,
+
                       decoration: const InputDecoration(
                           contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
                           enabledBorder: OutlineInputBorder(
@@ -79,7 +80,11 @@ class LoginPage extends StatelessWidget {
                             borderSide: BorderSide(
                               color: Color(0xFFBDBDBD),
                             ),
-                          )
+                          ),
+                        prefixIcon: Icon(
+                          Icons.email,
+                          color: Color(0xFFBDBDBD), // Adjust the color as needed
+                        ),
                       ),
                     ),
                     const SizedBox(height:10),
@@ -93,23 +98,7 @@ class LoginPage extends StatelessWidget {
                           style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
                         ),
                         SizedBox(height:5),
-                        TextField(
-                          obscureText: true,
-                          controller: login_pswd,
-                          decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
-                              )
-                          ),
-                        ),
+                        PasswordTextField(controller: login_pswd),
                         //SizedBox(height:10),
                         TextButton(
                           onPressed: () {
@@ -143,6 +132,8 @@ class LoginPage extends StatelessWidget {
                       password: login_pswd.text,
                       )
                           .then((value) {
+
+
                       Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => HomePage()),
@@ -235,7 +226,7 @@ class LoginPage extends StatelessWidget {
                       email: login_email.text,
                     );
                     _showSuccessDialog(context, 'Password reset instructions sent to ${login_email.text}');
-                    Navigator.of(context).pop(); // Close the dialog
+                    Navigator.of(context).pop();
                   } catch (error) {
                     print("Error sending reset instructions: ${error.toString()}");
                     _showErrorDialog(context, 'Error sending reset instructions: ${error.toString()}');
@@ -248,7 +239,43 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  void _showErrorDialog(BuildContext context, String errorMessage) {
+  void _showErrorDialog(BuildContext context, dynamic error) {
+    String errorMessage = 'An error occurred. Please enter credentials.';
+
+    if (error is FirebaseException) {
+      switch (error.code) {
+        case 'invalid-email':
+          errorMessage = 'Invalid email address. Please enter a valid email.';
+          break;
+        case 'user-not-found':
+          errorMessage = 'User not found. Please check your email and try again.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Wrong password. Please try again.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'Your account has been disabled. Please contact support.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many login attempts. Please try again later.';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'Email address is already in use. Please use a different email.';
+          break;
+        case 'weak-password':
+          errorMessage = 'Weak password. Please use a stronger password.';
+          break;
+
+      }
+
+    } else if (error.toString().contains('required_email')) {
+      errorMessage = 'Email field is required. Please enter your email.';
+    } else if (error.toString().contains('required_password')) {
+      errorMessage = 'Password field is required. Please enter your password.';
+    }
+
+
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -267,6 +294,8 @@ class LoginPage extends StatelessWidget {
       },
     );
   }
+
+
 
 
   void _showSuccessDialog(BuildContext context, String message) {
@@ -294,34 +323,52 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-//WE WILL BE CREATING WIDGET FOR TEXTFIELD
-Widget inputFile({label,obscureText=false}){
-  return Column(
-      crossAxisAlignment:CrossAxisAlignment.start,
-    children: [
-      Text(
-        label,
-        style: TextStyle(fontSize: 15,fontWeight: FontWeight.w400,color: Colors.black87),
-      ),
-      const SizedBox(height:5),
-      TextField(
-        obscureText: obscureText,
-        decoration: const InputDecoration(
-          contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Color(0xFFBDBDBD),
-            ),
+//WE WILL BE CREATING WIDGET FOR password
+class PasswordTextField extends StatefulWidget {
+  final TextEditingController controller;
+
+  PasswordTextField({required this.controller});
+
+  @override
+  _PasswordTextFieldState createState() => _PasswordTextFieldState();
+}
+
+class _PasswordTextFieldState extends State<PasswordTextField> {
+  bool _isObscured = true; // Initially, the password is obscured
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      obscureText: _isObscured,
+      controller: widget.controller,
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color(0xFFBDBDBD),
           ),
-          border:OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Color(0xFFBDBDBD),
-            ),
-          )
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color(0xFFBDBDBD),
+          ),
+        ),
+        prefixIcon: Icon(
+          Icons.password,
+          color: Color(0xFFBDBDBD),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            _isObscured ? Icons.visibility : Icons.visibility_off,
+            color: Colors.grey,
+          ),
+          onPressed: () {
+            setState(() {
+              _isObscured = !_isObscured;
+            });
+          },
         ),
       ),
-      SizedBox(height:10),
-    ],
-  );
-
+    );
+  }
 }
