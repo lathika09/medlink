@@ -4,17 +4,18 @@ import 'package:get/get_utils/src/get_utils/get_utils.dart';
 import 'package:medlink/views/patient/home.dart';
 //import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/login.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../splash/splash_controller.dart';
 
 //import '../splash/splash_screen.dart';
 
 class SignupPage extends StatelessWidget {
-  TextEditingController _name = TextEditingController();
-  TextEditingController _email = TextEditingController();
-  TextEditingController _phn = TextEditingController();
-  TextEditingController _pswd = TextEditingController();
-  TextEditingController _conpswd = TextEditingController();
+  final TextEditingController _name = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _phn = TextEditingController();
+  final TextEditingController _pswd = TextEditingController();
+  final TextEditingController _conpswd = TextEditingController();
 
   bool validateEmail(String email) {
     return GetUtils.isEmail(email); // Using GetUtils to validate email
@@ -39,9 +40,9 @@ class SignupPage extends StatelessWidget {
         leading: IconButton(
           onPressed: (){
             Navigator.pop(context);
-            },
+          },
           icon: Icon(Icons.arrow_back_ios,size: 25,color: Colors.black,),
-          
+
         ),
       ),
       body: SingleChildScrollView(
@@ -79,17 +80,17 @@ class SignupPage extends StatelessWidget {
                           controller:_name,
 
                           decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            ),
+                            border:OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
+                            ),
                             prefixIcon: Icon(
                               Icons.person,
                               color: Color(0xFFBDBDBD), // Adjust the color as needed
@@ -111,17 +112,17 @@ class SignupPage extends StatelessWidget {
                           obscureText: false,
 
                           decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            ),
+                            border:OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
+                            ),
                             prefixIcon: Icon(
                               Icons.email,
                               color: Color(0xFFBDBDBD), // Adjust the color as needed
@@ -144,17 +145,17 @@ class SignupPage extends StatelessWidget {
                           obscureText: false,
                           controller:_phn,
                           decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
-                              border:OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color(0xFFBDBDBD),
-                                ),
+                            ),
+                            border:OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color(0xFFBDBDBD),
                               ),
+                            ),
                             prefixIcon: Icon(
                               Icons.phone,
                               color: Color(0xFFBDBDBD), // Adjust the color as needed
@@ -202,6 +203,7 @@ class SignupPage extends StatelessWidget {
 
                       FirebaseAuth.instance.createUserWithEmailAndPassword(email: _email.text, password: _pswd.text).then((value) {
                         print("account created");
+                        addUserToFirestore(_name.text, _email.text, _phn.text);//ADD TO FIREBASE
                         Navigator.push(context,MaterialPageRoute(builder: (context)=>HomePage()));
                       }).onError((error, stackTrace) {
                         print("error ${error.toString()}");
@@ -212,19 +214,20 @@ class SignupPage extends StatelessWidget {
                       _showErrorDialog(context, "Please enter your name.");
                     } else if (!validateEmail(_email.text)) {
                       _showErrorDialog(context, "Invalid email format.");
-                    } else if (!validatePhoneNumber(_phn.text)) {
-                      _showErrorDialog(context, "Invalid phone number format.");
+                    } else if (!validatePhoneNumber(_phn.text)|| (_phn.text.isEmpty)) {
+                      _showErrorDialog(context, "Enter valid phone number.");
                     } else if (_pswd.text.isEmpty || _conpswd.text.isEmpty) {
                       _showErrorDialog(context, "Please enter a password and confirm it.");
                     } else if (_pswd.text != _conpswd.text) {
                       _showErrorDialog(context, "Passwords do not match.");
                     } else {
                       try {
-                        final authResult = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                        await FirebaseAuth.instance.createUserWithEmailAndPassword(
                           email: _email.text,
                           password: _pswd.text,
                         );
                         print("Account created");
+                        addUserToFirestore(_name.text, _email.text, _phn.text);//ADD TO FIREBASE
                         _showSuccessDialog(context, "Account created successfully!");
 
                       } catch (error) {
@@ -284,6 +287,21 @@ class SignupPage extends StatelessWidget {
       ),
     );
   }
+
+  void addUserToFirestore(String name, String email, String phoneNumber) async {
+    CollectionReference patients = FirebaseFirestore.instance.collection('patients');
+
+    await patients.add({
+      'name': name,
+      'email': email,
+      'phoneNumber': phoneNumber,
+    }).then((DocumentReference document) {
+      print('Document added with ID: ${document.id}');
+    }).catchError((error) {
+      print('Error adding document: $error');
+    });
+  }
+
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       context: context,

@@ -4,12 +4,12 @@ import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/signup.dart';
 
-import '../Welcome.dart';
-import '../splash/splash_screen.dart';
+// import '../Welcome.dart';
+// import '../splash/splash_screen.dart';
 
 class LoginPage extends StatelessWidget {
-  TextEditingController login_email = TextEditingController();
-  TextEditingController login_pswd = TextEditingController();
+  final TextEditingController login_email = TextEditingController();
+  final TextEditingController login_pswd = TextEditingController();
 
 
   @override
@@ -64,7 +64,7 @@ class LoginPage extends StatelessWidget {
                       "Email",
                       style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
                     ),
-                    SizedBox(height:5),
+                    const SizedBox(height:5),
                     TextField(
                       controller: login_email,
                       obscureText: false,
@@ -125,25 +125,71 @@ class LoginPage extends StatelessWidget {
                   child: MaterialButton(
                     minWidth:MediaQuery.of(context).size.width/2,
                     height: 50,
-                    onPressed:(){
-                      FirebaseAuth.instance
-                          .signInWithEmailAndPassword(
-                      email: login_email.text,
-                      password: login_pswd.text,
-                      )
-                          .then((value) {
+                    onPressed:() async {
+                      if (login_email.text.isEmpty) {
+                        _showErrorDialog(context, "Please enter your Email to login.");
+                      } else if (login_pswd.text.isEmpty) {
+                        _showErrorDialog(context, "Please enter your Password to Login.");
+                      }else{
+                        try {
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: login_email.text,
+                            password: login_pswd.text,
+                          ).then((value) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomePage()),
+                              );
+                          });
+                        }
+                        catch(error){
+                          print("Error caught: ${error.toString()}");
 
+                          if (error is FirebaseAuthException) {
+                            String errorMessage = 'An error occurred during sign-in.';
 
-                      Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
-                      );
-                      }).catchError((error) {
-                      print("Error: ${error.toString()}");
-                      _showErrorDialog(context, error.toString());
+                            switch (error.code) {
+                              case 'invalid-email':
+                                errorMessage = 'Invalid email address. Please enter a valid email.';
+                                break;
+                              case 'user-not-found':
+                                errorMessage = 'User not found. Please check your email and try again.';
+                                break;
+                              case 'wrong-password':
+                                errorMessage = 'Incorrect password. Please try again.';
+                                break;
+                              case 'user-disabled':
+                                errorMessage = 'Your account has been disabled. Please contact support.';
+                                break;
+                              case 'too-many-requests':
+                                errorMessage = 'Too many login attempts. Please try again later.';
+                                break;
+                              case 'email-already-in-use':
+                                errorMessage = 'Email address is already in use. Please use a different email.';
+                                break;
+                              case 'weak-password':
+                                errorMessage = 'Weak password. Please use a stronger password.';
+                                break;
+                              default:
+                                errorMessage = 'An error occurred during sign-in.';
+                                break;
+                            }
 
-                      });
+                            // Check for the "user-not-found" error specifically
+                            if (error.code == 'user-not-found') {
+                              errorMessage = 'User not found. Please check your email and try again.';
+                            }
 
+                            print('Firebase Authentication Error: ${error.code} - ${error.message}');
+
+                            _showErrorDialog(context, errorMessage);
+                          } else {
+                            // Handle other non-Firebase exceptions, if any
+                            print('Non-Firebase Exception: $error');
+                            _showErrorDialog(context, 'An unexpected error occurred.');
+                          }
+                        }
+                      }
                     },
                     color: Colors.blue[600],
                     shape: RoundedRectangleBorder(
@@ -239,43 +285,7 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  void _showErrorDialog(BuildContext context, dynamic error) {
-    String errorMessage = 'An error occurred. Please enter credentials.';
-
-    if (error is FirebaseException) {
-      switch (error.code) {
-        case 'invalid-email':
-          errorMessage = 'Invalid email address. Please enter a valid email.';
-          break;
-        case 'user-not-found':
-          errorMessage = 'User not found. Please check your email and try again.';
-          break;
-        case 'wrong-password':
-          errorMessage = 'Wrong password. Please try again.';
-          break;
-        case 'user-disabled':
-          errorMessage = 'Your account has been disabled. Please contact support.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many login attempts. Please try again later.';
-          break;
-        case 'email-already-in-use':
-          errorMessage = 'Email address is already in use. Please use a different email.';
-          break;
-        case 'weak-password':
-          errorMessage = 'Weak password. Please use a stronger password.';
-          break;
-
-      }
-
-    } else if (error.toString().contains('required_email')) {
-      errorMessage = 'Email field is required. Please enter your email.';
-    } else if (error.toString().contains('required_password')) {
-      errorMessage = 'Password field is required. Please enter your password.';
-    }
-
-
-
+  void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -298,6 +308,7 @@ class LoginPage extends StatelessWidget {
 
 
 
+
   void _showSuccessDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -312,7 +323,7 @@ class LoginPage extends StatelessWidget {
                 Navigator.of(context).pop();// Close the dialog
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  MaterialPageRoute(builder: (context) =>HomePage()),
                 );
               },
             ),

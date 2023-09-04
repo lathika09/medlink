@@ -7,5 +7,13 @@ const String login_pg='assets/login.jpg';
 const String bg='assets/bg.jpg';
 const String logo='assets/logo1.jpg';
 
+const String slide1='assets/slider1.jpg';
+const String slide2='assets/slider2.png';
+const String slide3='assets/slider3.png';
+const String slide4='assets/slider4.png';
+const String slide5='assets/slider5.png';
+const String slide6='assets/slider2.jpg';
+const String slide7='assets/slider4.jpg';
+
 //appname
 const String appname='MediWise';
