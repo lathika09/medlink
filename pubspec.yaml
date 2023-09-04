@@ -88,6 +88,11 @@ flutter:
     - assets/slider5.png
     - assets/slider2.jpg
     - assets/slider4.jpg
+    - assets/nav1.jpg
+    - assets/profile.png
+    - assets/doctor_on.jpg
+    - assets/bg_nav.jpg
+    - assets/img.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

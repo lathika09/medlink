@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/patient/MainPage.dart';
+import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:medlink/views/splash/splash_screen.dart';
 
@@ -83,7 +85,7 @@ class WelcomePage extends StatelessWidget {
                           minWidth:double.infinity,
                           height: 50,
                           onPressed:(){
-                            Navigator.push(context,MaterialPageRoute(builder: (context)=>SplashScreen()));
+                            Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
                           },
                           color: Colors.blue[600],
                           shape: RoundedRectangleBorder(
