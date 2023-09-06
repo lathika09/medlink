@@ -295,17 +295,29 @@ class DoctorData extends StatelessWidget {
               ),
               Flexible(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 5,vertical: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Dr Vijay Sharma",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),),
-                      Text("Dental",style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),),
+                      Row(
+
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Dr Vijay Sharma",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),),
+                              Text("Dental",style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),),
+                            ],
+                          ),
+                          IconButton(onPressed: (){}, icon:Icon(Icons.chat,color: Colors.blueAccent.shade700,size: 35,),)
+                        ],
+                      ),
+
                       Spacer(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Icon(Icons.star_border,color: Colors.yellow,size: 16,),
+                          Icon(Icons.star_border,color: Colors.blueAccent.shade700,size: 16,),
                           Spacer(),
                           Text('4.5'),
                           Spacer(flex: 1,),

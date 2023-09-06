@@ -33,10 +33,55 @@ class _DocDetailsState extends State<DocDetails> {
         ],
 
       ),
-      body: SafeArea(child: Column(
-        children: [
-          AboutDoctor(),
-        ],
+      body: SafeArea(child: SingleChildScrollView(
+        child: Container(
+          color: Colors.blue.shade50,
+          child: Column(
+            children: [
+              AboutDoctor(),
+              SizedBox(height: 8,),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0,vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text("About Doctor",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,)),
+                    SizedBox(height: 10,),
+                    Text("Dr. Vijay Sharma practices at Green Life Dental Care Clinic in Mithapur,Patna.He promise to deliver the ultimate dental care aasisted by patient counselling and perfectly customized treatment protocols.His clinical knowledge and way of treatment is excellent.His approach towards patients is very humble and cordial.",
+                      style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                      height: 1.2,
+                    ),
+                      softWrap: true,
+                      textAlign: TextAlign.justify,
+                    ),
+
+                  ],
+                ),
+              ),
+
+              Padding(padding: EdgeInsets.all(15),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent.shade700,
+                ),
+                onPressed: () {
+                  // Your button's action here
+                },
+                child: Text(
+                  "Book Appointment",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                  ),
+                ),
+              )
+
+              ),
+            ],
+          ),
+        ),
       )),
     );
   }
@@ -54,12 +99,75 @@ class AboutDoctor extends StatelessWidget {
         children: [
           SizedBox(height: 10,),
           CircleAvatar(
-            radius: 65.0,
+            radius: 60.0,
             backgroundImage: AssetImage(dc_prof),
             backgroundColor: Colors.white,
           ),
-          SizedBox(height: 30,),
-          Text("Dr Vijay Sharma",style: TextStyle(color: Colors.black,fontSize: 24.0,fontWeight: FontWeight.bold),),
+          SizedBox(height: 12,),
+          Text("Dr Vijay Sharma",style: TextStyle(color: Colors.black,fontSize: 26.0,fontWeight: FontWeight.bold),),
+          SizedBox(height: 3,),
+          SizedBox(
+            width: MediaQuery.of(context).size.width*0.75,
+            child: Text(
+              "Dental",
+              style: TextStyle(color: Colors.grey.shade800,fontSize: 20),
+              softWrap: true,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 3,),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 15,horizontal: 12),
+            margin: EdgeInsets.symmetric(vertical: 10,horizontal: 15),
+
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3), // Shadow color
+                  spreadRadius: 3, // Spread radius
+                  blurRadius: 5, // Blur radius
+                  offset: Offset(0, 2), // Offset of the shadow
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(FontAwesomeIcons.bookMedical,color: Colors.blueAccent.shade700,size: 18,),
+                    DoctorInfo(data: "Qualification : ", info:"BDS Bachelor of Dental Surgery")
+                  ],),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(FontAwesomeIcons.hospital,color: Colors.blueAccent.shade700,size: 18,),
+                    DoctorInfo(data: "Hospital : ", info: "Green Life Dental Care")
+                  ],),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(FontAwesomeIcons.mapLocation,color: Colors.blueAccent.shade700,size: 18,),
+                   DoctorInfo(data: "Location : ", info: "Harilal Complex, Mithapur Main Road, Patna")
+                  ],),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(FontAwesomeIcons.briefcaseMedical,color: Colors.blueAccent.shade700,size: 18,),
+                   DoctorInfo(data: "Experience : ", info: "33 years"),
+                  ],),
+              ],),
+          ),
+
+
+
 
         ],
       ),
@@ -67,6 +175,53 @@ class AboutDoctor extends StatelessWidget {
   }
 }
 
+
+
+//DoctorMainInfo
+class DoctorMainContainer extends StatelessWidget {
+  const DoctorMainContainer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+//
+class DoctorInfo extends StatelessWidget {
+   DoctorInfo({Key? key,required this.data,required this.info}) : super(key: key);
+
+  final String data;
+  final String info;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Text(data,
+                style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
+                softWrap: true,
+                textAlign: TextAlign.left,
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width*0.47,
+              child: Text(info,
+                style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
+                softWrap: true,
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ],
+        );
+
+
+  }
+}
 
 
 //CUSTOM APP BAR
@@ -89,9 +244,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blueAccent.shade700,
       elevation:2,
-      title: Text(widget.appTitle!,style: TextStyle(fontSize: 20,color: Colors.black),),
+      title: Text(widget.appTitle!,style: TextStyle(fontSize: 24,color: Colors.white,fontWeight: FontWeight.bold),),
       leading: widget.icon!=null ? Container(
         margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 10,),
         decoration: BoxDecoration(
