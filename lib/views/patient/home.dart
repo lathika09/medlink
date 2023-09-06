@@ -1,7 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -14,13 +16,41 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Define the colors and ratio for blending
+  final color1 = Colors.tealAccent.shade400;
+  final color2 = Colors.tealAccent.shade700;
+  // final color3 = Colors.greenAccent.shade400;
+  final ratio = 0.5; // Adjust this ratio to control the mixture
+
+  get mixedColor => Color.lerp(color1, color2, ratio);
+
   String? valueChoose;
   List listItem=[
     "Mumbai","Delhi","Pune","Chennai"
   ];
   TextEditingController search_name = TextEditingController();
   String searchText='';
-  
+
+  List<Map<String,dynamic>> medCat=[
+    {
+      'icon':FontAwesomeIcons.userDoctor,
+      'category':'General',
+    },
+    {
+      'icon':FontAwesomeIcons.heartPulse,
+      'category':'Cardiology',
+    },
+    {
+      'icon':FontAwesomeIcons.hand,
+      'category':'Dermatology',
+    },
+    {
+      'icon':FontAwesomeIcons.teeth,
+      'category':'Dental',
+    },
+  ];
+
+
   @override
 
   Widget build(BuildContext context) {
@@ -28,17 +58,22 @@ class _HomePageState extends State<HomePage> {
       drawer:NavBar(),
 
       appBar:AppBar(
+        backgroundColor:Colors.blueAccent.shade700,
+        iconTheme: IconThemeData(
+          color: Colors.white, // Change the color to your desired color
+        ),
         title:Center(
           child: Text("MediWise",
             style: TextStyle(
                 fontSize: 30,
+                color: Colors.white,
                 fontWeight: FontWeight.bold),
           ),
         ),
         elevation: 24.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.notifications,size: 30,color: Colors.blueAccent.shade700,),
+            icon: Icon(Icons.notifications,size: 30,color: Colors.white,),
             onPressed: () {
               Navigator.push(
                 context,
@@ -96,12 +131,6 @@ class _HomePageState extends State<HomePage> {
                           }).toList(),
                         ),
                       ),
-
-
-
-
-
-
                     ],
                   ),
                 ),
@@ -148,6 +177,81 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
+                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 80,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: List<Widget>.generate(medCat.length, (index) {
+                            return Card(
+                              elevation: 5,
+                              margin: EdgeInsets.only(right: 20.0),
+                              // color: Colors.blueAccent.shade700,
+                              // color:  Colors.tealAccent.shade100,
+                              color:  Colors.blue.shade50,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 15.0,vertical: 10.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  children: [
+                                    FaIcon(
+                                      medCat[index]['icon'],
+                                      color: Colors.indigo.shade900,
+                                      size:27,
+                                    ),
+
+                                    const SizedBox(height: 8,),
+                                    Text(medCat[index]['category'],
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color:Colors.indigo.shade900,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+
+                                ],
+                              ),),
+                            );
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 25,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text("Appointment Today",
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10,),
+                      AppointmentData(),
+                      SizedBox(height: 25,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text("Top Doctor",
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10,),
+                      //doctor card
+                      Column(
+                        children:List.generate(10,(index){
+                          return DoctorData(
+                            route: 'doc_details',
+                          );
+                        }),
+                      ),
+
+
+
+
                     ],
                   ),
                 ),
@@ -161,49 +265,207 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-
-//DROPDOWN
-class CityDropdown extends StatefulWidget {
-  const CityDropdown({Key? key}) : super(key: key);
-
-
-  @override
-  State<CityDropdown> createState() => _CityDropdownState();
-}
-
-class _CityDropdownState extends State<CityDropdown> {
-  String? valueChoose;
-  List listItem=[
-    "Mumbai","Delhi","Pune","Chennai"
-  ];
+//DOCTOR CARD
+class DoctorData extends StatelessWidget {
+  const DoctorData({Key? key,required this.route}) : super(key: key);
+  final String route;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton(
-      hint: Text("Select City "),
-      dropdownColor: Colors.blueAccent.shade700,
-      icon: Icon(Icons.arrow_drop_down),
-      iconSize: 30,
-      isExpanded: true,
-      style:TextStyle(
-        color: Colors.black,
-        fontSize: 24,
+    return Container(
+      padding:const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+      height: 150,
+      child: GestureDetector(
+        child: Card(
+          elevation: 5,
+          color: Colors.white,
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.only(left: 10,right: 10),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.0),//or 15.0
+                  child: Container(
+                    height: 90.0,
+                    width: 85.0,
+                    color: Color(0xffFF0E58),
+                    child: Image.asset(dc_prof,fit: BoxFit.fill,),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Dr Vijay Sharma",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),),
+                      Text("Dental",style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),),
+                      Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Icon(Icons.star_border,color: Colors.yellow,size: 16,),
+                          Spacer(),
+                          Text('4.5'),
+                          Spacer(flex: 1,),
+                          Text('Reviews'),
+                          Spacer(flex: 1,),
+                          Text('(20)'),
+                          Spacer(flex: 7,),
+                        ],
+                      ),
+                    ],
+                  ),
+              ),
+              ),
+            ],
+          ),
+        ),
+        onTap: (){
+          Navigator.of(context).pushNamed(route);
+        },
       ),
-      value:valueChoose,
-    onChanged: (newValue){
-        setState(() {
-          valueChoose=newValue as String;;
-        });
-    },
-        items: listItem.map((valueItem){
-          return DropdownMenuItem(
-              value:valueItem,
-              child:Text(valueItem)
-          );
-        }).toList(),
     );
   }
 }
+
+
+//APPOINTMENT CARD
+
+class AppointmentData extends StatefulWidget {
+  const AppointmentData({Key? key}) : super(key: key);
+
+  @override
+  State<AppointmentData> createState() => _AppointmentDataState();
+}
+
+class _AppointmentDataState extends State<AppointmentData> {
+// Define the colors and ratio for blending
+  final color1 = Colors.teal.shade50;
+  final color2 = Colors.tealAccent.shade100;
+  // final color3 = Colors.greenAccent.shade400;
+  final ratio = 0.5;
+
+  get mixednewColor => Color.lerp(color1, color2, ratio);
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color:mixednewColor,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3), // Shadow color
+            spreadRadius: 3, // Spread radius
+            blurRadius: 5, // Blur radius
+            offset: Offset(0, 2), // Offset of the shadow
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Padding(padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const CircleAvatar(
+                    backgroundImage: AssetImage(dc_prof),
+                  ),
+                  const SizedBox(width:10,),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children:const [
+                      Text("Dr Ajay Kumar",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.bold,),),
+                      SizedBox(height: 2,),
+                      Text("Dental",style: TextStyle(color: Colors.black54,fontSize: 16,fontWeight: FontWeight.bold,),)
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 25,),
+              //Shedule details
+              ScheduleData(),
+              SizedBox(height: 25,),
+              //ACTION BUTTON
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: ElevatedButton(
+                    style:ElevatedButton.styleFrom(backgroundColor: Colors.redAccent,),
+                    onPressed: (){},
+                    child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 17),),
+                  ),
+                  ),
+                  SizedBox(width: 20,),
+                  Expanded(child: ElevatedButton(
+                    style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent,),
+                    onPressed: (){},
+                    child: Text("Completed",style: TextStyle(color: Colors.white,fontSize: 17),),
+                  ),
+                  ),
+                ],
+              )
+
+
+            ],
+          ),
+        ),
+      ),
+
+    );
+  }
+}
+
+
+class ScheduleData extends StatelessWidget {
+  ScheduleData({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        // color: Colors.blueAccent.shade100,
+        color:Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2), // Shadow color
+            spreadRadius: 2, // Spread radius
+            blurRadius: 4, // Blur radius
+            offset: Offset(0, 2), // Offset of the shadow
+          ),
+        ],
+
+      ),
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.calendar_month_sharp,color: Colors.black,size: 16,),
+          SizedBox(width: 4,),
+          Text(
+            'Monday,11/28/2022',
+            style: const TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width:15,),
+          Icon(Icons.access_alarm_rounded,color: Colors.black,size: 16,),
+          SizedBox(width: 4,),
+          Flexible(child: Text('2:00 PM',style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),),
+          ),
+        ],
+      ),
+
+    );
+  }
+}
+
 
 
 //Navbar

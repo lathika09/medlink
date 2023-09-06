@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/signup.dart';
 
@@ -138,7 +139,7 @@ class LoginPage extends StatelessWidget {
                           ).then((value) {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => HomePage()),
+                                MaterialPageRoute(builder: (context) => MainPage()),
                               );
                           });
                         }

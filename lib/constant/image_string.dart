@@ -20,6 +20,8 @@ const String doc='assets/doctor_on.jpg';
 const String nav='assets/nav1.jpg';
 const String bg_nav='assets/bg_nav.jpg';
 
+const String dc_prof='assets/doc_prof.jpg';
+
 
 //appname
 const String appname='MediWise';
