@@ -15,6 +15,12 @@ class _DocDetailsState extends State<DocDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    final String description = args['description'];
+
+
     return Scaffold(
       appBar: CustomAppBar(
         appTitle: "Doctor Details",
@@ -47,7 +53,7 @@ class _DocDetailsState extends State<DocDetails> {
                   children: [
                     Text("About Doctor",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 20,)),
                     SizedBox(height: 10,),
-                    Text("Dr. Vijay Sharma practices at Green Life Dental Care Clinic in Mithapur,Patna.He promise to deliver the ultimate dental care aasisted by patient counselling and perfectly customized treatment protocols.His clinical knowledge and way of treatment is excellent.His approach towards patients is very humble and cordial.",
+                    Text(description,
                       style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 15,
@@ -94,6 +100,16 @@ class AboutDoctor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> args =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    final String name = args['name'];
+    final String speciality = args['speciality'];
+    final String qualification = args['qualification'];
+    final String hospital = args['hospital'];
+    final String address = args['address'];
+    final String experience = args['experience'];
+
     return Container(
       width: double.infinity,
       child: Column(
@@ -105,12 +121,12 @@ class AboutDoctor extends StatelessWidget {
             backgroundColor: Colors.white,
           ),
           SizedBox(height: 12,),
-          Text("Dr Vijay Sharma",style: TextStyle(color: Colors.black,fontSize: 26.0,fontWeight: FontWeight.bold),),
+          Text(name,style: TextStyle(color: Colors.black,fontSize: 26.0,fontWeight: FontWeight.bold),),
           SizedBox(height: 3,),
           SizedBox(
             width: MediaQuery.of(context).size.width*0.75,
             child: Text(
-              "Dental",
+              speciality,
               style: TextStyle(color: Colors.grey.shade800,fontSize: 20),
               softWrap: true,
               textAlign: TextAlign.center,
@@ -141,28 +157,28 @@ class AboutDoctor extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.bookMedical,color: Colors.blueAccent.shade700,size: 18,),
-                    DoctorInfo(data: "Qualification : ", info:"BDS Bachelor of Dental Surgery")
+                    DoctorInfo(data: "Qualification : ", info:qualification)
                   ],),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.hospital,color: Colors.blueAccent.shade700,size: 18,),
-                    DoctorInfo(data: "Hospital : ", info: "Green Life Dental Care")
+                    DoctorInfo(data: "Hospital : ", info:hospital)
                   ],),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.mapLocation,color: Colors.blueAccent.shade700,size: 18,),
-                   DoctorInfo(data: "Location : ", info: "Harilal Complex, Mithapur Main Road, Patna")
+                   DoctorInfo(data: "Location : ", info: address)
                   ],),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.briefcaseMedical,color: Colors.blueAccent.shade700,size: 18,),
-                   DoctorInfo(data: "Experience : ", info: "33 years"),
+                   DoctorInfo(data: "Experience : ", info: experience),
                   ],),
               ],),
           ),
@@ -176,18 +192,6 @@ class AboutDoctor extends StatelessWidget {
   }
 }
 
-
-
-//DoctorMainInfo
-class DoctorMainContainer extends StatelessWidget {
-  const DoctorMainContainer({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
-  }
-}
-
 //
 class DoctorInfo extends StatelessWidget {
    DoctorInfo({Key? key,required this.data,required this.info}) : super(key: key);
@@ -197,6 +201,8 @@ class DoctorInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,

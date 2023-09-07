@@ -8,6 +8,65 @@ import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+Future<int> getDoctorCount() async {
+  try {
+    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+    return querySnapshot.docs.length;
+  } catch (e) {
+    print('Error fetching doctor count: $e');
+    return 0; // Handle the error as needed.
+  }
+}
+
+Future<List<DoctorData>> fetchDoctors() async {
+  try {
+    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+
+    List<DoctorData> doctors = querySnapshot.docs.map((doc) {
+      // Access fields from the document
+      dynamic nameField = doc['name'];
+      dynamic specialityField = doc['speciality'];
+      dynamic qualificationField = doc['qualification'];
+      dynamic hospitalField = doc['hospital'];
+      dynamic addressField = doc['address'];
+      dynamic experienceField = doc['experience'];
+      dynamic desField = doc['description'];
+
+      String name = (nameField is String) ? nameField : '';
+      List<String> speciality = (specialityField is List) ? List<String>.from(specialityField) : [];
+      String qualification = (qualificationField is String) ? qualificationField : '';
+      String hospital = (hospitalField is String) ? hospitalField : '';
+      String address = (addressField is String) ? addressField : '';
+      String experience = (experienceField is String) ? experienceField : '';
+      String description = (desField is String) ? desField : '';
+
+
+
+      return DoctorData(
+        route: 'doc_details',
+        name: name,
+        speciality: speciality,
+          qualification:qualification,
+          hospital:hospital,
+          address:address,
+          experience:experience,
+          description:description
+
+      );
+    }).toList();
+
+    return doctors;
+  } catch (e) {
+    print('Error fetching doctors: $e');
+    return []; // Return an empty list or handle the error as needed.
+  }
+}
+
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -242,12 +301,31 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(height: 10,),
                       //doctor card
                       Column(
-                        children:List.generate(10,(index){
-                          return DoctorData(
-                            route: 'doc_details',
-                          );
-                        }),
-                      ),
+                        children: [
+                          FutureBuilder<List<DoctorData>>(
+                            future: fetchDoctors(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return CircularProgressIndicator(); // Display a loading indicator while fetching data.
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                List<DoctorData> doctors = snapshot.data ?? [];
+
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: doctors.length,
+                                  itemBuilder: (context, index) {
+                                    return doctors[index];
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      )
+
+
 
 
 
@@ -255,10 +333,13 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                 ),
+                SizedBox(height: 10,),
               ],
 
             ),
+
           ),
+
         ),
       ) ,
     );
@@ -267,75 +348,110 @@ class _HomePageState extends State<HomePage> {
 
 //DOCTOR CARD
 class DoctorData extends StatelessWidget {
-  const DoctorData({Key? key,required this.route}) : super(key: key);
+  const DoctorData({Key? key,required this.route,required this.name,
+    required this.speciality,required this.qualification,required this.hospital,required this.address,
+    required this.experience,required this.description}) : super(key: key);
   final String route;
+  final String name;
+  final List<String> speciality;
+  final String qualification;
+  final String hospital;
+  final String address;
+  final String experience;
+  final String description;
+
 
   @override
   Widget build(BuildContext context) {
+    String specialtiesString = speciality.join(', ');
     return Container(
-      padding:const EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-      height: 150,
+      padding:const EdgeInsets.symmetric(horizontal: 10,vertical: 15),
+      height: 210,
       child: GestureDetector(
         child: Card(
           elevation: 5,
           color: Colors.white,
-          child: Row(
+          child: Column(
             children: [
-              Container(
-                padding: EdgeInsets.only(left: 10,right: 10),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20.0),//or 15.0
-                  child: Container(
-                    height: 90.0,
-                    width: 85.0,
-                    color: Color(0xffFF0E58),
-                    child: Image.asset(dc_prof,fit: BoxFit.fill,),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.only(left: 10,right: 10,top: 15,bottom: 10),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),//or 15.0
+                      child: Container(
+                        height: 90.0,
+                        width: 85.0,
+                        color: Color(0xffFF0E58),
+                        child: Image.asset(dc_prof,fit: BoxFit.fill,),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Flexible(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5,vertical: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-
+                  Flexible(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 15),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
+
                             children: [
-                              Text("Dr Vijay Sharma",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),),
-                              Text("Dental",style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width*0.4,
+                                      child: Text(name,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),softWrap: true,)),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width*0.46,
+                                      child: Text(specialtiesString,style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),softWrap: true,)),
+                                ],
+                              ),
+                              // IconButton(onPressed: (){}, icon:Icon(Icons.chat,color: Colors.blueAccent.shade700,size: 35,),)
                             ],
                           ),
-                          IconButton(onPressed: (){}, icon:Icon(Icons.chat,color: Colors.blueAccent.shade700,size: 35,),)
                         ],
                       ),
-
-                      Spacer(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Icon(Icons.star_border,color: Colors.blueAccent.shade700,size: 16,),
-                          Spacer(),
-                          Text('4.5'),
-                          Spacer(flex: 1,),
-                          Text('Reviews'),
-                          Spacer(flex: 1,),
-                          Text('(20)'),
-                          Spacer(flex: 7,),
-                        ],
-                      ),
-                    ],
                   ),
+                  ),
+                ],
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                children: [
+                  FloatingActionButton(onPressed: (){},child:Icon(Icons.chat,color: Colors.white,size: 30,) ,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    mini: true,
+                    backgroundColor: Colors.blueAccent.shade700 ,),
+                  ElevatedButton(
+                    style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent.shade700,),
+                    onPressed: (){},
+                    child: Text("Book Appointment",style: TextStyle(color: Colors.white,fontSize: 18),),
+                  ),
+                ],
               ),
+
             ],
           ),
         ),
         onTap: (){
-          Navigator.of(context).pushNamed(route);
+          Navigator.pushNamed(
+            context,
+            'doc_details',
+            arguments: {
+              'name': name, // Pass the name
+              'speciality': specialtiesString, // Pass the speciality
+              'qualification':qualification,
+              'hospital':hospital,
+              'address':address,
+              'experience':experience,
+              'description':description,
+            },
+          );
         },
       ),
     );
@@ -367,7 +483,7 @@ class _AppointmentDataState extends State<AppointmentData> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color:mixednewColor,
+        color:Colors.greenAccent.shade200,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -613,4 +729,6 @@ class _ImageSliderState extends State<ImageSlider> {
     );
   }
 }
+
+//CUSTOM
 

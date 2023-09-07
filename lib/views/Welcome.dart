@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/doctor/login_doc.dart';
 import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/login.dart';
@@ -64,7 +65,7 @@ class WelcomePage extends StatelessWidget {
                             minWidth:double.infinity,
                             height: 50,
                             onPressed:(){
-                              Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage()));
+                              Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage()));//FOR PATIENTS
                             },
                           color: Colors.blue[600],
                           shape: RoundedRectangleBorder(
@@ -85,7 +86,7 @@ class WelcomePage extends StatelessWidget {
                           minWidth:double.infinity,
                           height: 50,
                           onPressed:(){
-                            Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
+                            Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
                           },
                           color: Colors.blue[600],
                           shape: RoundedRectangleBorder(
