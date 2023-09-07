@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:medlink/views/patient/BookingPage.dart';
+import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/doctor_details.dart';
 import 'package:medlink/views/splash/splash_screen.dart';
 import 'package:flutter/services.dart';
@@ -36,7 +38,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       routes: {
+        "main":(context)=>const MainPage(),
         'doc_details':(context)=>const DocDetails(),
+        "booking_Page":(context)=>const BookingPage(),
+        "success_app":(context)=>const AppointmentBooked(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),

@@ -68,6 +68,7 @@ class _DocDetailsState extends State<DocDetails> {
                 ),
                 onPressed: () {
                   // Your button's action here
+                  Navigator.of(context).pushNamed("booking_Page");
                 },
                 child: Text(
                   "Book Appointment",
