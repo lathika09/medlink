@@ -27,15 +27,15 @@ class _DocDetailsState extends State<DocDetails> {
         icon: FaIcon(Icons.arrow_back_ios),
         actions: [
           IconButton(
-              onPressed: (){
-                setState(() {
-                  isFav=!isFav;
-                });
-              },
-              icon: FaIcon(
-                  isFav ? Icons.favorite_rounded: Icons.favorite_outline,
-                color: Colors.red,
-              ),),
+            onPressed: (){
+              setState(() {
+                isFav=!isFav;
+              });
+            },
+            icon: FaIcon(
+              isFav ? Icons.favorite_rounded: Icons.favorite_outline,
+              color: Colors.red,
+            ),),
         ],
 
       ),
@@ -55,10 +55,10 @@ class _DocDetailsState extends State<DocDetails> {
                     SizedBox(height: 10,),
                     Text(description,
                       style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 15,
-                      height: 1.2,
-                    ),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        height: 1.2,
+                      ),
                       softWrap: true,
                       textAlign: TextAlign.justify,
                     ),
@@ -68,22 +68,29 @@ class _DocDetailsState extends State<DocDetails> {
               ),
 
               Padding(padding: EdgeInsets.all(15),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent.shade700,
-                ),
-                onPressed: () {
-                  // Your button's action here
-                  Navigator.of(context).pushNamed("booking_Page");
-                },
-                child: Text(
-                  "Book Appointment",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                  ),
-                ),
-              )
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.shade700,
+                    ),
+                    onPressed: () {
+                      // Navigator.of(context).pushNamed("booking_Page");
+                      Navigator.of(context).pushNamed(
+                        "booking_Page",
+                        arguments: {
+                          // Pass the availability information here
+                          'availability': args['availability'],
+                        },
+                      );
+
+                    },
+                    child: Text(
+                      "Book Appointment",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  )
 
               ),
             ],
@@ -171,14 +178,14 @@ class AboutDoctor extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.mapLocation,color: Colors.blueAccent.shade700,size: 18,),
-                   DoctorInfo(data: "Location : ", info: address)
+                    DoctorInfo(data: "Location : ", info: address)
                   ],),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(FontAwesomeIcons.briefcaseMedical,color: Colors.blueAccent.shade700,size: 18,),
-                   DoctorInfo(data: "Experience : ", info: experience),
+                    DoctorInfo(data: "Experience : ", info: experience),
                   ],),
               ],),
           ),
@@ -194,7 +201,7 @@ class AboutDoctor extends StatelessWidget {
 
 //
 class DoctorInfo extends StatelessWidget {
-   DoctorInfo({Key? key,required this.data,required this.info}) : super(key: key);
+  DoctorInfo({Key? key,required this.data,required this.info}) : super(key: key);
 
   final String data;
   final String info;
@@ -206,25 +213,25 @@ class DoctorInfo extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Text(data,
-                style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
-                softWrap: true,
-                textAlign: TextAlign.left,
-              ),
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width*0.47,
-              child: Text(info,
-                style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
-                softWrap: true,
-                textAlign: TextAlign.left,
-              ),
-            ),
-          ],
-        );
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Text(data,
+            style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
+            softWrap: true,
+            textAlign: TextAlign.left,
+          ),
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width*0.47,
+          child: Text(info,
+            style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
+            softWrap: true,
+            textAlign: TextAlign.left,
+          ),
+        ),
+      ],
+    );
 
 
   }

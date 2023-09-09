@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/patient/BookingPage.dart';
 import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/NotificationPage.dart';
+import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -27,6 +29,18 @@ Future<List<DoctorData>> fetchDoctors() async {
     QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
 
     List<DoctorData> doctors = querySnapshot.docs.map((doc) {
+      Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
+
+      // Access the availability field
+      Map<String, dynamic> availability = doctorData['availability'] ?? {
+        'weekday': [],
+        'time': 0, // Assuming a default time of 0 if not specified
+      };
+
+      // Extract 'weekday' and 'time' from the availability map
+      List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
+      int time = availability['time'] ?? 0;
+
       // Access fields from the document
       dynamic nameField = doc['name'];
       dynamic specialityField = doc['speciality'];
@@ -44,18 +58,22 @@ Future<List<DoctorData>> fetchDoctors() async {
       String experience = (experienceField is String) ? experienceField : '';
       String description = (desField is String) ? desField : '';
 
-
+      // Create the availability map here
+      Map<String, dynamic> doctorAvailability = {
+        'weekday': weekdays,
+        'time': time,
+      };
 
       return DoctorData(
         route: 'doc_details',
         name: name,
         speciality: speciality,
-          qualification:qualification,
-          hospital:hospital,
-          address:address,
-          experience:experience,
-          description:description
-
+        qualification: qualification,
+        hospital: hospital,
+        address: address,
+        experience: experience,
+        description: description,
+        availability: doctorAvailability, // Include the availability data
       );
     }).toList();
 
@@ -65,6 +83,7 @@ Future<List<DoctorData>> fetchDoctors() async {
     return []; // Return an empty list or handle the error as needed.
   }
 }
+
 
 
 class HomePage extends StatefulWidget {
@@ -149,26 +168,42 @@ class _HomePageState extends State<HomePage> {
           child:Container(
 
             child:Column(
+
               children: [
                 Container(
-                  // height: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color:Colors.greenAccent.shade200,
+                    borderRadius: BorderRadius.circular(18),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3), // Shadow color
+                        spreadRadius: 3, // Spread radius
+                        blurRadius: 5, // Blur radius
+                        offset: Offset(0, 2), // Offset of the shadow
+                      ),
+                    ],
+                  ),
 
                   padding: EdgeInsets.symmetric(vertical:10,horizontal: 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(child: Icon(Icons.location_on,size: 28,)),
-                      SizedBox(width: 20,),
+                      Container(child: Icon(Icons.location_on,size: 28,color: Colors.black,)),
+
                       Container(
-                        width:260,
-                        // width: MediaQuery.of(context).size.width/2,
+                        // width:260,
+                        width: MediaQuery.of(context).size.width/2,
                         // decoration: BoxDecoration(border: Border.all(color:Colors.black,width: 1.0,),borderRadius: BorderRadius.circular(10.0)),
                         height:40,
                         padding: EdgeInsets.all(3.0),
                         child: DropdownButton(
                           elevation: 0,
+                          menuMaxHeight: 300,
+
                           hint: Text("Select City "),
-                          dropdownColor: Colors.white,
+                          dropdownColor: Colors.green.shade50,
                           icon: Icon(Icons.arrow_drop_down),
                           iconSize: 26,
                           isExpanded: true,
@@ -182,43 +217,28 @@ class _HomePageState extends State<HomePage> {
                               valueChoose=newValue as String;;
                             });
                           },
+
+
                           items: listItem.map((valueItem){
                             return DropdownMenuItem(
+
                                 value:valueItem,
                                 child:Text(valueItem)
                             );
                           }).toList(),
                         ),
                       ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                          onPressed: (){
+                            Navigator.push(
+                              context,MaterialPageRoute(builder: (context) => DoctorList()),
+                        );
+                      }, icon: Icon(Icons.search,size: 28,color: Colors.black,))
                     ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 2.0,horizontal: 20.0),
-                  child:  TextField(
 
-                    style:const TextStyle(fontSize: 19.0,fontWeight: FontWeight.w600,color: Colors.black),
-                    controller: search_name,
-                    onChanged: (value){
-                      setState(() {
-                        searchText=value;
-
-                      });
-                    },
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 5.0),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide:const BorderSide(width: 0.8),
-                      ),
-                      hintText: "   Search by Speciality",
-                      // prefixIcon:const Icon(Icons.search,size:20.0,),
-                      suffixIcon: IconButton(onPressed: (){}, icon:const Icon(Icons.search,size: 20.0,))
-                    ),
-
-                  ),
-
-                ),
                 ImageSlider(),
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 15.0),
@@ -346,11 +366,14 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+
+
+
 //DOCTOR CARD
 class DoctorData extends StatelessWidget {
-  const DoctorData({Key? key,required this.route,required this.name,
+  DoctorData({Key? key,required this.route,required this.name,
     required this.speciality,required this.qualification,required this.hospital,required this.address,
-    required this.experience,required this.description}) : super(key: key);
+    required this.experience,required this.description,required this.availability,}) : super(key: key);
   final String route;
   final String name;
   final List<String> speciality;
@@ -359,6 +382,14 @@ class DoctorData extends StatelessWidget {
   final String address;
   final String experience;
   final String description;
+  final Map<String, dynamic> availability;
+// Define the colors and ratio for blending
+  final color1 = Colors.white;
+  final color2 = Colors.greenAccent.shade100;
+  // final color3 = Colors.greenAccent.shade400;
+  final ratio = 0.5;
+
+  get mixednewColor => Color.lerp(color1, color2, ratio);
 
 
   @override
@@ -370,7 +401,7 @@ class DoctorData extends StatelessWidget {
       child: GestureDetector(
         child: Card(
           elevation: 5,
-          color: Colors.white,
+          color: mixednewColor,
           child: Column(
             children: [
               Row(
@@ -429,7 +460,11 @@ class DoctorData extends StatelessWidget {
                     backgroundColor: Colors.blueAccent.shade700 ,),
                   ElevatedButton(
                     style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent.shade700,),
-                    onPressed: (){},
+                    onPressed: (){
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=>BookingPage(),
+                      ),
+                      );
+                    },
                     child: Text("Book Appointment",style: TextStyle(color: Colors.white,fontSize: 18),),
                   ),
                 ],
@@ -469,13 +504,6 @@ class AppointmentData extends StatefulWidget {
 }
 
 class _AppointmentDataState extends State<AppointmentData> {
-// Define the colors and ratio for blending
-  final color1 = Colors.teal.shade50;
-  final color2 = Colors.tealAccent.shade100;
-  // final color3 = Colors.greenAccent.shade400;
-  final ratio = 0.5;
-
-  get mixednewColor => Color.lerp(color1, color2, ratio);
 
 
   @override
@@ -730,5 +758,5 @@ class _ImageSliderState extends State<ImageSlider> {
   }
 }
 
-//CUSTOM
+//CUSTOM DROPDOWN
 

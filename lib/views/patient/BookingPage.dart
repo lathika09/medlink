@@ -22,8 +22,22 @@ class _BookingPageState extends State<BookingPage> {
   bool _dateSelected=false;
   bool _timeSelected=false;
 
+
+
+
   @override
   Widget build(BuildContext context) {
+
+    final Map<String, dynamic> args =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    final Map<String, dynamic> availability = args['availability'] ?? {
+      'weekday': [],  // Default value for 'weekday'
+      'time': 0,      // Default value for 'time'
+    };
+    List<dynamic> weekdays = availability['weekday'] ?? [];
+    int time = availability['time'] ?? 0;
+
     return Scaffold(
       appBar: CustomAppBar(
         appTitle: "Appointment",
@@ -104,7 +118,33 @@ class _BookingPageState extends State<BookingPage> {
                 width : double.infinity,
                 title:"Make Appointment",
                 onPressed:(){
-                  Navigator.push(context,MaterialPageRoute(builder: (context)=>AppointmentBooked()));
+                  // Navigator.push(context,MaterialPageRoute(builder: (context)=>AppointmentBooked()));
+                  showModalBottomSheet(context: context, builder: ((context){
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 20,),
+                        Expanded(
+                          flex: 3,
+                          child: Lottie.asset("assets/success.json"),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          child: Text("Successfully Booked",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                        ),
+                        Spacer(),
+                        Padding(padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
+                          child: Button(
+                              width: double.infinity,
+                              title: "Back to Home.",
+                              disable: false,
+                              onPressed: ()=>Navigator.of(context).pushNamed('main')),
+                        ),
+                      ],
+                    );
+
+                  }));
                 },
                 disable :_timeSelected && _dateSelected ? false: true,
               ),
@@ -118,6 +158,7 @@ class _BookingPageState extends State<BookingPage> {
 
   //CALENDAR TABLE
   Widget _tableCalendar(){
+
     return TableCalendar(
       focusedDay: _focusDay,
       firstDay: DateTime.now(),
@@ -188,39 +229,6 @@ class Button extends StatelessWidget {
   }
 }
 
-//SUCCEESSFULLY BOOKED
-class AppointmentBooked extends StatelessWidget {
-  const AppointmentBooked({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 3,
-                child: Lottie.asset("assets/success.json"),
-              ),
-              Container(
-                width: double.infinity,
-                alignment: Alignment.center,
-                child: Text("Successfully Booked",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-              ),
-              Spacer(),
-              Padding(padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
-                child: Button(
-                    width: double.infinity, 
-                    title: "Back to Home.", 
-                    disable: false, 
-                    onPressed: ()=>Navigator.of(context).pushNamed('main')),
-              ),
-            ],
-      )),
-    );
-  }
-}
 
 
 

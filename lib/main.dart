@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
         "main":(context)=>const MainPage(),
         'doc_details':(context)=>const DocDetails(),
         "booking_Page":(context)=>const BookingPage(),
-        "success_app":(context)=>const AppointmentBooked(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
