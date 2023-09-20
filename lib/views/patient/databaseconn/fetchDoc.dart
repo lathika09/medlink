@@ -34,22 +34,14 @@ Future<List<DoctorData>> fetchDoctors() async {
       List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
       int time = availability['time'] ?? 0;
 
-      // Access fields from the document
-      dynamic nameField = doc['name'];
-      dynamic specialityField = doc['speciality'];
-      dynamic qualificationField = doc['qualification'];
-      dynamic hospitalField = doc['hospital'];
-      dynamic addressField = doc['address'];
-      dynamic experienceField = doc['experience'];
-      dynamic desField = doc['description'];
-
-      String name = (nameField is String) ? nameField : '';
-      List<String> speciality = (specialityField is List) ? List<String>.from(specialityField) : [];
-      String qualification = (qualificationField is String) ? qualificationField : '';
-      String hospital = (hospitalField is String) ? hospitalField : '';
-      String address = (addressField is String) ? addressField : '';
-      String experience = (experienceField is String) ? experienceField : '';
-      String description = (desField is String) ? desField : '';
+      // Access fields from the document with null checks
+      String name = (doctorData['name'] is String) ? doctorData['name'] : '';
+      List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
+      String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
+      String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
+      String address = (doctorData['address'] is String) ? doctorData['address'] : '';
+      String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
+      String description = (doctorData['description'] is String) ? doctorData['description'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -76,6 +68,7 @@ Future<List<DoctorData>> fetchDoctors() async {
     return []; // Return an empty list or handle the error as needed.
   }
 }
+
 
 
 class DoctorList extends StatefulWidget {
@@ -160,6 +153,7 @@ class _DoctorListState extends State<DoctorList> {
                             List<DoctorData> doctors = snapshot.data ?? [];
 
                             return ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
                               shrinkWrap: true,
                               itemCount: doctors.length,
                               itemBuilder: (context, index) {

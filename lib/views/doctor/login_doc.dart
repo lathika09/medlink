@@ -1,17 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/sign_up.dart';
-import 'package:medlink/views/patient/MainPage.dart';
+// import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/signup.dart';
+import 'package:medlink/views/doctor/screens/home_doc.dart';
 
 // import '../Welcome.dart';
 // import '../splash/splash_screen.dart';
 
-class LoginPage_Doc extends StatelessWidget {
+
+class LoginPage_Doc extends StatefulWidget {
+  const LoginPage_Doc({Key? key}) : super(key: key);
+
+  @override
+  State<LoginPage_Doc> createState() => _LoginPage_DocState();
+}
+
+class _LoginPage_DocState extends State<LoginPage_Doc> {
   final TextEditingController login_email = TextEditingController();
   final TextEditingController login_pswd = TextEditingController();
+
 
 
   @override
@@ -138,11 +150,18 @@ class LoginPage_Doc extends StatelessWidget {
                               email: login_email.text,
                               password: login_pswd.text,
                             ).then((value) {
-                              Navigator.push(
+                              //pushReplacementNamed
+                              Navigator.pushNamed(
                                 context,
-                                MaterialPageRoute(builder: (context) => MainPage()),
+                                'doc_home',
+                                arguments: {
+                                  'email':login_email.text
+                                },
                               );
-                            });
+
+
+                            }
+                            );
                           }
                           catch(error){
                             print("Error caught: ${error.toString()}");
@@ -325,7 +344,9 @@ class LoginPage_Doc extends StatelessWidget {
                 Navigator.of(context).pop();// Close the dialog
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>HomePage()),
+                  MaterialPageRoute(
+                    builder: (context) => HomePage()
+                  ),
                 );
               },
             ),
@@ -335,3 +356,4 @@ class LoginPage_Doc extends StatelessWidget {
     );
   }
 }
+

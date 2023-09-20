@@ -14,16 +14,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-Future<int> getDoctorCount() async {
-  try {
-    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
-    return querySnapshot.docs.length;
-  } catch (e) {
-    print('Error fetching doctor count: $e');
-    return 0; // Handle the error as needed.
-  }
-}
-
 Future<List<DoctorData>> fetchDoctors() async {
   try {
     QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
@@ -41,22 +31,14 @@ Future<List<DoctorData>> fetchDoctors() async {
       List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
       int time = availability['time'] ?? 0;
 
-      // Access fields from the document
-      dynamic nameField = doc['name'];
-      dynamic specialityField = doc['speciality'];
-      dynamic qualificationField = doc['qualification'];
-      dynamic hospitalField = doc['hospital'];
-      dynamic addressField = doc['address'];
-      dynamic experienceField = doc['experience'];
-      dynamic desField = doc['description'];
-
-      String name = (nameField is String) ? nameField : '';
-      List<String> speciality = (specialityField is List) ? List<String>.from(specialityField) : [];
-      String qualification = (qualificationField is String) ? qualificationField : '';
-      String hospital = (hospitalField is String) ? hospitalField : '';
-      String address = (addressField is String) ? addressField : '';
-      String experience = (experienceField is String) ? experienceField : '';
-      String description = (desField is String) ? desField : '';
+      // Access fields from the document with null checks
+      String name = (doctorData['name'] is String) ? doctorData['name'] : '';
+      List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
+      String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
+      String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
+      String address = (doctorData['address'] is String) ? doctorData['address'] : '';
+      String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
+      String description = (doctorData['description'] is String) ? doctorData['description'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -83,6 +65,7 @@ Future<List<DoctorData>> fetchDoctors() async {
     return []; // Return an empty list or handle the error as needed.
   }
 }
+
 
 
 
@@ -165,6 +148,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body:SafeArea(
         child: SingleChildScrollView(
+          // physics: AlwaysScrollableScrollPhysics(),
           child:Container(
 
             child:Column(
@@ -260,6 +244,9 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         height: 80,
                         child: ListView(
+                          // physics: AlwaysScrollableScrollPhysics(),
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
                           children: List<Widget>.generate(medCat.length, (index) {
                             return Card(
@@ -333,6 +320,8 @@ class _HomePageState extends State<HomePage> {
                                 List<DoctorData> doctors = snapshot.data ?? [];
 
                                 return ListView.builder(
+                                  // physics: AlwaysScrollableScrollPhysics(),
+                                  physics: NeverScrollableScrollPhysics(),//by adding this scroll is working properly now as it has listview
                                   shrinkWrap: true,
                                   itemCount: doctors.length,
                                   itemBuilder: (context, index) {
@@ -383,6 +372,7 @@ class DoctorData extends StatelessWidget {
   final String experience;
   final String description;
   final Map<String, dynamic> availability;
+
 // Define the colors and ratio for blending
   final color1 = Colors.white;
   final color2 = Colors.greenAccent.shade100;
@@ -461,9 +451,24 @@ class DoctorData extends StatelessWidget {
                   ElevatedButton(
                     style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent.shade700,),
                     onPressed: (){
-                      Navigator.push(context,MaterialPageRoute(builder: (context)=>BookingPage(),
-                      ),
+                      // Navigator.push(context,MaterialPageRoute(builder: (context)=>BookingPage(),
+                      //
+                      // ),
+                      // );
+                      Navigator.pushNamed(
+                        context,
+                        'booking_Page',
+                        arguments: {
+                          'name': name, // Pass the name
+                          'speciality': specialtiesString, // Pass the speciality
+                          'qualification':qualification,
+                          'hospital':hospital,
+                          'address':address,
+                          'experience':experience,
+                          'description':description,
+                        },
                       );
+
                     },
                     child: Text("Book Appointment",style: TextStyle(color: Colors.white,fontSize: 18),),
                   ),

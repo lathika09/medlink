@@ -15,6 +15,7 @@ class SignupPage_Doc extends StatelessWidget {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _phn = TextEditingController();
+  final TextEditingController _med = TextEditingController();
   final TextEditingController _pswd = TextEditingController();
   final TextEditingController _conpswd = TextEditingController();
 
@@ -170,13 +171,13 @@ class SignupPage_Doc extends StatelessWidget {
                       crossAxisAlignment:CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "med.",
+                          "Medical Licence : ",
                           style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
                         ),
                         const SizedBox(height:3),
                         TextField(
                           obscureText: false,
-                          controller:_phn,
+                          controller:_med,
                           decoration: const InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
                             enabledBorder: OutlineInputBorder(
@@ -236,7 +237,7 @@ class SignupPage_Doc extends StatelessWidget {
 
                       FirebaseAuth.instance.createUserWithEmailAndPassword(email: _email.text, password: _pswd.text).then((value) {
                         print("account created");
-                        addUserToFirestore(_name.text, _email.text, _phn.text);//ADD TO FIREBASE
+                        addUserToFirestore(_name.text, _email.text, _phn.text,_med.text,_pswd.text);//ADD TO FIREBASE
                         Navigator.push(context,MaterialPageRoute(builder: (context)=>HomePage()));
                       }).onError((error, stackTrace) {
                         print("error ${error.toString()}");
@@ -253,6 +254,8 @@ class SignupPage_Doc extends StatelessWidget {
                       _showErrorDialog(context, "Please enter a password and confirm it.");
                     } else if (_pswd.text != _conpswd.text) {
                       _showErrorDialog(context, "Passwords do not match.");
+                    } else if (_med.text.isEmpty) {
+                      _showErrorDialog(context, "Enter Medical licence field.");
                     } else {
                       try {
                         await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -260,7 +263,7 @@ class SignupPage_Doc extends StatelessWidget {
                           password: _pswd.text,
                         );
                         print("Account created");
-                        addUserToFirestore(_name.text, _email.text, _phn.text);//ADD TO FIREBASE
+                        addUserToFirestore(_name.text, _email.text, _phn.text,_med.text,_pswd.text);//ADD TO FIREBASE
                         _showSuccessDialog(context, "Account created successfully!");
 
                       } catch (error) {
@@ -279,9 +282,7 @@ class SignupPage_Doc extends StatelessWidget {
                         _showErrorDialog(context, errorMessage);
                       }
                     }
-
-
-                  },
+               },
                   color: Colors.blue[600],
                   shape: RoundedRectangleBorder(
                       side: const BorderSide(
@@ -300,7 +301,6 @@ class SignupPage_Doc extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
                   const Text("Alreday have an account? ",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 15),),
                   //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                   TextButton(
@@ -312,8 +312,6 @@ class SignupPage_Doc extends StatelessWidget {
                   )
                 ],
               ),
-
-
             ],
           ),
         ),
@@ -321,13 +319,15 @@ class SignupPage_Doc extends StatelessWidget {
     );
   }
 
-  void addUserToFirestore(String name, String email, String phoneNumber) async {
-    CollectionReference patients = FirebaseFirestore.instance.collection('patients');
+  void addUserToFirestore(String name, String email, String phoneNumber,String med,String password) async {
+    CollectionReference doctor= FirebaseFirestore.instance.collection('doctor');
 
-    await patients.add({
+    await doctor.add({
       'name': name,
       'email': email,
-      'phoneNumber': phoneNumber,
+      'phoneno': phoneNumber,
+      'medical_lic':med,
+      'password':password
     }).then((DocumentReference document) {
       print('Document added with ID: ${document.id}');
     }).catchError((error) {
