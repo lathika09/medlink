@@ -129,7 +129,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
 
                         decoration: BoxDecoration(
-                          color:Colors.blueAccent,
+                          color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(

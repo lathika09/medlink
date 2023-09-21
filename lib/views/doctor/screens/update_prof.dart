@@ -1,6 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // If you are using Firebase Auth as well
+import 'package:cloud_firestore/cloud_firestore.dart'; // If you are using Firestore as well
 
 
 Future getDocDetails(String email)async{
@@ -16,6 +21,27 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileState extends State<UpdateProfile> {
+
+  Map<String, int> dayNameToValue = {
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5,
+    'Saturday': 6,
+    'Sunday': 7,
+  };
+
+  Map<int, String> dayValueToName = {
+    1: 'Monday',
+    2: 'Tuesday',
+    3: 'Wednesday',
+    4: 'Thursday',
+    5: 'Friday',
+    6: 'Saturday',
+    7: 'Sunday',
+  };
+  List<int> selectedWeekdayIntegers = [];
   List<String> selectedWeekdays = [];
 
   List<MultiSelectItem<String>> weekdayItems = [
@@ -62,8 +88,15 @@ class _UpdateProfileState extends State<UpdateProfile> {
           final List<dynamic> weekdays = (doctorData["availability"] != null && doctorData["availability"]["weekday"] != null)
               ? List.from(doctorData["availability"]["weekday"])
               : <dynamic>[];
+
           // Provide an empty list if the field is not found or not an array
           print(weekdays);
+
+
+          // Convert weekday integers to weekday strings
+          selectedWeekdayIntegers = weekdays.cast<int>(); // Cast the list to List<int>
+          selectedWeekdays = weekdays.map((intVal) => dayValueToName[intVal] ?? '').toList();
+
 print(doctorData);
 
 
@@ -84,6 +117,30 @@ print(doctorData);
       print("Error fetching doctor data: $e");
     }
   }
+  Future<void> pickImageAndUploadToFirestore(String email) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final imageFile = File(pickedFile.path);
+
+      // Generate a unique filename, e.g., using a timestamp
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final filename = '$timestamp.jpg'; // You can use a different file extension if needed
+
+      // Upload the image to Firebase Storage
+      final storageRef = FirebaseStorage.instance.ref().child('prof_image/$email/$filename');
+      final uploadTask = storageRef.putFile(imageFile);
+      final TaskSnapshot uploadTaskSnapshot = await uploadTask;
+      final imageUrl = await uploadTaskSnapshot.ref.getDownloadURL();
+
+      // Update the Firestore document with the image URL
+      await FirebaseFirestore.instance.collection('doctor').doc(email).update({
+        'prof_image': imageUrl,
+      });
+    }
+  }
+
 
   @override
   void didChangeDependencies() {
@@ -138,7 +195,9 @@ print(doctorData);
                     ),
                     Positioned(
                       child: IconButton(
-                        onPressed:(){},
+                        onPressed:(){
+                          pickImageAndUploadToFirestore(email!);
+                        },
                         icon: Icon(Icons.add_a_photo),
                         iconSize: 30,
                         color: Colors.black,
@@ -180,7 +239,38 @@ print(doctorData);
                     buildTextField("Available Time :",_time),
                     SizedBox(height: 15,),
                     //week
-                    buildTextField("WeekDay :",_week),
+                    // buildMultiSelectField("WeekDay :",selectedWeekdays),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "WeekDay :",
+                          style:  TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        AbsorbPointer(
+                          absorbing: !isEditing,
+                          child: MultiSelectDialogField(
+                            items: weekdayItems,
+
+                            initialValue:selectedWeekdays,
+                            listType: MultiSelectListType.CHIP,
+                            onConfirm: (values) {
+                              setState(() {
+                                selectedWeekdays = values;
+                                // Convert selected weekday strings to integers
+                                selectedWeekdayIntegers = selectedWeekdays.map((weekday) => dayNameToValue[weekday]!).toList();
+
+                              });
+                            },
+
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 15,),
                     //bio
                     buildTextField("Bio :",_bio),
@@ -311,6 +401,7 @@ print(doctorData);
   void onSaveButtonClick() async {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? email = arguments?['email'] as String?;
+    print("LATHIKA : ${selectedWeekdayIntegers}");
     // Update the Firestore document with new values
     final updatedData = {
       "name": _name.text,
@@ -320,8 +411,14 @@ print(doctorData);
       "city": _city.text,
       "address": _add.text,
       "qualification": _qua.text,
+      // "time": int.parse(_time.text),
+      // "weekday": selectedWeekdayIntegers,
       // "Available time": _time.text,
       // "Weekday": _week.text,
+      "availability": {
+        "weekday": selectedWeekdayIntegers,
+        "time": int.parse(_time.text),// Store the selected weekdays as an integer array
+      },
       "description": _bio.text,
     };
 
@@ -408,33 +505,6 @@ print(doctorData);
     );
   }
 
-  //MULTISELECT
-  Widget buildMultiSelectField(String label, List<String> selectedValues) {
-    final textStyle = TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.w500,
-      color: Colors.black87,
-    );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: textStyle,
-        ),
-        MultiSelectDialogField(
-          items: weekdayItems,
-          initialValue: selectedValues,
-          listType: MultiSelectListType.CHIP,
-          onConfirm: (values) {
-            setState(() {
-              selectedValues = values;
-            });
-          },
-        ),
-      ],
-    );
-  }
 
 }
