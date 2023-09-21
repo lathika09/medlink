@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/screens/profile.dart';
+import 'package:medlink/views/doctor/screens/update_prof.dart';
 import 'package:medlink/views/patient/BookingPage.dart';
 import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/doctor_details.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         "booking_Page":(context)=>const BookingPage(),
         'doc_profile':(context)=>const ProfileSetting(),
         'doc_home':(context)=>const HomePage_doc(),
+        'update_prof':(context)=>const UpdateProfile(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),

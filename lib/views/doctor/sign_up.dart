@@ -176,6 +176,7 @@ class SignupPage_Doc extends StatelessWidget {
                         ),
                         const SizedBox(height:3),
                         TextField(
+
                           obscureText: false,
                           controller:_med,
                           decoration: const InputDecoration(

@@ -28,9 +28,9 @@ class HomePage_doc extends StatefulWidget {
 
 class _HomePage_docState extends State<HomePage_doc> {
   // Define the colors and ratio for blending
-  final color1 = Colors.greenAccent.shade100;
+  final color1 = Colors.greenAccent.shade200;
   final color2 = Colors.white;
-  final ratio = 0.5;
+  final ratio = 0.7;
   get mixedColor => Color.lerp(color1, color2, ratio);
 
 
@@ -73,7 +73,19 @@ class _HomePage_docState extends State<HomePage_doc> {
               child:Container(
                 width: MediaQuery.of(context).size.width,
                 padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 50.0),
-                color: Colors.greenAccent,
+                decoration: BoxDecoration(
+                  color:Colors.greenAccent.shade200,
+                  borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30.0),    // Bottom-left corner
+                    bottomRight: Radius.circular(30.0), ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3), // Shadow color
+                      spreadRadius: 3, // Spread radius
+                      blurRadius: 5, // Blur radius
+                      offset: Offset(0, 20), // Offset of the shadow
+                    ),
+                  ],
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,7 +115,7 @@ class _HomePage_docState extends State<HomePage_doc> {
               width: MediaQuery.of(context).size.width,
 
               padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 25.0),
-              color: mixedColor,
+              color: Colors.white,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -117,14 +129,22 @@ class _HomePage_docState extends State<HomePage_doc> {
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
 
                         decoration: BoxDecoration(
-                          color:Colors.white,
+                          color:Colors.blueAccent,
                           borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
                         ),
 
                         child:GestureDetector(
                           child: Card(
-                            color:Colors.greenAccent,
-                            elevation: 5,
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
 
@@ -164,12 +184,20 @@ class _HomePage_docState extends State<HomePage_doc> {
                         decoration: BoxDecoration(
                           color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
                         ),
 
                         child:GestureDetector(
                           child: Card(
-                            color:Colors.greenAccent,
-                            elevation: 5,
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
 
@@ -193,7 +221,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                               context,
                               'doc_profile', // The route name for ProfileSetting
                               arguments: {
-                                'email':email, // Pass the doctor's profile data as an argument
+                                'email': email, // Pass the doctor's profile data as an argument
                               },
                             );
                           },
@@ -214,12 +242,20 @@ class _HomePage_docState extends State<HomePage_doc> {
                         decoration: BoxDecoration(
                           color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
                         ),
 
                         child:GestureDetector(
                           child: Card(
-                            color:Colors.greenAccent,
-                            elevation: 5,
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
 
@@ -233,20 +269,19 @@ class _HomePage_docState extends State<HomePage_doc> {
                                   child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
 
                                 ),
-                                Text("doc1",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
+                                Text("doc",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
 
                               ],
                             ),
                           ),
                           onTap: (){
-                                Navigator.pushNamed(
-                                  context,
-                                  'doc_profile', // The route name for ProfileSetting
-                                  arguments: {
-                                    'email': email, // Pass the doctor's profile data as an argument
-                                  },
-                                );
-
+                            Navigator.pushNamed(
+                              context,
+                              'update_prof', // The route name for ProfileSetting
+                              arguments: {
+                                'email': email, // Pass the doctor's profile data as an argument
+                              },
+                            );
                           },
                         ),
                       ),
@@ -260,12 +295,20 @@ class _HomePage_docState extends State<HomePage_doc> {
                         decoration: BoxDecoration(
                           color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
                         ),
 
                         child:GestureDetector(
                           child: Card(
-                            color:Colors.greenAccent,
-                            elevation: 5,
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
 
@@ -289,7 +332,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                               context,
                               'doc_profile', // The route name for ProfileSetting
                               arguments: {
-                                'email':email, // Pass the doctor's profile data as an argument
+                                'email': email, // Pass the doctor's profile data as an argument
                               },
                             );
                           },
@@ -298,6 +341,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                     ],
                   ),
                   SizedBox(height: 30,),
+
                   Container(
                     width: 130,
                     height: 130,
@@ -307,12 +351,20 @@ class _HomePage_docState extends State<HomePage_doc> {
                     decoration: BoxDecoration(
                       color:Colors.white,
                       borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                          spreadRadius: 3, // Spread radius
+                          blurRadius: 5, // Blur radius
+                          offset: Offset(0, 20), // Offset of the shadow
+                        ),
+                      ],
                     ),
 
                     child:GestureDetector(
                       child: Card(
-                        color:Colors.greenAccent,
-                        elevation: 5,
+                        color:Colors.greenAccent.shade200,
+                        elevation: 2,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
 
@@ -334,7 +386,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                       onTap: (){
                         Navigator.pushNamed(
                           context,
-                          'doc_profile', // The route name for ProfileSetting
+                          'update_prof', // The route name for ProfileSetting
                           arguments: {
                             'email': email, // Pass the doctor's profile data as an argument
                           },
