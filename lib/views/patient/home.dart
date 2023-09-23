@@ -793,8 +793,8 @@ class ScheduleData extends StatelessWidget {
 
 class NavBar extends StatefulWidget {
   const NavBar({Key? key,required this.user_name,required this.user_email}) : super(key: key);
-  final String user_name;
-  final String user_email;
+  final String? user_name;
+  final String? user_email;
 
   @override
   State<NavBar> createState() => _NavBarState();
@@ -808,12 +808,12 @@ class _NavBarState extends State<NavBar> {
         padding: EdgeInsets.zero,
         children:[
           UserAccountsDrawerHeader(
-            accountName:  Text(widget.user_name,
+            accountName:  Text(widget.user_name!,
               style: TextStyle(
                 fontSize: 30, // Font size
                 fontWeight: FontWeight.bold,),
             ),
-            accountEmail: Text(widget.user_email,
+            accountEmail: Text(widget.user_email!,
               style: TextStyle(
                 fontSize: 16,),
             ),
