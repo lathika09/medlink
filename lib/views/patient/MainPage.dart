@@ -13,11 +13,14 @@ class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
 
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
+
+
   int currentPage=0;
   final PageController _page=PageController();
 
@@ -31,6 +34,11 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String? email = arguments?['email'] as String?;
+    print(email);
+    print("mainpage");
+
     return Scaffold(
       body: PageView(
         controller:_page,
@@ -39,8 +47,8 @@ class _MainPageState extends State<MainPage> {
             currentPage=value;
           });
         }),
-        children:const <Widget> [
-          HomePage(),
+        children: <Widget> [
+          HomePage(email: email,),
           AppointmentPage(),
         ],
       ),

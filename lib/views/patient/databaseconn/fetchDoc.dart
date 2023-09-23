@@ -42,6 +42,7 @@ Future<List<DoctorData>> fetchDoctors() async {
       String address = (doctorData['address'] is String) ? doctorData['address'] : '';
       String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
       String description = (doctorData['description'] is String) ? doctorData['description'] : '';
+      String email = (doctorData['email'] is String) ? doctorData['email'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -58,14 +59,15 @@ Future<List<DoctorData>> fetchDoctors() async {
         address: address,
         experience: experience,
         description: description,
-        availability: doctorAvailability, // Include the availability data
+        availability: doctorAvailability,
+        email: email,
       );
     }).toList();
 
     return doctors;
   } catch (e) {
     print('Error fetching doctors: $e');
-    return []; // Return an empty list or handle the error as needed.
+    return [];
   }
 }
 
@@ -223,33 +225,3 @@ class _Custom_SearchBarState extends State<Custom_SearchBar> {
   }
 }
 
-
-// class Doctor {
-//   final String name;
-//   final String qualification;
-//   final String hospital;
-//   final String location;
-//   final String experience;
-//
-//   Doctor({
-//     required this.name,
-//     required this.qualification,
-//     required this.hospital,
-//     required this.location,
-//     required this.experience,
-//   });
-// }
-//
-// Future<Map<String, dynamic>?> fetchDoctorData(String doctorId) async {
-//   try {
-//     DocumentSnapshot doctorSnapshot =
-//     await FirebaseFirestore.instance.collection('doctor').doc(doctorId).get();
-//
-//     if (doctorSnapshot.exists) {
-//       return doctorSnapshot.data() as Map<String, dynamic>;
-//     }
-//   } catch (e) {
-//     print('Error fetching doctor data: $e');
-//   }
-//   return null; // Return null if the doctor data couldn't be fetched
-// }

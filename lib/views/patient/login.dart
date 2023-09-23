@@ -137,10 +137,13 @@ class LoginPage extends StatelessWidget {
                             email: login_email.text,
                             password: login_pswd.text,
                           ).then((value) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => MainPage()),
-                              );
+                            Navigator.pushNamed(
+                              context,
+                              'main',//MainPage
+                              arguments: {
+                                'email':login_email.text
+                              },
+                            );
                           });
                         }
                         catch(error){
@@ -216,7 +219,7 @@ class LoginPage extends StatelessWidget {
                     //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                     TextButton(
                         onPressed: (){
-                          Navigator.push(context,MaterialPageRoute(builder: (context)=>SignupPage()));
+                          Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage()));//SIGNUP PAGE NAVIGATE
                           },
                         child: const Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                         ),
@@ -324,7 +327,7 @@ class LoginPage extends StatelessWidget {
                 Navigator.of(context).pop();// Close the dialog
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>HomePage()),
+                  MaterialPageRoute(builder: (context) =>HomePage(email: login_email.text,)),
                 );
               },
             ),

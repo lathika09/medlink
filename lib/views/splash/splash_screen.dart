@@ -18,11 +18,11 @@ class SplashScreen extends StatelessWidget {
         children: [
           Obx(
           ()=> AnimatedPositioned(
-            duration: const Duration(milliseconds: 1500),
+            duration: const Duration(milliseconds: 1600),
             top:0,
             left: splashScreenController.animate.value ? 0:-30,
             child:AnimatedOpacity(
-              duration: const Duration(milliseconds: 1800),
+              duration: const Duration(milliseconds: 1000),
               opacity: splashScreenController.animate.value ? 1 : 0,
               child:Image.asset(SplashAbove,width:MediaQuery.of(context).size.width ),
             ),
@@ -30,23 +30,23 @@ class SplashScreen extends StatelessWidget {
           ),
           Obx(
                 ()=> AnimatedPositioned(
-                  duration:const Duration(milliseconds: 1500),
+                  duration:const Duration(milliseconds: 1600),
                   top: 160,
                   left:splashScreenController.animate.value ? 0:30,
                   right:splashScreenController.animate.value ? 0:30,
                   child:AnimatedOpacity(
-                    duration: const Duration(milliseconds: 1800),
+                    duration: const Duration(milliseconds: 1000),
                     opacity: splashScreenController.animate.value ? 1 : 0,
                     child: Image.asset(SplashMiddle,width:MediaQuery.of(context).size.width )
               ),
             ),
           ),
           Obx(
-                ()=> AnimatedPositioned(duration:const Duration(milliseconds: 1000),
+                ()=> AnimatedPositioned(duration:const Duration(milliseconds: 1100),
                 bottom: 210,
                 left:80,
                 child:AnimatedOpacity(
-                  duration: const Duration(milliseconds: 1200),
+                  duration: const Duration(milliseconds: 1000),
                   opacity: splashScreenController.animate.value ? 1 : 0,
                   child: Text(appname,style: TextStyle(
                       fontSize: 45,
@@ -59,11 +59,11 @@ class SplashScreen extends StatelessWidget {
             ),
           ),
           Obx(
-                ()=> AnimatedPositioned(duration:const Duration(milliseconds: 1000),
+                ()=> AnimatedPositioned(duration:const Duration(milliseconds: 1100),
                 bottom:0,
                 left: splashScreenController.animate.value ? 0:-40,
                 child:AnimatedOpacity(
-                  duration: const Duration(milliseconds: 1800),
+                  duration: const Duration(milliseconds: 1000),
                   opacity: splashScreenController.animate.value ? 1 : 0,
                   child:Image.asset(Splashbelow)
                 ),

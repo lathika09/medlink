@@ -345,7 +345,7 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HomePage()
+                    builder: (context) => HomePage_doc()
                   ),
                 );
               },

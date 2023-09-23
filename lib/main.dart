@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:medlink/views/Welcome.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/screens/profile.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
@@ -12,7 +13,8 @@ import 'package:flutter/services.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+  );
 
   // Step 3
   SystemChrome.setPreferredOrientations([
@@ -45,6 +47,7 @@ class MyApp extends StatelessWidget {
         'doc_profile':(context)=>const ProfileSetting(),
         'doc_home':(context)=>const HomePage_doc(),
         'update_prof':(context)=>const UpdateProfile(),
+        'welcome':(context)=>const WelcomePage(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),

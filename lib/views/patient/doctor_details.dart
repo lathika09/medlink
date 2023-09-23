@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
@@ -102,8 +103,57 @@ class _DocDetailsState extends State<DocDetails> {
 }
 
 //ABOUT DOCTOR
-class AboutDoctor extends StatelessWidget {
+class AboutDoctor extends StatefulWidget {
   const AboutDoctor({Key? key}) : super(key: key);
+
+  @override
+  State<AboutDoctor> createState() => _AboutDoctorState();
+}
+
+class _AboutDoctorState extends State<AboutDoctor> {
+
+  //DOC IMAGE
+  String? _profileImageUrl;
+  Future<String?> getProfileImageUrl(String userEmail) async {
+    try {
+      final Reference storageReference =
+      FirebaseStorage.instance.ref().child('prof_images/$userEmail.jpg');
+
+      final String downloadURL = await storageReference.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      print('Error getting profile image URL: $e');
+      return null;
+    }
+  }
+  Future<void> loadProfileImage() async {
+    final Map<String, dynamic> args =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    // final String email = args['email'];
+
+    final imageUrl = await getProfileImageUrl(args['email']);
+    if (imageUrl != null) {
+      setState(() {
+
+        _profileImageUrl = imageUrl;
+        print("LATHIKA : ${_profileImageUrl} and ${args['email']}");
+      });
+    }
+    print("PROFILE");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadProfileImage();
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +166,10 @@ class AboutDoctor extends StatelessWidget {
     final String hospital = args['hospital'];
     final String address = args['address'];
     final String experience = args['experience'];
+    final String email = args['email'];
+
+
+
 
     return Container(
       width: double.infinity,
@@ -123,9 +177,11 @@ class AboutDoctor extends StatelessWidget {
         children: [
           SizedBox(height: 10,),
           CircleAvatar(
-            radius: 60.0,
-            backgroundImage: AssetImage(dc_prof),
-            backgroundColor: Colors.white,
+            radius: 60,
+            backgroundImage: _profileImageUrl != null
+                ? NetworkImage(_profileImageUrl!)
+                :NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"), // Provide a default image
+
           ),
           SizedBox(height: 12,),
           Text(name,style: TextStyle(color: Colors.black,fontSize: 26.0,fontWeight: FontWeight.bold),),
@@ -198,6 +254,7 @@ class AboutDoctor extends StatelessWidget {
     );
   }
 }
+
 
 //
 class DoctorInfo extends StatelessWidget {

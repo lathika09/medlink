@@ -1,18 +1,10 @@
 import 'dart:io';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // If you are using Firebase Auth as well
-import 'package:cloud_firestore/cloud_firestore.dart'; // If you are using Firestore as well
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-
-Future getDocDetails(String email)async{
-  final snapshot=await FirebaseFirestore.instance.collection("doctor").where("email",isEqualTo: email).get();
-  final doctorData=snapshot.docs.first.data();
-  return doctorData;
-}
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({Key? key}) : super(key: key);
 
@@ -21,7 +13,8 @@ class UpdateProfile extends StatefulWidget {
 }
 
 class _UpdateProfileState extends State<UpdateProfile> {
-
+  String? _profileImageUrl;
+  
   Map<String, int> dayNameToValue = {
     'Monday': 1,
     'Tuesday': 2,
@@ -68,10 +61,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   bool isEditing = false;
   Map<String, dynamic> doctorData = {}; // Store the doctor's data
 
-  @override
-  void initState() {
-    super.initState();
-  }
+
 // Fetch doctor data from Firestore based on the email
   Future<void> fetchDoctorData() async {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -82,24 +72,13 @@ class _UpdateProfileState extends State<UpdateProfile> {
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
-          final int time = (doctorData["availability"] != null && doctorData["availability"]["time"] != null)
-              ? doctorData["availability"]["time"] as int
-              : 0;
-          final List<dynamic> weekdays = (doctorData["availability"] != null && doctorData["availability"]["weekday"] != null)
-              ? List.from(doctorData["availability"]["weekday"])
-              : <dynamic>[];
-
-          // Provide an empty list if the field is not found or not an array
+          final int time = (doctorData["availability"] != null && doctorData["availability"]["time"] != null)  ? doctorData["availability"]["time"] as int : 0;
+          final List<dynamic> weekdays = (doctorData["availability"] != null && doctorData["availability"]["weekday"] != null) ? List.from(doctorData["availability"]["weekday"]) : <dynamic>[];
           print(weekdays);
-
-
           // Convert weekday integers to weekday strings
           selectedWeekdayIntegers = weekdays.cast<int>(); // Cast the list to List<int>
           selectedWeekdays = weekdays.map((intVal) => dayValueToName[intVal] ?? '').toList();
-
-print(doctorData);
-
-
+          print(doctorData);
           // Set the text controllers with the fetched data
           _name.text = doctorData["name"] ?? "";
           _exp.text = doctorData["experience"] ?? "";
@@ -117,44 +96,88 @@ print(doctorData);
       print("Error fetching doctor data: $e");
     }
   }
-  Future<void> pickImageAndUploadToFirestore(String email) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+
+  Future<void> uploadImageToFirebaseStorage(File imageFile, String Email) async {
+    try {
+      final Reference storageReference =
+      FirebaseStorage.instance.ref().child('prof_images/$Email.jpg');
+
+      final UploadTask uploadTask = storageReference.putFile(imageFile);
+
+      await uploadTask.whenComplete(() async {
+        final imageUrl = await storageReference.getDownloadURL();
+        print('Image uploaded to Firebase Storage: $imageUrl');
+
+        // Now you can save this URL in your Firestore or wherever you store user data.
+      });
+    } catch (e) {
+      print('Error uploading image to Firebase Storage: $e');
+    }
+  }
+  Future<void> _onImagePickerButtonPressed() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       final imageFile = File(pickedFile.path);
+      final Map<String, dynamic>? arguments =
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final String? email = arguments?['email'] as String?;
 
-      // Generate a unique filename, e.g., using a timestamp
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final filename = '$timestamp.jpg'; // You can use a different file extension if needed
+      if (email != null) {
+        uploadImageToFirebaseStorage(imageFile, email);
+      }
+    }
+  }
 
-      // Upload the image to Firebase Storage
-      final storageRef = FirebaseStorage.instance.ref().child('prof_image/$email/$filename');
-      final uploadTask = storageRef.putFile(imageFile);
-      final TaskSnapshot uploadTaskSnapshot = await uploadTask;
-      final imageUrl = await uploadTaskSnapshot.ref.getDownloadURL();
-
-      // Update the Firestore document with the image URL
-      await FirebaseFirestore.instance.collection('doctor').doc(email).update({
-        'prof_image': imageUrl,
+  Future<void> loadProfileImage() async {
+    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String? email = arguments?['email'] as String?;
+    print(email);
+    final imageUrl = await getProfileImageUrl(email!);
+    if (imageUrl != null) {
+      setState(() {
+        _profileImageUrl = imageUrl;
       });
     }
+    print("PROFILE");
   }
 
 
   @override
+  void initState() {
+    super.initState();
+
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    fetchDoctorData(); // Fetch the doctor's data when the dependencies change
+    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String? email = arguments?['email'] as String?;
+    fetchDoctorData();
+    loadProfileImage();
+
   }
+  Future<String?> getProfileImageUrl(String userEmail) async {
+    try {
+      final Reference storageReference =
+      FirebaseStorage.instance.ref().child('prof_images/$userEmail.jpg');
+
+      final String downloadURL = await storageReference.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      print('Error getting profile image URL: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? email = arguments?['email'] as String?;
     print(email);
     Widget buttons;
-    // fetchUserData(email!);
-
 
     return Scaffold(
         appBar:AppBar(
@@ -191,12 +214,17 @@ print(doctorData);
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundImage:NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"),
+                      backgroundImage: _profileImageUrl != null
+                          ? NetworkImage(_profileImageUrl!)
+                          :NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"), // Provide a default image
+
                     ),
                     Positioned(
                       child: IconButton(
-                        onPressed:(){
-                          pickImageAndUploadToFirestore(email!);
+                        onPressed:() async{
+                          print("pressed");
+                          _onImagePickerButtonPressed();
+                          loadProfileImage();
                         },
                         icon: Icon(Icons.add_a_photo),
                         iconSize: 30,
@@ -275,120 +303,66 @@ print(doctorData);
                     //bio
                     buildTextField("Bio :",_bio),
                     SizedBox(height: 30,),
-                    //button
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    //   children: [
-                    //     MaterialButton(
-                    //       minWidth:MediaQuery.of(context).size.width/3,
-                    //       height: 50,
-                    //       onPressed:(){
-                    //         // Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
-                    //       },
-                    //       color: Colors.blue[600],
-                    //       shape: RoundedRectangleBorder(
-                    //           side: const BorderSide(
-                    //               color:Colors.black
-                    //           ),
-                    //           borderRadius: BorderRadius.circular(50)
-                    //       ),
-                    //       child: const Text("Edit",
-                    //         style: TextStyle(
-                    //           color: Colors.white,
-                    //           fontSize: 25,
-                    //           fontWeight: FontWeight.bold,
-                    //         ),),
-                    //     ),
-                    //     MaterialButton(
-                    //       minWidth: MediaQuery.of(context).size.width/3,
-                    //       height: 50,
-                    //       onPressed:(){
-                    //         // Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
-                    //       },
-                    //       color: Colors.blue[600],
-                    //       shape: RoundedRectangleBorder(
-                    //           side: const BorderSide(
-                    //               color:Colors.black
-                    //           ),
-                    //           borderRadius: BorderRadius.circular(50)
-                    //       ),
-                    //       child: const Text("Save",
-                    //         style: TextStyle(
-                    //           color: Colors.white,
-                    //           fontSize: 25,
-                    //           fontWeight: FontWeight.bold,
-                    //         ),),
-                    //     ),
-                    //   ],
-                    // ),
-                    // SizedBox(height: 30,),
-                buttons = isEditing
-              ? Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                  // Save button
-              MaterialButton(
-              minWidth: MediaQuery.of(context).size.width/3,
-          height: 50,
-          onPressed:(){
-            onSaveButtonClick();
-            // Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
-          },
-          color: Colors.blue[600],
-          shape: RoundedRectangleBorder(
-              side: const BorderSide(
-                  color:Colors.black
-              ),
-              borderRadius: BorderRadius.circular(50)
-          ),
-          child: const Text("Save",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),),
-        ),
-            ],
-          )
-              : Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Edit button
-            MaterialButton(
-              minWidth:MediaQuery.of(context).size.width/3,
-              height: 50,
-              onPressed:(){
-                onEditButtonClick();
-                // Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
-              },
-              color: Colors.blue[600],
-              shape: RoundedRectangleBorder(
-                  side: const BorderSide(
-                      color:Colors.black
-                  ),
-                  borderRadius: BorderRadius.circular(50)
-              ),
-              child: const Text("Edit",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                ),),
-            ),
-          ],
-        ),
+                    buttons = isEditing ? Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        //SAVE BUUTTON
+                        MaterialButton(
+                          minWidth: MediaQuery.of(context).size.width/3,
+                          height: 50,
+                          onPressed:(){
+                            onSaveButtonClick();
+                          },
+                          color: Colors.blue[600],
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  color:Colors.black
+                              ),
+                              borderRadius: BorderRadius.circular(50)
+                          ),
+                          child: const Text("Save",
+                            style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,),
+                          ),
+                        ),
+                      ],
+                    )
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        // Edit button
+                        MaterialButton(
+                          minWidth:MediaQuery.of(context).size.width/3,
+                          height: 50,
+                          onPressed:(){
+                            onEditButtonClick();
+                          },
+                          color: Colors.blue[600],
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  color:Colors.black
+                              ),
+                              borderRadius: BorderRadius.circular(50)
+                          ),
+                          child: const Text("Edit",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 30,),
-
-
                   ],
                 ),
               ),
-
             ],
           ),
         )
     );
-
   }
   // Edit button click handler
   void onEditButtonClick() {
@@ -411,10 +385,6 @@ print(doctorData);
       "city": _city.text,
       "address": _add.text,
       "qualification": _qua.text,
-      // "time": int.parse(_time.text),
-      // "weekday": selectedWeekdayIntegers,
-      // "Available time": _time.text,
-      // "Weekday": _week.text,
       "availability": {
         "weekday": selectedWeekdayIntegers,
         "time": int.parse(_time.text),// Store the selected weekdays as an integer array
@@ -458,7 +428,6 @@ print(doctorData);
     fontWeight: FontWeight.w500,
     color: Colors.black,
   );
-
   final disabledTextStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w500,
@@ -504,7 +473,6 @@ print(doctorData);
       ],
     );
   }
-
-
-
 }
+
+

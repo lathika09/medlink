@@ -1,4 +1,5 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -39,6 +40,7 @@ Future<List<DoctorData>> fetchDoctors() async {
       String address = (doctorData['address'] is String) ? doctorData['address'] : '';
       String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
       String description = (doctorData['description'] is String) ? doctorData['description'] : '';
+      String email = (doctorData['email'] is String) ? doctorData['email'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -55,7 +57,8 @@ Future<List<DoctorData>> fetchDoctors() async {
         address: address,
         experience: experience,
         description: description,
-        availability: doctorAvailability, // Include the availability data
+        availability: doctorAvailability,
+        email:email,// Include the availability data
       );
     }).toList();
 
@@ -70,13 +73,31 @@ Future<List<DoctorData>> fetchDoctors() async {
 
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  HomePage({Key? key,required this.email }) : super(key: key);
+final String? email;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+// Fetch doctor data from Firestore based on the email
+  Map<String, dynamic> patientData = {};
+  Future<void> fetchDoctorData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.email).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          patientData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(patientData['name']);
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+  
+
   // Define the colors and ratio for blending
   final color1 = Colors.tealAccent.shade400;
   final color2 = Colors.tealAccent.shade700;
@@ -115,6 +136,7 @@ class _HomePageState extends State<HomePage> {
   @override
 
   Widget build(BuildContext context) {
+    print("homepage");
     return Scaffold(
       drawer:NavBar(),
 
@@ -359,10 +381,21 @@ class _HomePageState extends State<HomePage> {
 
 
 //DOCTOR CARD
-class DoctorData extends StatelessWidget {
-  DoctorData({Key? key,required this.route,required this.name,
-    required this.speciality,required this.qualification,required this.hospital,required this.address,
-    required this.experience,required this.description,required this.availability,}) : super(key: key);
+class DoctorData extends StatefulWidget {
+  DoctorData({
+    Key? key,
+    required this.route,
+    required this.name,
+    required this.speciality,
+    required this.qualification,
+    required this.hospital,
+    required this.address,
+    required this.experience,
+    required this.description,
+    required this.availability,
+    required this.email,
+  }) : super(key: key);
+
   final String route;
   final String name;
   final List<String> speciality;
@@ -372,21 +405,56 @@ class DoctorData extends StatelessWidget {
   final String experience;
   final String description;
   final Map<String, dynamic> availability;
+  final String email;
 
-// Define the colors and ratio for blending
+  @override
+  _DoctorDataState createState() => _DoctorDataState();
+}
+
+class _DoctorDataState extends State<DoctorData> {
+  // Define the colors and ratio for blending
   final color1 = Colors.white;
   final color2 = Colors.greenAccent.shade100;
-  // final color3 = Colors.greenAccent.shade400;
   final ratio = 0.5;
-
   get mixednewColor => Color.lerp(color1, color2, ratio);
 
+  //DOC IMAGE
+  String? _profileImageUrl;
+
+  Future<String?> getProfileImageUrl(String userEmail) async {
+    try {
+      final Reference storageReference =
+      FirebaseStorage.instance.ref().child('prof_images/$userEmail.jpg');
+
+      final String downloadURL = await storageReference.getDownloadURL();
+      return downloadURL;
+    } catch (e) {
+      print('Error getting profile image URL: $e');
+      return null;
+    }
+  }
+  Future<void> loadProfileImage() async {
+    final imageUrl = await getProfileImageUrl(widget.email);
+    if (imageUrl != null) {
+      setState(() {
+        _profileImageUrl = imageUrl;
+      });
+    }
+    print("PROFILE");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfileImage();
+  }
 
   @override
   Widget build(BuildContext context) {
-    String specialtiesString = speciality.join(', ');
+    String specialtiesString = widget.speciality.join(', ');
+
     return Container(
-      padding:const EdgeInsets.symmetric(horizontal: 10,vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
       height: 210,
       child: GestureDetector(
         child: Card(
@@ -398,98 +466,138 @@ class DoctorData extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: EdgeInsets.only(left: 10,right: 10,top: 15,bottom: 10),
+                    padding: EdgeInsets.only(
+                        left: 10, right: 10, top: 15, bottom: 10),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),//or 15.0
+                      borderRadius: BorderRadius.circular(20.0),
                       child: Container(
                         height: 90.0,
                         width: 85.0,
-                        color: Color(0xffFF0E58),
-                        child: Image.asset(dc_prof,fit: BoxFit.fill,),
+                        color:Colors.transparent,
+                        child:CircleAvatar(
+                          radius: 60,
+                          backgroundImage: _profileImageUrl != null
+                              ? NetworkImage(_profileImageUrl!)
+                              :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"), // Provide a default image
+
+                        ),
+                        // Image.asset(
+                        //   dc_prof,
+                        //   fit: BoxFit.fill,
+                        // ),
                       ),
                     ),
                   ),
                   Flexible(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 15),
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-
                             children: [
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width*0.4,
-                                      child: Text(name,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold,),softWrap: true,)),
+                                    width:
+                                    MediaQuery.of(context).size.width *
+                                        0.4,
+                                    child: Text(
+                                      widget.name,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      softWrap: true,
+                                    ),
+                                  ),
                                   SizedBox(
-                                      width: MediaQuery.of(context).size.width*0.46,
-                                      child: Text(specialtiesString,style: TextStyle(fontSize: 14,fontWeight: FontWeight.normal,),softWrap: true,)),
+                                    width:
+                                    MediaQuery.of(context).size.width *
+                                        0.46,
+                                    child: Text(
+                                      specialtiesString,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      softWrap: true,
+                                    ),
+                                  ),
                                 ],
                               ),
-                              // IconButton(onPressed: (){}, icon:Icon(Icons.chat,color: Colors.blueAccent.shade700,size: 35,),)
                             ],
                           ),
                         ],
                       ),
-                  ),
+                    ),
                   ),
                 ],
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-
                 children: [
-                  FloatingActionButton(onPressed: (){},child:Icon(Icons.chat,color: Colors.white,size: 30,) ,
+                  FloatingActionButton(
+                    onPressed: () {},
+                    child: Icon(
+                      Icons.chat,
+                      color: Colors.white,
+                      size: 30,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     mini: true,
-                    backgroundColor: Colors.blueAccent.shade700 ,),
+                    backgroundColor: Colors.blueAccent.shade700,
+                  ),
                   ElevatedButton(
-                    style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent.shade700,),
-                    onPressed: (){
-                      // Navigator.push(context,MaterialPageRoute(builder: (context)=>BookingPage(),
-                      //
-                      // ),
-                      // );
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent.shade700,
+                    ),
+                    onPressed: () {
                       Navigator.pushNamed(
                         context,
                         'booking_Page',
                         arguments: {
-                          'name': name, // Pass the name
-                          'speciality': specialtiesString, // Pass the speciality
-                          'qualification':qualification,
-                          'hospital':hospital,
-                          'address':address,
-                          'experience':experience,
-                          'description':description,
+                          'name': widget.name,
+                          'speciality': specialtiesString,
+                          'qualification': widget.qualification,
+                          'hospital': widget.hospital,
+                          'address': widget.address,
+                          'experience': widget.experience,
+                          'description': widget.description,
+                          'email': widget.email,
                         },
                       );
-
                     },
-                    child: Text("Book Appointment",style: TextStyle(color: Colors.white,fontSize: 18),),
+                    child: Text(
+                      "Book Appointment",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ],
               ),
-
             ],
           ),
         ),
-        onTap: (){
+        onTap: () {
           Navigator.pushNamed(
             context,
             'doc_details',
             arguments: {
-              'name': name, // Pass the name
-              'speciality': specialtiesString, // Pass the speciality
-              'qualification':qualification,
-              'hospital':hospital,
-              'address':address,
-              'experience':experience,
-              'description':description,
+              'name': widget.name,
+              'speciality': specialtiesString,
+              'qualification': widget.qualification,
+              'hospital': widget.hospital,
+              'address': widget.address,
+              'experience': widget.experience,
+              'description': widget.description,
+              'email': widget.email,
             },
           );
         },
@@ -497,7 +605,6 @@ class DoctorData extends StatelessWidget {
     );
   }
 }
-
 
 //APPOINTMENT CARD
 

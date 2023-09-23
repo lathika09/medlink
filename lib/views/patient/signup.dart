@@ -204,7 +204,7 @@ class SignupPage extends StatelessWidget {
                       FirebaseAuth.instance.createUserWithEmailAndPassword(email: _email.text, password: _pswd.text).then((value) {
                         print("account created");
                         addUserToFirestore(_name.text, _email.text, _phn.text);//ADD TO FIREBASE
-                        Navigator.push(context,MaterialPageRoute(builder: (context)=>HomePage()));
+                        Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage()));
                       }).onError((error, stackTrace) {
                         print("error ${error.toString()}");
                       });
