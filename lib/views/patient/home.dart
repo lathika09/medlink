@@ -4,8 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
-import 'package:medlink/views/patient/BookingPage.dart';
-import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
 import 'package:medlink/views/patient/login.dart';
@@ -41,6 +39,7 @@ Future<List<DoctorData>> fetchDoctors() async {
       String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
       String description = (doctorData['description'] is String) ? doctorData['description'] : '';
       String email = (doctorData['email'] is String) ? doctorData['email'] : '';
+      String city = (doctorData['city'] is String) ? doctorData['city'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -58,7 +57,8 @@ Future<List<DoctorData>> fetchDoctors() async {
         experience: experience,
         description: description,
         availability: doctorAvailability,
-        email:email,// Include the availability data
+        email:email,
+        city: city,// Include the availability data
       );
     }).toList();
 
@@ -96,7 +96,45 @@ class _HomePageState extends State<HomePage> {
       print("Error fetching doctor data: $e");
     }
   }
-  
+
+  //DROP CITY LIST
+  Future<List<String>> getUniqueCities() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+      List<String> cities = [];
+
+      querySnapshot.docs.forEach((doc) {
+        Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
+        String? city = doctorData['city'] as String?;
+        if (city != null && city.isNotEmpty && !cities.contains(city)) {
+          cities.add(city);
+        }
+
+
+      });
+      print(cities);
+      return cities;
+    } catch (e) {
+      print('Error fetching unique cities: $e');
+      return [];
+    }
+  }
+  List<String> listItem = [];
+  Future<void> fetchCities() async {
+    List<String> cities = await getUniqueCities();
+    setState(() {
+      print(listItem);
+      listItem = cities;
+      print("AFTER : ${listItem}");
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDoctorData();
+    fetchCities();
+  }
 
   // Define the colors and ratio for blending
   final color1 = Colors.tealAccent.shade400;
@@ -107,9 +145,7 @@ class _HomePageState extends State<HomePage> {
   get mixedColor => Color.lerp(color1, color2, ratio);
 
   String? valueChoose;
-  List listItem=[
-    "Mumbai","Delhi","Pune","Chennai"
-  ];
+
   TextEditingController search_name = TextEditingController();
   String searchText='';
 
@@ -124,11 +160,11 @@ class _HomePageState extends State<HomePage> {
     },
     {
       'icon':FontAwesomeIcons.hand,
-      'category':'Dermatology',
+      'category':'Dermatologist',
     },
     {
       'icon':FontAwesomeIcons.teeth,
-      'category':'Dental',
+      'category':'Dentist',
     },
   ];
 
@@ -138,7 +174,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     print("homepage");
     return Scaffold(
-      drawer:NavBar(),
+      drawer:NavBar(user_name: patientData['name'],user_email: patientData['email'],),
 
       appBar:AppBar(
         backgroundColor:Colors.blueAccent.shade700,
@@ -236,10 +272,16 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(width: 20,),
                       IconButton(
+                        //'docsearch'
                           onPressed: (){
-                            Navigator.push(
-                              context,MaterialPageRoute(builder: (context) => DoctorList()),
-                        );
+                            Navigator.pushNamed(
+                              context,
+                              'docsearch', // The route name for ProfileSetting
+                              arguments: {
+                                'list':listItem,
+                                'val':valueChoose,
+                              },
+                            );
                       }, icon: Icon(Icons.search,size: 28,color: Colors.black,))
                     ],
                   ),
@@ -267,37 +309,46 @@ class _HomePageState extends State<HomePage> {
                         height: 80,
                         child: ListView(
                           // physics: AlwaysScrollableScrollPhysics(),
-                          physics: NeverScrollableScrollPhysics(),
+                          // physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
                           children: List<Widget>.generate(medCat.length, (index) {
-                            return Card(
-                              elevation: 5,
-                              margin: EdgeInsets.only(right: 20.0),
-                              // color: Colors.blueAccent.shade700,
-                              // color:  Colors.tealAccent.shade100,
-                              color:  Colors.blue.shade50,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15.0,vertical: 10.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: [
-                                    FaIcon(
-                                      medCat[index]['icon'],
-                                      color: Colors.indigo.shade900,
-                                      size:27,
-                                    ),
+                            return GestureDetector(
+                              child: Card(
+                                elevation: 5,
+                                margin: EdgeInsets.only(right: 20.0),
+                                color:  Colors.blue.shade50,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 15.0,vertical: 10.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      FaIcon(
+                                        medCat[index]['icon'],
+                                        color: Colors.indigo.shade900,
+                                        size:27,
+                                      ),
 
-                                    const SizedBox(height: 8,),
-                                    Text(medCat[index]['category'],
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color:Colors.indigo.shade900,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                                      const SizedBox(height: 8,),
+                                      Text(medCat[index]['category'],
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color:Colors.indigo.shade900,
+                                            fontWeight: FontWeight.bold),
+                                      ),
 
-                                ],
-                              ),),
+                                  ],
+                                ),),
+                              ),
+                              onTap: (){
+                                Navigator.pushNamed(
+                                  context,
+                                  'specialitywise',
+                                  arguments: {
+                                    'category':medCat[index]['category'],
+                                  },
+                                );
+                              },
                             );
                             },
                           ),
@@ -394,6 +445,7 @@ class DoctorData extends StatefulWidget {
     required this.description,
     required this.availability,
     required this.email,
+    required this.city,
   }) : super(key: key);
 
   final String route;
@@ -406,6 +458,7 @@ class DoctorData extends StatefulWidget {
   final String description;
   final Map<String, dynamic> availability;
   final String email;
+  final String city;
 
   @override
   _DoctorDataState createState() => _DoctorDataState();
@@ -737,9 +790,17 @@ class ScheduleData extends StatelessWidget {
 
 
 //Navbar
-class NavBar extends StatelessWidget {
-  const NavBar({Key? key}) : super(key: key);
 
+class NavBar extends StatefulWidget {
+  const NavBar({Key? key,required this.user_name,required this.user_email}) : super(key: key);
+  final String user_name;
+  final String user_email;
+
+  @override
+  State<NavBar> createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -747,12 +808,12 @@ class NavBar extends StatelessWidget {
         padding: EdgeInsets.zero,
         children:[
           UserAccountsDrawerHeader(
-            accountName: const Text("Lathika Kotian",
-                style: TextStyle(
-                  fontSize: 30, // Font size
-                  fontWeight: FontWeight.bold,),
+            accountName:  Text(widget.user_name,
+              style: TextStyle(
+                fontSize: 30, // Font size
+                fontWeight: FontWeight.bold,),
             ),
-            accountEmail: const Text("lathikakotian03@gmail.com",
+            accountEmail: Text(widget.user_email,
               style: TextStyle(
                 fontSize: 16,),
             ),
@@ -762,7 +823,7 @@ class NavBar extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.blueAccent,
               image: DecorationImage(image:AssetImage(bg_nav),
-              fit: BoxFit.cover),
+                  fit: BoxFit.cover),
             ),
           ),
           ListTile(
@@ -803,18 +864,19 @@ class NavBar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 19,),
             ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
           ),
         ],
       ),
     );
   }
 }
+
 
 
 

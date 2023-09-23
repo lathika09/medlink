@@ -43,6 +43,7 @@ Future<List<DoctorData>> fetchDoctors() async {
       String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
       String description = (doctorData['description'] is String) ? doctorData['description'] : '';
       String email = (doctorData['email'] is String) ? doctorData['email'] : '';
+      String city = (doctorData['city'] is String) ? doctorData['city'] : '';
 
       // Create the availability map here
       Map<String, dynamic> doctorAvailability = {
@@ -61,6 +62,7 @@ Future<List<DoctorData>> fetchDoctors() async {
         description: description,
         availability: doctorAvailability,
         email: email,
+        city: city,
       );
     }).toList();
 
@@ -81,15 +83,36 @@ class DoctorList extends StatefulWidget {
 }
 
 class _DoctorListState extends State<DoctorList> {
-  String? valueChoose;
-  List listItem=[
-    "Mumbai","Delhi","Pune","Chennai"
-  ];
+
+  // List listItem=[
+  //   "Mumbai","Delhi","Pune","Chennai"
+  // ];
   TextEditingController search_name = TextEditingController();
   String searchText='';
+  String? valueChoose; // Initialize with null initially
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Initialize valueChoose with the value of val if available
+    final Map<String, dynamic>? arguments =
+    ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String? val = arguments?['val'] as String?;
+
+    if (val != null) {
+      setState(() {
+        valueChoose = val;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    final String? val = arguments?['val'] as String?;
+    final List<String>? listItem = arguments?['list'] as List<String>?;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor:Colors.blueAccent.shade700,
@@ -121,10 +144,10 @@ class _DoctorListState extends State<DoctorList> {
             value:valueChoose,
             onChanged: (newValue){
               setState(() {
-                valueChoose=newValue as String;;
+                valueChoose=newValue as String?;
               });
             },
-            items: listItem.map((valueItem){
+            items: listItem?.map((valueItem){
               return DropdownMenuItem(
 
                   value:valueItem,
@@ -139,7 +162,33 @@ class _DoctorListState extends State<DoctorList> {
             child: Container(
               child: Column(
                 children: [
-                  Custom_SearchBar(),
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 10.0,horizontal: 15.0),
+                    // padding: EdgeInsets.symmetric(vertical: 2.0,horizontal: 20.0),
+                    child:  TextField(
+
+                      style:const TextStyle(fontSize: 19.0,fontWeight: FontWeight.w600,color: Colors.black),
+                      controller: search_name,
+                      onChanged: (value){
+                        setState(() {
+                          searchText=value;
+
+                        });
+                      },
+                      decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.symmetric(vertical: 5.0,horizontal: 20.0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                            borderSide:const BorderSide(width: 0.8),
+                          ),
+                          hintText: "Search by Speciality",
+                          // prefixIcon:const Icon(Icons.search,size:20.0,),
+                          suffixIcon: IconButton(onPressed: (){}, icon:const Icon(Icons.search,size: 20.0,))
+                      ),
+
+                    ),
+
+                  ),
                   SizedBox(height: 10.0,),
                   //list of DOCTOR
                   Column(
@@ -153,6 +202,17 @@ class _DoctorListState extends State<DoctorList> {
                             return Text('Error: ${snapshot.error}');
                           } else {
                             List<DoctorData> doctors = snapshot.data ?? [];
+
+                            // Filter doctors based on city selection and search text
+                            doctors = doctors.where((doctor) {
+                              bool cityMatches = valueChoose == null || valueChoose!.isEmpty || doctor.city == valueChoose;
+                              bool nameMatches = searchText.isEmpty ||
+                                  doctor.speciality.any((s) => s.toLowerCase().contains(searchText.toLowerCase()));
+                              return cityMatches && nameMatches;
+                            }).toList();
+                            if (doctors.isEmpty) {
+                              return Container(child: Center(child: Text('No matching doctors found.')));
+                            }
 
                             return ListView.builder(
                               physics: NeverScrollableScrollPhysics(),

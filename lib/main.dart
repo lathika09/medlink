@@ -7,6 +7,8 @@ import 'package:medlink/views/doctor/screens/profile.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
 import 'package:medlink/views/patient/BookingPage.dart';
 import 'package:medlink/views/patient/MainPage.dart';
+import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
+import 'package:medlink/views/patient/databaseconn/specialitywise.dart';
 import 'package:medlink/views/patient/doctor_details.dart';
 import 'package:medlink/views/splash/splash_screen.dart';
 import 'package:flutter/services.dart';
@@ -48,6 +50,8 @@ class MyApp extends StatelessWidget {
         'doc_home':(context)=>const HomePage_doc(),
         'update_prof':(context)=>const UpdateProfile(),
         'welcome':(context)=>const WelcomePage(),
+        'specialitywise':(context)=>const SpecialityList(),
+        'docsearch':(context)=>const DoctorList(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
