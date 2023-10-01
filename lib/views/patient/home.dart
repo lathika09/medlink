@@ -8,84 +8,25 @@ import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-Future<List<DoctorData>> fetchDoctors() async {
-  try {
-    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
-
-    List<DoctorData> doctors = querySnapshot.docs.map((doc) {
-      Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
-
-      // Access the availability field
-      Map<String, dynamic> availability = doctorData['availability'] ?? {
-        'weekday': [],
-        'time': 0, // Assuming a default time of 0 if not specified
-      };
-
-      // Extract 'weekday' and 'time' from the availability map
-      List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
-      int time = availability['time'] ?? 0;
-
-      // Access fields from the document with null checks
-      String name = (doctorData['name'] is String) ? doctorData['name'] : '';
-      List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
-      String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
-      String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
-      String address = (doctorData['address'] is String) ? doctorData['address'] : '';
-      String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
-      String description = (doctorData['description'] is String) ? doctorData['description'] : '';
-      String email = (doctorData['email'] is String) ? doctorData['email'] : '';
-      String city = (doctorData['city'] is String) ? doctorData['city'] : '';
-
-      // Create the availability map here
-      Map<String, dynamic> doctorAvailability = {
-        'weekday': weekdays,
-        'time': time,
-      };
-
-      return DoctorData(
-        route: 'doc_details',
-        name: name,
-        speciality: speciality,
-        qualification: qualification,
-        hospital: hospital,
-        address: address,
-        experience: experience,
-        description: description,
-        availability: doctorAvailability,
-        email:email,
-        city: city,// Include the availability data
-      );
-    }).toList();
-
-    return doctors;
-  } catch (e) {
-    print('Error fetching doctors: $e');
-    return []; // Return an empty list or handle the error as needed.
-  }
-}
-
-
+import 'databaseconn/specialitywise.dart';
 
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key,required this.email }) : super(key: key);
-final String? email;
+  HomePage({Key? key,required this.pemail }) : super(key: key);
+final String? pemail;
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-// Fetch doctor data from Firestore based on the email
+
+
   Map<String, dynamic> patientData = {};
-  Future<void> fetchDoctorData() async {
+  Future<void> fetchPatientData() async {
     try {
-      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.email).get();
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.pemail!).get();
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           patientData = snapshot.docs.first.data() as Map<String, dynamic>;
@@ -96,6 +37,66 @@ class _HomePageState extends State<HomePage> {
       print("Error fetching doctor data: $e");
     }
   }
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Future<List<DoctorData>> fetchDoctors() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+
+      List<DoctorData> doctors = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
+
+        // Access the availability field
+        Map<String, dynamic> availability = doctorData['availability'] ?? {
+          'weekday': [],
+          'time': 0, // Assuming a default time of 0 if not specified
+        };
+
+        // Extract 'weekday' and 'time' from the availability map
+        List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
+        int time = availability['time'] ?? 0;
+
+        // Access fields from the document with null checks
+        String name = (doctorData['name'] is String) ? doctorData['name'] : '';
+        List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
+        String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
+        String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
+        String address = (doctorData['address'] is String) ? doctorData['address'] : '';
+        String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
+        String description = (doctorData['description'] is String) ? doctorData['description'] : '';
+        String email = (doctorData['email'] is String) ? doctorData['email'] : '';
+        String city = (doctorData['city'] is String) ? doctorData['city'] : '';
+        String pemail =(patientData['email'] is String) ? patientData['email'] : '';
+        // Create the availability map here
+        Map<String, dynamic> doctorAvailability = {
+          'weekday': weekdays,
+          'time': time,
+        };
+
+        return DoctorData(
+          route: 'doc_details',
+          name: name,
+          speciality: speciality,
+          qualification: qualification,
+          hospital: hospital,
+          address: address,
+          experience: experience,
+          description: description,
+          availability: doctorAvailability,
+          email:email,
+          city: city,
+          pemail:pemail,
+        );
+      }).toList();
+
+      return doctors;
+    } catch (e) {
+      print('Error fetching doctors: $e');
+      return []; // Return an empty list or handle the error as needed.
+    }
+  }
+
+// Fetch doctor data from Firestore based on the email
+
 
   //DROP CITY LIST
   Future<List<String>> getUniqueCities() async {
@@ -132,7 +133,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    fetchDoctorData();
+    fetchPatientData();
     fetchCities();
   }
 
@@ -173,6 +174,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget build(BuildContext context) {
     print("homepage");
+    String pemail =(patientData['email'] is String) ? patientData['email'] : '';
     return Scaffold(
       drawer:NavBar(user_name: patientData['name'],user_email: patientData['email'],),
 
@@ -280,6 +282,7 @@ class _HomePageState extends State<HomePage> {
                               arguments: {
                                 'list':listItem,
                                 'val':valueChoose,
+                                'pemail':widget.pemail,
                               },
                             );
                       }, icon: Icon(Icons.search,size: 28,color: Colors.black,))
@@ -341,12 +344,9 @@ class _HomePageState extends State<HomePage> {
                                 ),),
                               ),
                               onTap: (){
-                                Navigator.pushNamed(
+                                Navigator.push(
                                   context,
-                                  'specialitywise',
-                                  arguments: {
-                                    'category':medCat[index]['category'],
-                                  },
+                                  MaterialPageRoute(builder: (context) =>SpecialityList(pemail:pemail,category:medCat[index]['category'])),
                                 );
                               },
                             );
@@ -366,7 +366,7 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       SizedBox(height: 10,),
-                      AppointmentData(),
+                      AppointmentData(pemail: pemail!),
                       SizedBox(height: 25,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -446,6 +446,7 @@ class DoctorData extends StatefulWidget {
     required this.availability,
     required this.email,
     required this.city,
+    required this.pemail
   }) : super(key: key);
 
   final String route;
@@ -459,6 +460,8 @@ class DoctorData extends StatefulWidget {
   final Map<String, dynamic> availability;
   final String email;
   final String city;
+  final String pemail;
+
 
   @override
   _DoctorDataState createState() => _DoctorDataState();
@@ -470,6 +473,22 @@ class _DoctorDataState extends State<DoctorData> {
   final color2 = Colors.greenAccent.shade100;
   final ratio = 0.5;
   get mixednewColor => Color.lerp(color1, color2, ratio);
+
+  Map<String, dynamic> patientData = {};
+  Future<void> fetchDoctorData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.pemail).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          patientData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(patientData['name']);
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+
 
   //DOC IMAGE
   String? _profileImageUrl;
@@ -531,13 +550,8 @@ class _DoctorDataState extends State<DoctorData> {
                           radius: 60,
                           backgroundImage: _profileImageUrl != null
                               ? NetworkImage(_profileImageUrl!)
-                              :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"), // Provide a default image
-
+                              :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"),
                         ),
-                        // Image.asset(
-                        //   dc_prof,
-                        //   fit: BoxFit.fill,
-                        // ),
                       ),
                     ),
                   ),
@@ -592,7 +606,7 @@ class _DoctorDataState extends State<DoctorData> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  FloatingActionButton(
+                  MaterialButton(
                     onPressed: () {},
                     child: Icon(
                       Icons.chat,
@@ -602,8 +616,8 @@ class _DoctorDataState extends State<DoctorData> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    mini: true,
-                    backgroundColor: Colors.blueAccent.shade700,
+                    color: Colors.blueAccent.shade700,
+                    minWidth: MediaQuery.of(context).size.width/6,
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -622,6 +636,8 @@ class _DoctorDataState extends State<DoctorData> {
                           'experience': widget.experience,
                           'description': widget.description,
                           'email': widget.email,
+                          'pemail':widget.pemail,
+
                         },
                       );
                     },
@@ -651,6 +667,9 @@ class _DoctorDataState extends State<DoctorData> {
               'experience': widget.experience,
               'description': widget.description,
               'email': widget.email,
+              'availability':widget.availability,
+              'pemail':widget.pemail,
+              // 'patient':
             },
           );
         },
@@ -662,8 +681,8 @@ class _DoctorDataState extends State<DoctorData> {
 //APPOINTMENT CARD
 
 class AppointmentData extends StatefulWidget {
-  const AppointmentData({Key? key}) : super(key: key);
-
+  const AppointmentData({Key? key,required this.pemail}) : super(key: key);
+final String pemail;
   @override
   State<AppointmentData> createState() => _AppointmentDataState();
 }

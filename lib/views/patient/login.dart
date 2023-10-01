@@ -12,7 +12,6 @@ class LoginPage extends StatelessWidget {
   final TextEditingController login_email = TextEditingController();
   final TextEditingController login_pswd = TextEditingController();
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,7 +326,7 @@ class LoginPage extends StatelessWidget {
                 Navigator.of(context).pop();// Close the dialog
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) =>HomePage(email: login_email.text,)),
+                  MaterialPageRoute(builder: (context) =>HomePage(pemail: login_email.text,)),
                 );
               },
             ),

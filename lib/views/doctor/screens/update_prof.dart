@@ -110,6 +110,11 @@ class _UpdateProfileState extends State<UpdateProfile> {
         print('Image uploaded to Firebase Storage: $imageUrl');
 
         // Now you can save this URL in your Firestore or wherever you store user data.
+        await FirebaseFirestore.instance.collection('doctor').doc(Email).update({
+          'prof_image': imageUrl,
+        });
+
+        print('Image URL saved in Firestore.');
       });
     } catch (e) {
       print('Error uploading image to Firebase Storage: $e');

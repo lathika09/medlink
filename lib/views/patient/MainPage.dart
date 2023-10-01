@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/AppointmentPage.dart';
-// import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/home.dart';
-// import 'package:medlink/views/patient/login.dart';
-import 'package:medlink/main.dart';
+
+
+import '../chats/main_screen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -36,7 +36,7 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? email = arguments?['email'] as String?;
-    print(email);
+    print(email!);
     print("mainpage");
 
     return Scaffold(
@@ -48,8 +48,9 @@ class _MainPageState extends State<MainPage> {
           });
         }),
         children: <Widget> [
-          HomePage(email: email,),
+          HomePage(pemail: email ?? ""),
           AppointmentPage(),
+          MainChatScreen(),
         ],
       ),
       bottomNavigationBar: ClipRRect(
@@ -72,6 +73,10 @@ class _MainPageState extends State<MainPage> {
               BottomNavigationBarItem(
                 icon: Icon(Icons.book_sharp),
                 label: "Appointment",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat),
+                label: "Chats",
               ),
             ],
           selectedLabelStyle: TextStyle(color: Colors.white,fontSize: 15),

@@ -18,6 +18,8 @@ class _DocDetailsState extends State<DocDetails> {
   Widget build(BuildContext context) {
     final Map<String, dynamic> args =
     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+final String email=args['email'];
+    final String pemail=args['pemail'];
 
     final String description = args['description'];
 
@@ -78,8 +80,8 @@ class _DocDetailsState extends State<DocDetails> {
                       Navigator.of(context).pushNamed(
                         "booking_Page",
                         arguments: {
-                          // Pass the availability information here
-                          'availability': args['availability'],
+                          'email':email,
+                          'pemail':pemail,
                         },
                       );
 
@@ -167,6 +169,9 @@ class _AboutDoctorState extends State<AboutDoctor> {
     final String address = args['address'];
     final String experience = args['experience'];
     final String email = args['email'];
+    final Map<String, dynamic> availability = args['availability'];
+    List<dynamic> weekdays = availability['weekday'] ?? [];
+    int time = availability['time'] ?? 0;
 
 
 

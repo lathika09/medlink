@@ -5,75 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/home.dart';
 
-final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-Future<int> getDoctorCount() async {
-  try {
-    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
-    return querySnapshot.docs.length;
-  } catch (e) {
-    print('Error fetching doctor count: $e');
-    return 0; // Handle the error as needed.
-  }
-}
-
-Future<List<DoctorData>> fetchDoctors() async {
-  try {
-    QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
-
-    List<DoctorData> doctors = querySnapshot.docs.map((doc) {
-      Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
-
-      // Access the availability field
-      Map<String, dynamic> availability = doctorData['availability'] ?? {
-        'weekday': [],
-        'time': 0, // Assuming a default time of 0 if not specified
-      };
-
-      // Extract 'weekday' and 'time' from the availability map
-      List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
-      int time = availability['time'] ?? 0;
-
-      // Access fields from the document with null checks
-      String name = (doctorData['name'] is String) ? doctorData['name'] : '';
-      List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
-      String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
-      String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
-      String address = (doctorData['address'] is String) ? doctorData['address'] : '';
-      String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
-      String description = (doctorData['description'] is String) ? doctorData['description'] : '';
-      String email = (doctorData['email'] is String) ? doctorData['email'] : '';
-      String city = (doctorData['city'] is String) ? doctorData['city'] : '';
-
-      // Create the availability map here
-      Map<String, dynamic> doctorAvailability = {
-        'weekday': weekdays,
-        'time': time,
-      };
-
-      return DoctorData(
-        route: 'doc_details',
-        name: name,
-        speciality: speciality,
-        qualification: qualification,
-        hospital: hospital,
-        address: address,
-        experience: experience,
-        description: description,
-        availability: doctorAvailability,
-        email: email,
-        city: city,
-      );
-    }).toList();
-
-    return doctors;
-  } catch (e) {
-    print('Error fetching doctors: $e');
-    return [];
-  }
-}
-
-
 
 class DoctorList extends StatefulWidget {
   const DoctorList({Key? key}) : super(key: key);
@@ -95,7 +26,6 @@ class _DoctorListState extends State<DoctorList> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    // Initialize valueChoose with the value of val if available
     final Map<String, dynamic>? arguments =
     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? val = arguments?['val'] as String?;
@@ -112,6 +42,96 @@ class _DoctorListState extends State<DoctorList> {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? val = arguments?['val'] as String?;
     final List<String>? listItem = arguments?['list'] as List<String>?;
+    final String? pemail = arguments?['pemail'] as String?;
+    print(pemail);
+
+    Map<String, dynamic> patientData = {};
+    Future<void> fetchDoctorData() async {
+      try {
+        final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: pemail).get();
+        if (snapshot.docs.isNotEmpty) {
+          setState(() {
+            patientData = snapshot.docs.first.data() as Map<String, dynamic>;
+            print(patientData['name']);
+          });
+        }
+      } catch (e) {
+        print("Error fetching doctor data: $e");
+      }
+    }
+
+
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    Future<int> getDoctorCount() async {
+      try {
+        QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+        return querySnapshot.docs.length;
+      } catch (e) {
+        print('Error fetching doctor count: $e');
+        return 0; // Handle the error as needed.
+      }
+    }
+
+    Future<List<DoctorData>> fetchDoctors() async {
+      try {
+        QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+
+        List<DoctorData> doctors = querySnapshot.docs.map((doc) {
+          Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
+
+          // Access the availability field
+          Map<String, dynamic> availability = doctorData['availability'] ?? {
+            'weekday': [],
+            'time': 0, // Assuming a default time of 0 if not specified
+          };
+
+          // Extract 'weekday' and 'time' from the availability map
+          List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
+          int time = availability['time'] ?? 0;
+
+          // Access fields from the document with null checks
+          String name = (doctorData['name'] is String) ? doctorData['name'] : '';
+          List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
+          String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
+          String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
+          String address = (doctorData['address'] is String) ? doctorData['address'] : '';
+          String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
+          String description = (doctorData['description'] is String) ? doctorData['description'] : '';
+          String email = (doctorData['email'] is String) ? doctorData['email'] : '';
+          String city = (doctorData['city'] is String) ? doctorData['city'] : '';
+
+          // Create the availability map here
+          Map<String, dynamic> doctorAvailability = {
+            'weekday': weekdays,
+            'time': time,
+          };
+
+          return DoctorData(
+            route: 'doc_details',
+            name: name,
+            speciality: speciality,
+            qualification: qualification,
+            hospital: hospital,
+            address: address,
+            experience: experience,
+            description: description,
+            availability: doctorAvailability,
+            email: email,
+            city: city,
+            pemail: arguments?['pemail'],
+
+          );
+        }).toList();
+
+        return doctors;
+      } catch (e) {
+        print('Error fetching doctors: $e');
+        return [];
+      }
+    }
+
+
 
     return Scaffold(
       appBar: AppBar(

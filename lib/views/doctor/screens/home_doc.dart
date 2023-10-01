@@ -158,7 +158,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                                   child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
 
                                 ),
-                                Text("doc",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
+                                Text("Patient details",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
 
                               ],
                             ),
@@ -211,7 +211,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                                   child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
 
                                 ),
-                                Text("doc",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
+                                Text("Appointments",maxLines:1,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
 
                               ],
                             ),
@@ -219,7 +219,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                           onTap: (){
                             Navigator.pushNamed(
                               context,
-                              'doc_profile', // The route name for ProfileSetting
+                              'appointment_stats', // The route name for ProfileSetting
                               arguments: {
                                 'email': email, // Pass the doctor's profile data as an argument
                               },
@@ -230,117 +230,8 @@ class _HomePage_docState extends State<HomePage_doc> {
                     ],
                   ),
                   SizedBox(height: 30,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 130,
-                        height: 130,
 
-                        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-
-                        decoration: BoxDecoration(
-                          color:Colors.white,
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
-                            ),
-                          ],
-                        ),
-
-                        child:GestureDetector(
-                          child: Card(
-                            color:Colors.greenAccent.shade200,
-                            elevation: 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
-                              children: [
-                                Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
-                                  color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-                                  child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-
-                                ),
-                                Text("doc",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
-
-                              ],
-                            ),
-                          ),
-                          onTap: (){
-                            Navigator.pushNamed(
-                              context,
-                              'update_prof', // The route name for ProfileSetting
-                              arguments: {
-                                'email': email, // Pass the doctor's profile data as an argument
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(width: 30,),
-                      Container(
-                        width: 130,
-                        height: 130,
-
-                        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-
-                        decoration: BoxDecoration(
-                          color:Colors.white,
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
-                            ),
-                          ],
-                        ),
-
-                        child:GestureDetector(
-                          child: Card(
-                            color:Colors.greenAccent.shade200,
-                            elevation: 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
-                              children: [
-                                Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
-                                  color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-                                  child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-
-                                ),
-                                Text("doc",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
-
-                              ],
-                            ),
-                          ),
-                          onTap: (){
-                            Navigator.pushNamed(
-                              context,
-                              'doc_profile', // The route name for ProfileSetting
-                              arguments: {
-                                'email': email, // Pass the doctor's profile data as an argument
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 30,),
+                  // SizedBox(height: 30,),
 
                   Container(
                     width: 130,
@@ -378,7 +269,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                               child: Icon(FontAwesomeIcons.imagePortrait,size: 50,color: Colors.blueAccent.shade700,),
 
                             ),
-                            Text("Profile",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
+                            Text("Profile",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
 
                           ],
                         ),
@@ -407,62 +298,4 @@ class _HomePage_docState extends State<HomePage_doc> {
   }
 }
 
-
-
-
-
-// class Manage extends StatelessWidget {
-//   Manage({Key? key,required this.route,required this.icon,required this.text}) : super(key: key);
-//   final String route;
-//   final Icon icon;
-//   final String text;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//         width: 130,
-//         height: 130,
-//
-//         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-//
-//         decoration: BoxDecoration(
-//           color:Colors.white,
-//           borderRadius: BorderRadius.circular(25),
-//         ),
-//
-//         child:GestureDetector(
-//           child: Card(
-//             color:Colors.greenAccent,
-//             elevation: 5,
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.start,
-//
-//               children: [
-//                 Container(
-//                   width: 75,
-//                   height: 75,
-//                   padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
-//                   color:Colors.transparent,
-//                   // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-//                   child: icon,
-//
-//                 ),
-//                 Text(text,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 18),),
-//
-//               ],
-//             ),
-//           ),
-//           onTap: (){
-//             Navigator.pushNamed(
-//               context,
-//               route, // The route name for ProfileSetting
-//               arguments: {
-//                 'doctorInfo': widget.doctorInfo, // Pass the doctor's profile data as an argument
-//               },
-//             );
-//           },
-//         ),
-//     );
-//   }
-// }
 
