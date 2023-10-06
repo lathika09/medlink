@@ -136,13 +136,14 @@ class LoginPage extends StatelessWidget {
                             email: login_email.text,
                             password: login_pswd.text,
                           ).then((value) {
-                            Navigator.pushNamed(
-                              context,
-                              'main',//MainPage
-                              arguments: {
-                                'email':login_email.text
-                              },
-                            );
+                            Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage(pemail: login_email.text,)));
+                            // Navigator.pushNamed(
+                            //   context,
+                            //   'main',//MainPage
+                            //   arguments: {
+                            //     'email':login_email.text
+                            //   },
+                            // );
                           });
                         }
                         catch(error){
@@ -218,7 +219,14 @@ class LoginPage extends StatelessWidget {
                     //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                     TextButton(
                         onPressed: (){
-                          Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage()));//SIGNUP PAGE NAVIGATE
+                          Navigator.push(context,MaterialPageRoute(builder: (context)=>SignupPage()));//SIGNUP PAGE NAVIGATE
+                          // Navigator.pushNamed(
+                          //   context,
+                          //   'main',//MainPage
+                          //   arguments: {
+                          //     'email':login_email.text
+                          //   },
+                          // );
                           },
                         child: const Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                         ),

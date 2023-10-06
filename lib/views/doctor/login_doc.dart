@@ -151,12 +151,10 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                               password: login_pswd.text,
                             ).then((value) {
                               //pushReplacementNamed
-                              Navigator.pushNamed(
+                              print("Login email :${login_email.text}");
+                              Navigator.push(
                                 context,
-                                'doc_home',
-                                arguments: {
-                                  'email':login_email.text
-                                },
+                                MaterialPageRoute(builder: (context) =>HomePage_doc(email: login_email.text)),
                               );
 
 
@@ -345,7 +343,7 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HomePage_doc()
+                    builder: (context) => HomePage_doc(email: login_email.text,)
                   ),
                 );
               },

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/views/doctor/screens/profile.dart';
+import 'package:medlink/views/patient/AppointmentPage.dart';
 import '../../patient/NotificationPage.dart';
 
 //${widget.userData['email']}
@@ -20,7 +21,8 @@ void fetchUserData(String userEmail) async {
 
 class HomePage_doc extends StatefulWidget {
 
-  const HomePage_doc({Key? key}) : super(key: key);
+  const HomePage_doc({Key? key,required this.email}) : super(key: key);
+  final String email;
 
   @override
   State<HomePage_doc> createState() => _HomePage_docState();
@@ -37,9 +39,9 @@ class _HomePage_docState extends State<HomePage_doc> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String? email = arguments?['email'] as String?;
-    print(email);
+    // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    // final String? email = arguments?['email'] as String?;
+    // print(email);
 
 
     return Scaffold(
@@ -155,10 +157,10 @@ class _HomePage_docState extends State<HomePage_doc> {
                                   padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
                                   color:Colors.transparent,
                                   // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-                                  child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
+                                  child: Icon(Icons.person,size: 50,color: Colors.black,),
 
                                 ),
-                                Text("Patient details",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
+                                Text("Patients",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
 
                               ],
                             ),
@@ -168,7 +170,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                               context,
                               'doc_profile', // The route name for ProfileSetting
                               arguments: {
-                                'email': email, // Pass the doctor's profile data as an argument
+                                'email': widget.email, // Pass the doctor's profile data as an argument
                               },
                             );
                           },
@@ -208,7 +210,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                                   padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
                                   color:Colors.transparent,
                                   // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-                                  child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
+                                  child: Icon(FontAwesomeIcons.bookMedical ,size: 40,color: Colors.black,),
 
                                 ),
                                 Text("Appointments",maxLines:1,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
@@ -217,12 +219,14 @@ class _HomePage_docState extends State<HomePage_doc> {
                             ),
                           ),
                           onTap: (){
-                            Navigator.pushNamed(
+                            Navigator.push(
                               context,
-                              'appointment_stats', // The route name for ProfileSetting
-                              arguments: {
-                                'email': email, // Pass the doctor's profile data as an argument
-                              },
+                              MaterialPageRoute(builder: (context) =>AppointmentPage(email: widget.email)),
+                              // context,
+                              // 'appointment_stats', // The route name for ProfileSetting
+                              // arguments: {
+                              //   'email': email, // Pass the doctor's profile data as an argument
+                              // },
                             );
                           },
                         ),
@@ -230,61 +234,120 @@ class _HomePage_docState extends State<HomePage_doc> {
                     ],
                   ),
                   SizedBox(height: 30,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 130,
+                        height: 130,
+
+                        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+
+                        decoration: BoxDecoration(
+                          color:Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
+                        ),
+
+                        child:GestureDetector(
+                          child: Card(
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+
+                              children: [
+                                Container(
+                                  width: 75,
+                                  height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  color:Colors.transparent,
+                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
+                                  child: Icon(Icons.message,size: 50,color: Colors.black,),
+
+                                ),
+                                Text("Chats",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
+
+                              ],
+                            ),
+                          ),
+                          onTap: (){
+                            Navigator.pushNamed(
+                              context,
+                              'doc_profile', // The route name for ProfileSetting
+                              arguments: {
+                                'email': widget.email, // Pass the doctor's profile data as an argument
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 30,),
+                      Container(
+                        width: 130,
+                        height: 130,
+
+                        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+
+                        decoration: BoxDecoration(
+                          color:Colors.white,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
+                              spreadRadius: 3, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset: Offset(0, 20), // Offset of the shadow
+                            ),
+                          ],
+                        ),
+
+                        child:GestureDetector(
+                          child: Card(
+                            color:Colors.greenAccent.shade200,
+                            elevation: 2,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+
+                              children: [
+                                Container(
+                                  width: 75,
+                                  height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  color:Colors.transparent,
+                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
+                                  child: Icon(FontAwesomeIcons.imagePortrait,size: 50,color: Colors.black,),
+
+                                ),
+                                Text("Profile",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
+
+                              ],
+                            ),
+                          ),
+                          onTap: (){
+                            Navigator.pushNamed(
+                              context,
+                              'update_prof', // The route name for ProfileSetting
+                              arguments: {
+                                'email': widget.email, // Pass the doctor's profile data as an argument
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
 
                   // SizedBox(height: 30,),
 
-                  Container(
-                    width: 130,
-                    height: 130,
 
-                    padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-
-                    decoration: BoxDecoration(
-                      color:Colors.white,
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                          spreadRadius: 3, // Spread radius
-                          blurRadius: 5, // Blur radius
-                          offset: Offset(0, 20), // Offset of the shadow
-                        ),
-                      ],
-                    ),
-
-                    child:GestureDetector(
-                      child: Card(
-                        color:Colors.greenAccent.shade200,
-                        elevation: 2,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-
-                          children: [
-                            Container(
-                              width: 75,
-                              height: 75,
-                              padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
-                              color:Colors.transparent,
-                              // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
-                              child: Icon(FontAwesomeIcons.imagePortrait,size: 50,color: Colors.blueAccent.shade700,),
-
-                            ),
-                            Text("Profile",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
-
-                          ],
-                        ),
-                      ),
-                      onTap: (){
-                        Navigator.pushNamed(
-                          context,
-                          'update_prof', // The route name for ProfileSetting
-                          arguments: {
-                            'email': email, // Pass the doctor's profile data as an argument
-                          },
-                        );
-                      },
-                    ),
-                  ),
 
                 ],
               ),

@@ -47,6 +47,28 @@ class _UpdateProfileState extends State<UpdateProfile> {
     MultiSelectItem<String>('Sunday', 'Sunday'),
   ];
 
+  // List<int> selectedSlotIntegers = [];
+  List<String> selectedSlot = [];
+  List<MultiSelectItem<String>> timeItems = [
+    MultiSelectItem<String>('7:00 AM', '7:00 AM'),
+    MultiSelectItem<String>('8:00 AM', '8:00 AM'),
+    MultiSelectItem<String>('9:00 AM', '9:00 AM'),
+    MultiSelectItem<String>('10:00 AM', '10:00 AM'),
+    MultiSelectItem<String>('11:00 AM', '11:00 AM'),
+    MultiSelectItem<String>('12:00 PM', '12:00 PM'),
+    MultiSelectItem<String>('13:00 PM', '13:00 PM'),
+    MultiSelectItem<String>('14:00 PM', '14:00 PM'),
+    MultiSelectItem<String>('15:00 PM', '15:00 PM'),
+    MultiSelectItem<String>('16:00 PM', '16:00 PM'),
+    MultiSelectItem<String>('17:00 PM', '17:00 PM'),
+    MultiSelectItem<String>('18:00 PM', '18:00 PM'),
+    MultiSelectItem<String>('19:00 PM', '19:00 PM'),
+    MultiSelectItem<String>('20:00 PM', '20:00 PM'),
+    MultiSelectItem<String>('21:00 PM', '21:00 PM'),
+    MultiSelectItem<String>('22:30 PM', '22:30 PM'),
+    // Add more time slots as needed
+  ];
+
   final TextEditingController _name = TextEditingController();
   final TextEditingController _exp= TextEditingController();
   final TextEditingController _city= TextEditingController();
@@ -72,7 +94,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
-          final int time = (doctorData["availability"] != null && doctorData["availability"]["time"] != null)  ? doctorData["availability"]["time"] as int : 0;
+          final List<dynamic> time = (doctorData["availability"] != null && doctorData["availability"]["time"] != null)  ? List.from(doctorData["availability"]["time"]): <dynamic>[];
           final List<dynamic> weekdays = (doctorData["availability"] != null && doctorData["availability"]["weekday"] != null) ? List.from(doctorData["availability"]["weekday"]) : <dynamic>[];
           print(weekdays);
           // Convert weekday integers to weekday strings
@@ -88,7 +110,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
           _bio.text = doctorData["description"] ?? "";
           _add.text = doctorData["address"] ?? "";
           _hos.text = doctorData["hospital"] ?? "";
-          _time.text = time.toString();
+          // _time.text = time.toString();
+          selectedSlot=time.cast<String>();
           // _week.text = weekdays;
         });
       }
@@ -269,7 +292,39 @@ class _UpdateProfileState extends State<UpdateProfile> {
                     buildTextField("Qualification :",_qua),
                     SizedBox(height: 15,),
                     //Time
-                    buildTextField("Available Time :",_time),
+                    // buildTextField("Available Time :",_time),
+                    // SizedBox(height: 15,),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Available Time :",
+                          style:  TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        AbsorbPointer(
+                          absorbing: !isEditing,
+                          child: MultiSelectDialogField(
+                            items: timeItems,
+
+                            initialValue:selectedSlot,
+                            listType: MultiSelectListType.CHIP,
+                            onConfirm: (values) {
+                              setState(() {
+                                selectedSlot = values.toList();
+                                // Convert selected weekday strings to integers
+                                // selectedWeekdayIntegers = selectedSlot.map((weekday) => dayNameToValue[weekday]!).toList();
+
+                              });
+                            },
+
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 15,),
                     //week
                     // buildMultiSelectField("WeekDay :",selectedWeekdays),
@@ -329,7 +384,8 @@ class _UpdateProfileState extends State<UpdateProfile> {
                             style: TextStyle(
                             color: Colors.white,
                             fontSize: 25,
-                            fontWeight: FontWeight.bold,),
+                            fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -392,7 +448,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
       "qualification": _qua.text,
       "availability": {
         "weekday": selectedWeekdayIntegers,
-        "time": int.parse(_time.text),// Store the selected weekdays as an integer array
+        "time":selectedSlot,
       },
       "description": _bio.text,
     };

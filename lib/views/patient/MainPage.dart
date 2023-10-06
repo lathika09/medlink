@@ -10,8 +10,8 @@ import 'package:medlink/views/patient/home.dart';
 import '../chats/main_screen.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
-
+  const MainPage({Key? key,required this.pemail}) : super(key: key);
+final String pemail;
 
 
   @override
@@ -34,9 +34,9 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String? email = arguments?['email'] as String?;
-    print(email!);
+    // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    // final String? email = arguments?['email'] as String?;
+    // print(email!);
     print("mainpage");
 
     return Scaffold(
@@ -48,8 +48,8 @@ class _MainPageState extends State<MainPage> {
           });
         }),
         children: <Widget> [
-          HomePage(pemail: email ?? ""),
-          AppointmentPage(),
+          HomePage(pemail: widget.pemail),
+          // AppointmentPage(),
           MainChatScreen(),
         ],
       ),
@@ -70,10 +70,10 @@ class _MainPageState extends State<MainPage> {
                   icon: Icon(Icons.home,),
                 label: "Home",
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.book_sharp),
-                label: "Appointment",
-              ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(Icons.book_sharp),
+              //   label: "Appointment",
+              // ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.chat),
                 label: "Chats",

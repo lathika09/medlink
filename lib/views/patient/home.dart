@@ -10,6 +10,7 @@ import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'databaseconn/specialitywise.dart';
+import 'package:intl/intl.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -31,6 +32,7 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           patientData = snapshot.docs.first.data() as Map<String, dynamic>;
           print(patientData['name']);
+          print("PRINT THIS : ${widget.pemail}");
         });
       }
     } catch (e) {
@@ -47,13 +49,17 @@ class _HomePageState extends State<HomePage> {
 
         // Access the availability field
         Map<String, dynamic> availability = doctorData['availability'] ?? {
-          'weekday': [],
-          'time': 0, // Assuming a default time of 0 if not specified
+          'weekday': '',
+          'time': '',// Assuming a default time of 0 if not specified
         };
 
         // Extract 'weekday' and 'time' from the availability map
-        List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
-        int time = availability['time'] ?? 0;
+        // List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
+        // List<dynamic> time = List<dynamic>.from(availability['time'] ?? []);
+        List<dynamic> weekdays =
+        availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
+        List<dynamic> time =
+        availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
         // Access fields from the document with null checks
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
@@ -95,7 +101,174 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-// Fetch doctor data from Firestore based on the email
+// Fetch appointment data from Firestore LISTVIEW
+  Future<List<AppointmentData>> getAppointments() async {
+    try{
+      final query = await FirebaseFirestore.instance
+          .collection('patients')
+          .where('email', isEqualTo: widget.pemail)
+          .get();
+
+      if (query.docs.isEmpty) {
+        return []; // No patient found with the given email
+      }
+
+      final patientId = query.docs.first.id;
+
+
+      QuerySnapshot appointmentsQuery = await FirebaseFirestore.instance
+          .collection('patients')
+          .doc(patientId)
+          .collection('appointments')
+          .get();
+      final appointmentsId=appointmentsQuery.docs.first.id;
+
+      List<AppointmentData> appointments=appointmentsQuery.docs.map((doc){
+        Map<String, dynamic> appointData = doc.data() as Map<String, dynamic>;
+
+        String doc_name = (appointData['doctor_name'] is String) ? appointData['doctor_name'] : '';
+        String pat_name = (appointData['patient_name'] is String) ? appointData['patient_name'] : '';
+        String schedule_time = (appointData['schedule_time'] is String) ? appointData['schedule_time'] : '';
+        String status = (appointData['status'] is String) ? appointData['status'] : '';
+        Timestamp? appointment_date = (appointData['appointment_date'] is Timestamp) ? appointData['appointment_date'] : null;
+        String formattedDate = '';
+        String pemail =(patientData['email'] is String) ? patientData['email'] : '';
+
+        if (appointment_date != null) {
+          DateTime dateTime = appointment_date.toDate();
+          formattedDate = DateFormat('EEEE, dd/MM/yyyy').format(dateTime);
+        }
+
+        return AppointmentData(
+          id:appointmentsId,
+          doc_name:doc_name,
+          pat_name:pat_name,
+          schedule_time:schedule_time,
+          status:status,
+          appointment_date:formattedDate,
+        );
+
+
+      }).toList();//map
+
+      // return appointments;
+
+      List<AppointmentData> validAppointments = appointments
+          .where((appointment) =>
+      appointment.status == "Request" ||
+          appointment.status == "Confirm" ||
+          appointment.status == "Cancel")
+          .toList();
+
+
+      // Handle cancelled appointments
+      for (final doc in appointmentsQuery.docs) {
+        Map<String, dynamic> appointData = doc.data() as Map<String, dynamic>;
+        String status = (appointData['status'] is String) ? appointData['status'] : '';
+        print("gjhk : $status");
+
+        if (status == "Cancel") {
+          // Calculate the date 1 minute from now
+          const int delayMilliseconds = 1 * 60 * 1000;
+          // final oneMinuteFromNow = DateTime.now().add(Duration(milliseconds: delayMilliseconds));
+
+
+          Future.delayed(Duration(milliseconds: delayMilliseconds), () async {
+            // Print a message before deletion
+            print("Deleting appointment with ID ${doc.id}");
+
+            // Delete the document from the patient's subcollection
+            await doc.reference.delete();
+
+            // Delete the document from the appointment collection
+            final appointmentCollection = FirebaseFirestore.instance.collection('appointments');
+            await appointmentCollection.doc(doc.id).delete();
+
+            // Delete the document from the doctor's subcollection by doctor name
+            final doctorName = doc['doctor_name'] as String; // Replace with your doctor name field name
+            final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
+            final doctorSnapshot = await doctorQuery.get();
+            for (final doctorDoc in doctorSnapshot.docs) {
+              final doctorRef = doctorDoc.reference.collection('appointments').doc(doc.id);
+              await doctorRef.delete();
+              print("Deleted from doctor's subcollection");
+            }
+
+            // Print a message after deletion
+            print("Deleted appointment with ID ${doc.id}");
+            // Remove the deleted appointment from the 'appointments' list
+            setState(() {
+              appointments.removeWhere((appointment) => appointment.id == doc.id);
+            });
+          });
+        }
+      }
+
+
+      return validAppointments;
+
+    }//try
+    catch (e) {
+      print('Error fetching doctors: $e');
+      return []; // Return an empty list or handle the error as needed.
+    }
+
+  }
+  Future<void> deletePastAppointments() async {
+    final now = DateTime.now();
+    final collection = FirebaseFirestore.instance.collection('appointments'); // Replace with your Firestore collection name
+
+    final querySnapshot = await collection.get();
+
+    for (final doc in querySnapshot.docs) {
+      final appointmentDate = doc['appointment_date'] as Timestamp; // Replace with your date field name
+      final scheduleTime = doc['schedule_time'] as String; // Replace with your time field name
+      final patientName = doc['patient_name'] as String; // Replace with your patient name field name
+      final doctorName = doc['doctor_name'] as String; // Replace with your doctor name field name
+
+      final appointmentDateTime = appointmentDate.toDate();
+      final scheduleTimeParts = scheduleTime.split(' ');
+      final time=scheduleTimeParts[0];
+      print("Datetime now :${DateTime.now()}");
+      final appointmentDateTimeWithTime = DateTime(
+        appointmentDateTime.year,
+        appointmentDateTime.month,
+        appointmentDateTime.day,
+        int.parse(time.split(':')[0]), // Extract the hour from the time string
+        int.parse(time.split(':')[1]), // Extract the minute from the time string
+      );
+
+      if (appointmentDateTimeWithTime.isBefore(now)) {
+        // Calculate the delay in milliseconds (10 minutes)
+        const int delayMilliseconds = 1 * 60 * 1000;
+
+        // Delay the deletion by 10 minutes
+        await Future.delayed(Duration(milliseconds: delayMilliseconds));
+
+        // Query the patient and doctor collections to find matching documents
+        final patientQuery = FirebaseFirestore.instance.collection('patients').where('name', isEqualTo: patientName);
+        final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
+
+        final patientSnapshot = await patientQuery.get();
+        final doctorSnapshot = await doctorQuery.get();
+
+        // Delete the document from the main collection
+        await doc.reference.delete();
+
+        // Delete the document from the patient's subcollection
+        for (final patientDoc in patientSnapshot.docs) {
+          final patientRef = patientDoc.reference.collection('appointments').doc(doc.id);
+          await patientRef.delete();
+        }
+
+        // Delete the document from the doctor's subcollection
+        for (final doctorDoc in doctorSnapshot.docs) {
+          final doctorRef = doctorDoc.reference.collection('appointments').doc(doc.id);
+          await doctorRef.delete();
+        }
+      }
+    }
+  }
 
 
   //DROP CITY LIST
@@ -135,6 +308,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     fetchPatientData();
     fetchCities();
+    deletePastAppointments();
+  //   getAppointments();
   }
 
   // Define the colors and ratio for blending
@@ -168,6 +343,23 @@ class _HomePageState extends State<HomePage> {
       'category':'Dentist',
     },
   ];
+  Future<void> refreshData() async {
+    try {
+      // Fetch updated doctor and appointment data
+      List<DoctorData> doctors = await fetchDoctors();
+      List<AppointmentData> appointments = await getAppointments();
+
+      // Update the state to trigger a rebuild with the new data
+      setState(() {
+        // Update your data variables with the new data
+        // For example:
+        doctors = doctors;
+        appointments = appointments;
+      });
+    } catch (e) {
+      print('Error refreshing data: $e');
+    }
+  }
 
 
   @override
@@ -176,7 +368,7 @@ class _HomePageState extends State<HomePage> {
     print("homepage");
     String pemail =(patientData['email'] is String) ? patientData['email'] : '';
     return Scaffold(
-      drawer:NavBar(user_name: patientData['name'],user_email: patientData['email'],),
+      drawer:NavBar(user_name: patientData['name'],user_email: patientData['email'],),//widget.pemail can also be used here
 
       appBar:AppBar(
         backgroundColor:Colors.blueAccent.shade700,
@@ -194,12 +386,13 @@ class _HomePageState extends State<HomePage> {
         elevation: 24.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.notifications,size: 30,color: Colors.white,),
+            icon: Icon(Icons.refresh,size: 30,color: Colors.white,),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => NotificationPage()),
-              );
+              refreshData();
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => NotificationPage()),
+              // );
             },
           ),
         ],
@@ -358,7 +551,7 @@ class _HomePageState extends State<HomePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text("Appointment Today",
+                          Text("Appointment ",
                             style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold),
@@ -366,7 +559,60 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       SizedBox(height: 10,),
-                      AppointmentData(pemail: pemail!),
+                      // AppointmentData(pemail: widget.pemail!),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                        children: [
+                          FutureBuilder<List<AppointmentData>>(
+                            future: getAppointments(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return CircularProgressIndicator(); // Display a loading indicator while fetching data.
+                              } else if (snapshot.hasError) {
+                                return Text('Error: ${snapshot.error}');
+                              } else {
+                                List<AppointmentData> appointments = snapshot.data ?? [];
+
+                                if (appointments.isEmpty) {
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(vertical: 10.0,horizontal: 15.0),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color:Colors.greenAccent.shade200,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.3), // Shadow color
+                                            spreadRadius: 3, // Spread radius
+                                            blurRadius: 5, // Blur radius
+                                            offset: Offset(0, 2), // Offset of the shadow
+                                          ),
+                                        ],
+                                      ),
+                                    child:Text('No appointments scheduled.',style: TextStyle(color: Colors.black,fontSize: 19,fontWeight: FontWeight.bold,),
+                                    )
+                                  );
+                                }
+
+                                return ListView.builder(
+                                  // physics: AlwaysScrollableScrollPhysics(),
+                                  physics: NeverScrollableScrollPhysics(),//by adding this scroll is working properly now as it has listview
+                                  shrinkWrap: true,
+                                  itemCount: appointments.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      margin: EdgeInsets.symmetric(vertical: 12),
+                                      child: appointments[index],
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+
                       SizedBox(height: 25,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -406,12 +652,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       )
-
-
-
-
-
-
                     ],
                   ),
                 ),
@@ -475,7 +715,7 @@ class _DoctorDataState extends State<DoctorData> {
   get mixednewColor => Color.lerp(color1, color2, ratio);
 
   Map<String, dynamic> patientData = {};
-  Future<void> fetchDoctorData() async {
+  Future<void> fetchPatientData() async {
     try {
       final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.pemail).get();
       if (snapshot.docs.isNotEmpty) {
@@ -678,21 +918,86 @@ class _DoctorDataState extends State<DoctorData> {
   }
 }
 
-//APPOINTMENT CARD
+// APPOINTMENT CARD
 
 class AppointmentData extends StatefulWidget {
-  const AppointmentData({Key? key,required this.pemail}) : super(key: key);
-final String pemail;
+  const AppointmentData({Key? key,required this.id,required this.doc_name,required this.pat_name,required this.schedule_time,required this.status,required this.appointment_date,}) : super(key: key);
+  final String id;
+  final String doc_name;
+  final String pat_name;
+  final String schedule_time;
+  final String status;
+  final String appointment_date;
+
+
   @override
   State<AppointmentData> createState() => _AppointmentDataState();
 }
 
 class _AppointmentDataState extends State<AppointmentData> {
+//DOC IMAGE
+  String? _profileImageUrl;
+  Future<void> loadProfileImage(String userEmail) async {
+    try {
+      final Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child('prof_images/$userEmail.jpg');
 
+      final String downloadURL = await storageReference.getDownloadURL();
+      setState(() {
+        _profileImageUrl = downloadURL;
+      });
+    } catch (e) {
+      print('Error getting profile image URL: $e');
+      setState(() {
+        _profileImageUrl = null; // Handle the error by setting _profileImageUrl to null.
+      });
+    }
+    print("PROFILE: $_profileImageUrl");
+  }
+
+
+  Map<String, dynamic> docData = {};
+  String? demail;
+  String? specialitiesString = '';
+
+  Future<void> fetchDocData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("doctor").where("name", isEqualTo: widget.doc_name).get();
+      print("snapshot : ${snapshot.docs.first.data()}");
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          final docData = snapshot.docs.first.data() as Map<String, dynamic>;
+          final demail = docData['email'];
+          final List<String> speciality = (docData['speciality'] is List) ? List<String>.from(docData['speciality']) : [];
+
+print("HELLO ALL : ${demail}");//remove
+          if (demail != null) {
+            loadProfileImage(demail);
+          }
+          print("DOCDATA : $demail");
+          specialitiesString = speciality.join(', ');//remove
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDocData();
+    print("DOCDATA : ${demail}");//remove later
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return  Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color:Colors.greenAccent.shade200,
@@ -713,44 +1018,100 @@ class _AppointmentDataState extends State<AppointmentData> {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundImage: AssetImage(dc_prof),
+                  CircleAvatar(
+                    // backgroundImage: NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"),
+                    backgroundImage: _profileImageUrl != null
+                        ? NetworkImage(_profileImageUrl!)
+                        :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"),
                   ),
                   const SizedBox(width:10,),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children:const [
-                      Text("Dr Ajay Kumar",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.bold,),),
+                    children:[
+                      Text(widget.doc_name,style: TextStyle(color: Colors.black,fontSize: 19,fontWeight: FontWeight.bold,),),
                       SizedBox(height: 2,),
-                      Text("Dental",style: TextStyle(color: Colors.black54,fontSize: 16,fontWeight: FontWeight.bold,),)
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width/1.6,
+                        child: Text(specialitiesString ?? 'Loading...',style: TextStyle(color: Colors.black54,fontSize: 15,fontWeight: FontWeight.bold,),
+                          // overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                          // maxLines: 1,
+                        ),
+                      )
                     ],
                   ),
                 ],
               ),
               SizedBox(height: 25,),
               //Shedule details
-              ScheduleData(),
+              Container(
+                decoration: BoxDecoration(
+                  // color: Colors.blueAccent.shade100,
+                  color:Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2), // Shadow color
+                      spreadRadius: 2, // Spread radius
+                      blurRadius: 4, // Blur radius
+                      offset: Offset(0, 2), // Offset of the shadow
+                    ),
+                  ],
+
+                ),
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(Icons.calendar_month_sharp,color: Colors.black,size: 16,),
+                    SizedBox(width: 4,),
+                    Text(
+                      widget.appointment_date,
+                      style: const TextStyle(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width:15,),
+                    Icon(Icons.access_alarm_rounded,color: Colors.black,size: 16,),
+                    SizedBox(width: 4,),
+                    Flexible(child: Text(widget.schedule_time,style: TextStyle(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),),
+                    ),
+                  ],
+                ),
+
+              ),
               SizedBox(height: 25,),
               //ACTION BUTTON
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(child: ElevatedButton(
-                    style:ElevatedButton.styleFrom(backgroundColor: Colors.redAccent,),
-                    onPressed: (){},
-                    child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 17),),
+              Center(
+                child:Container(
+                  padding: EdgeInsets.symmetric(vertical: 10,horizontal: 25),
+
+                  decoration: BoxDecoration(
+                    color:Colors.blueAccent,
+
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2), // Shadow color
+                        spreadRadius: 2, // Spread radius
+                        blurRadius: 4, // Blur radius
+                        offset: Offset(0, 2), // Offset of the shadow
+                      ),
+                    ],
+
                   ),
-                  ),
-                  SizedBox(width: 20,),
-                  Expanded(child: ElevatedButton(
-                    style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent,),
-                    onPressed: (){},
-                    child: Text("Completed",style: TextStyle(color: Colors.white,fontSize: 17),),
-                  ),
-                  ),
-                ],
-              )
+                  child: Text(
+                            widget.status =="Request"
+                            ? 'Request send'
+                                : widget.status == "Cancel"
+                                ? 'Appointment is Cancelled choose another date '
+                                :widget.status == "Confirm"
+                                ? 'Appointment is Confirmed'
+                                : 'Status : ${widget.status}',
+                    style: TextStyle(color: Colors.white,fontSize: 19,fontWeight: FontWeight.bold),),
+                ),
+
+              ),
 
 
             ],
@@ -759,8 +1120,107 @@ class _AppointmentDataState extends State<AppointmentData> {
       ),
 
     );
+
   }
-}
+  }
+
+
+// class AppointmentData extends StatefulWidget {
+//   const AppointmentData({Key? key,required this.pemail}) : super(key: key);
+// final String pemail;
+//   @override
+//   State<AppointmentData> createState() => _AppointmentDataState();
+// }
+//
+// class _AppointmentDataState extends State<AppointmentData> {
+//
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//   }
+//   @override
+//   void didChangeDependencies() {
+//     super.didChangeDependencies();
+//
+//
+//   }
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: double.infinity,
+//       decoration: BoxDecoration(
+//         color:Colors.greenAccent.shade200,
+//         borderRadius: BorderRadius.circular(10),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black.withOpacity(0.3), // Shadow color
+//             spreadRadius: 3, // Spread radius
+//             blurRadius: 5, // Blur radius
+//             offset: Offset(0, 2), // Offset of the shadow
+//           ),
+//         ],
+//       ),
+//       child: Material(
+//         color: Colors.transparent,
+//         child: Padding(padding: const EdgeInsets.all(20),
+//           child: Column(
+//             children: [
+//               Row(
+//                 children: [
+//                   const CircleAvatar(
+//                     backgroundImage: AssetImage(dc_prof),
+//                   ),
+//                   const SizedBox(width:10,),
+//                   Column(
+//                     mainAxisAlignment: MainAxisAlignment.center,
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children:const [
+//                       Text("Dr Ajay Kumar",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.bold,),),
+//                       SizedBox(height: 2,),
+//                       Text("Dental",style: TextStyle(color: Colors.black54,fontSize: 16,fontWeight: FontWeight.bold,),)
+//                     ],
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 25,),
+//               //Shedule details
+//               ScheduleData(),
+//               SizedBox(height: 25,),
+//               //ACTION BUTTON
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Expanded(child: ElevatedButton(
+//                     style:ElevatedButton.styleFrom(backgroundColor: Colors.redAccent,),
+//                     onPressed: (){},
+//                     child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 17),),
+//                   ),
+//                   ),
+//                   SizedBox(width: 20,),
+//                   Expanded(child: ElevatedButton(
+//                     style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent,),
+//                     onPressed: (){},
+//                     child: Text("Completed",style: TextStyle(color: Colors.white,fontSize: 17),),
+//                   ),
+//                   ),
+//                 ],
+//               )
+//
+//
+//             ],
+//           ),
+//         ),
+//       ),
+//
+//     );
+//   }
+// }
+
+
+
 
 
 class ScheduleData extends StatelessWidget {
@@ -951,5 +1411,4 @@ class _ImageSliderState extends State<ImageSlider> {
   }
 }
 
-//CUSTOM DROPDOWN
 

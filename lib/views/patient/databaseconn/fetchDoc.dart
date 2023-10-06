@@ -82,13 +82,15 @@ class _DoctorListState extends State<DoctorList> {
 
           // Access the availability field
           Map<String, dynamic> availability = doctorData['availability'] ?? {
-            'weekday': [],
-            'time': 0, // Assuming a default time of 0 if not specified
+            'weekday': '',
+            'time': '', // Assuming a default time of 0 if not specified
           };
 
           // Extract 'weekday' and 'time' from the availability map
-          List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
-          int time = availability['time'] ?? 0;
+          List<dynamic> weekdays =
+          availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
+          List<dynamic> time =
+          availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
           // Access fields from the document with null checks
           String name = (doctorData['name'] is String) ? doctorData['name'] : '';

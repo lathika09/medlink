@@ -77,7 +77,7 @@ final String email=args['email'];
                     ),
                     onPressed: () {
                       // Navigator.of(context).pushNamed("booking_Page");
-                      Navigator.of(context).pushNamed(
+                      Navigator.of(context).pushReplacementNamed(
                         "booking_Page",
                         arguments: {
                           'email':email,
@@ -170,8 +170,8 @@ class _AboutDoctorState extends State<AboutDoctor> {
     final String experience = args['experience'];
     final String email = args['email'];
     final Map<String, dynamic> availability = args['availability'];
-    List<dynamic> weekdays = availability['weekday'] ?? [];
-    int time = availability['time'] ?? 0;
+    // List<int> weekdays = availability['weekday'] ?? [];
+    // List<String> time = availability['time'] ?? [];
 
 
 

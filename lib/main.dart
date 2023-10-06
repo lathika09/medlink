@@ -48,16 +48,16 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       routes: {
-        "main":(context)=>const MainPage(),
+
         'doc_details':(context)=>const DocDetails(),
         "booking_Page":(context)=>const BookingPage(),
         'doc_profile':(context)=>const ProfileSetting(),
-        'doc_home':(context)=>const HomePage_doc(),
+        // 'doc_home':(context)=>const HomePage_doc(email: ,),
         'update_prof':(context)=>const UpdateProfile(),
         'welcome':(context)=>const WelcomePage(),
 
         'docsearch':(context)=>const DoctorList(),
-        'appointment_stats':(context)=>const AppointmentPage(),
+        // 'appointment_stats':(context)=>const AppointmentPage(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),
