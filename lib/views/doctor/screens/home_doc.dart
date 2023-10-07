@@ -1,26 +1,11 @@
 import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:medlink/views/doctor/screens/profile.dart';
 import 'package:medlink/views/patient/AppointmentPage.dart';
 import '../../patient/NotificationPage.dart';
 
-//${widget.userData['email']}
-final usersCollection = FirebaseFirestore.instance.collection('doctor');
-void fetchUserData(String userEmail) async {
-  final snapshot = await usersCollection.where('email', isEqualTo: userEmail).get();
-  if (snapshot.docs.isNotEmpty) {
-    final userData = snapshot.docs.first.data();
-
-  }
-}
-
 class HomePage_doc extends StatefulWidget {
-
   const HomePage_doc({Key? key,required this.email}) : super(key: key);
   final String email;
 
@@ -29,20 +14,15 @@ class HomePage_doc extends StatefulWidget {
 }
 
 class _HomePage_docState extends State<HomePage_doc> {
-  // Define the colors and ratio for blending
   final color1 = Colors.greenAccent.shade200;
   final color2 = Colors.white;
   final ratio = 0.7;
   get mixedColor => Color.lerp(color1, color2, ratio);
 
-
-
   @override
   Widget build(BuildContext context) {
     // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     // final String? email = arguments?['email'] as String?;
-    // print(email);
-
 
     return Scaffold(
         appBar:AppBar(
@@ -51,7 +31,8 @@ class _HomePage_docState extends State<HomePage_doc> {
             color: Colors.white,
           ),
           title:Center(
-            child: Text("MediWise",
+            child: Text(
+            appname,
               style: TextStyle(
               fontSize: 30,
               color: Colors.white,
@@ -81,10 +62,10 @@ class _HomePage_docState extends State<HomePage_doc> {
                     bottomRight: Radius.circular(30.0), ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.3), // Shadow color
-                      spreadRadius: 3, // Spread radius
-                      blurRadius: 5, // Blur radius
-                      offset: Offset(0, 20), // Offset of the shadow
+                      color: Colors.black.withOpacity(0.3),
+                      spreadRadius: 3,
+                      blurRadius: 5,
+                      offset: Offset(0, 20),
                     ),
                   ],
                 ),
@@ -93,9 +74,9 @@ class _HomePage_docState extends State<HomePage_doc> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(16.0), // Adjust the radius as needed
+                      borderRadius: BorderRadius.circular(16.0),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 10.0), // Adjust the blur values as needed
+                        filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 10.0),
                         child: Image.asset(logo, width: MediaQuery.of(context).size.width / 2),
                       ),
                     ),
@@ -106,16 +87,13 @@ class _HomePage_docState extends State<HomePage_doc> {
                         fontWeight: FontWeight.bold,
                         shadows: [Shadow(color: Colors.blueAccent, offset: Offset(1,1), blurRadius:2)]
                     ),
-
                     ),
                   ],
                 ),
               )
-
             ),
             Container(
               width: MediaQuery.of(context).size.width,
-
               padding: EdgeInsets.symmetric(vertical: 30.0, horizontal: 25.0),
               color: Colors.white,
               child: Column(
@@ -125,9 +103,10 @@ class _HomePage_docState extends State<HomePage_doc> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 130,
-                        height: 130,
-
+                        // width: 130,
+                        // height: 130,
+                        width:MediaQuery.of(context).size.width/3,
+                        height: MediaQuery.of(context).size.height/6,
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
 
                         decoration: BoxDecoration(
@@ -135,42 +114,35 @@ class _HomePage_docState extends State<HomePage_doc> {
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
+                              color: Colors.greenAccent.withOpacity(0.3),
+                              spreadRadius: 3,
+                              blurRadius: 5,
+                              offset: Offset(0, 20),
                             ),
-                          ],
-                        ),
-
+                          ],),
                         child:GestureDetector(
                           child: Card(
                             color:Colors.greenAccent.shade200,
                             elevation: 2,
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  // width: 75,
+                                  // height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0,),
                                   color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
                                   child: Icon(Icons.person,size: 50,color: Colors.black,),
-
                                 ),
                                 Text("Patients",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
-
-                              ],
-                            ),
+                              ],),
                           ),
                           onTap: (){
                             Navigator.pushNamed(
                               context,
-                              'doc_profile', // The route name for ProfileSetting
+                              'doc_profile',
                               arguments: {
-                                'email': widget.email, // Pass the doctor's profile data as an argument
+                                'email': widget.email,
                               },
                             );
                           },
@@ -178,112 +150,92 @@ class _HomePage_docState extends State<HomePage_doc> {
                       ),
                       SizedBox(width: 30,),
                       Container(
-                        width: 130,
-                        height: 130,
-
+                        // width: 130,
+                        // height: 130,
+                        width:MediaQuery.of(context).size.width/3,
+                        height: MediaQuery.of(context).size.height/6,
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-
                         decoration: BoxDecoration(
                           color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
+                              color: Colors.greenAccent.withOpacity(0.3),
+                              spreadRadius: 3,
+                              blurRadius: 5,
+                              offset: Offset(0, 20),
                             ),
-                          ],
-                        ),
-
+                          ],),
                         child:GestureDetector(
                           child: Card(
                             color:Colors.greenAccent.shade200,
                             elevation: 2,
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  // width: 75,
+                                  // height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0,),
                                   color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
                                   child: Icon(FontAwesomeIcons.bookMedical ,size: 40,color: Colors.black,),
-
                                 ),
-                                Text("Appointments",maxLines:1,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
-
-                              ],
-                            ),
+                                Text("Schedules",maxLines:1,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
+                              ],),
                           ),
                           onTap: (){
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) =>AppointmentPage(email: widget.email)),
-                              // context,
-                              // 'appointment_stats', // The route name for ProfileSetting
-                              // arguments: {
-                              //   'email': email, // Pass the doctor's profile data as an argument
-                              // },
                             );
                           },
                         ),
                       ),
-                    ],
-                  ),
+                    ],),
                   SizedBox(height: 30,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 130,
-                        height: 130,
-
+                        // width: 130,
+                        // height: 130,
+                        width:MediaQuery.of(context).size.width/3,
+                        height: MediaQuery.of(context).size.height/6,
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
-
                         decoration: BoxDecoration(
                           color:Colors.white,
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
+                              color: Colors.greenAccent.withOpacity(0.3),
+                              spreadRadius: 3,
+                              blurRadius: 5,
+                              offset: Offset(0, 20),
                             ),
-                          ],
-                        ),
-
+                          ],),
                         child:GestureDetector(
                           child: Card(
                             color:Colors.greenAccent.shade200,
                             elevation: 2,
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  // width: 75,
+                                  // height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0,),
                                   color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
                                   child: Icon(Icons.message,size: 50,color: Colors.black,),
-
                                 ),
                                 Text("Chats",softWrap:true,style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
-
-                              ],
-                            ),
+                              ],),
                           ),
                           onTap: (){
                             Navigator.pushNamed(
                               context,
-                              'doc_profile', // The route name for ProfileSetting
+                              'doc_profile',
                               arguments: {
-                                'email': widget.email, // Pass the doctor's profile data as an argument
+                                'email': widget.email, //doctor email
                               },
                             );
                           },
@@ -291,8 +243,10 @@ class _HomePage_docState extends State<HomePage_doc> {
                       ),
                       SizedBox(width: 30,),
                       Container(
-                        width: 130,
-                        height: 130,
+                        // width: 130,
+                        // height: 130,
+                        width:MediaQuery.of(context).size.width/3,
+                        height: MediaQuery.of(context).size.height/6,
 
                         padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
 
@@ -301,60 +255,44 @@ class _HomePage_docState extends State<HomePage_doc> {
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.greenAccent.withOpacity(0.3), // Shadow color
-                              spreadRadius: 3, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset: Offset(0, 20), // Offset of the shadow
+                              color: Colors.greenAccent.withOpacity(0.3),
+                              spreadRadius: 3,
+                              blurRadius: 5,
+                              offset: Offset(0, 20),
                             ),
-                          ],
-                        ),
-
+                          ],),
                         child:GestureDetector(
                           child: Card(
                             color:Colors.greenAccent.shade200,
                             elevation: 2,
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  width: 75,
-                                  height: 75,
-                                  padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 0.0),
+                                  // width: 75,
+                                  // height: 75,
+                                  padding: EdgeInsets.symmetric(vertical: 5.0,),
                                   color:Colors.transparent,
-                                  // child: Icon(FontAwesomeIcons.userDoctor,size: 50,color: Colors.black,),
                                   child: Icon(FontAwesomeIcons.imagePortrait,size: 50,color: Colors.black,),
-
                                 ),
                                 Text("Profile",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 16),),
-
-                              ],
-                            ),
+                              ],),
                           ),
                           onTap: (){
                             Navigator.pushNamed(
                               context,
-                              'update_prof', // The route name for ProfileSetting
+                              'update_prof',
                               arguments: {
-                                'email': widget.email, // Pass the doctor's profile data as an argument
+                                'email': widget.email,
                               },
                             );
                           },
                         ),
                       ),
-                    ],
-                  ),
-
-                  // SizedBox(height: 30,),
-
-
-
-                ],
-              ),
+                    ],),
+                ],),
             )
-          ],
-        ),
-
+          ],),
       ),
     ),
     );

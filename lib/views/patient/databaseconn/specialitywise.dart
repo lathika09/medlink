@@ -1,14 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/home.dart';
-
-import 'fetchDoc.dart';
-
-
-
 
 class SpecialityList extends StatefulWidget {
   const SpecialityList({Key? key,required this.pemail,required this.category}) : super(key: key);
@@ -27,7 +19,7 @@ class _SpecialityListState extends State<SpecialityList> {
       return querySnapshot.docs.length;
     } catch (e) {
       print('Error fetching doctor count: $e');
-      return 0; // Handle the error as needed.
+      return 0;
     }
   }
   Future<List<DoctorData>> fetchDoctors(String? specCategory) async {
@@ -38,19 +30,17 @@ class _SpecialityListState extends State<SpecialityList> {
           .map((doc) {
         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
 
-        // Access the availability field
         Map<String, dynamic> availability = doctorData['availability'] ?? {
           'weekday': '',
-          'time': '', // Assuming a default time of 0 if not specified
+          'time': '',
         };
 
-        // Extract 'weekday' and 'time' from the availability map
+        // weekday and time' from the availability map
         List<dynamic> weekdays =
         availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
         List<dynamic> time =
         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
-        // Access fields from the document with null checks
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
@@ -61,7 +51,7 @@ class _SpecialityListState extends State<SpecialityList> {
         String email = (doctorData['email'] is String) ? doctorData['email'] : '';
         String city = (doctorData['city'] is String) ? doctorData['city'] : '';
 
-        // Create the availability map here
+        //  availability map
         Map<String, dynamic> doctorAvailability = {
           'weekday': weekdays,
           'time': time,
@@ -103,18 +93,17 @@ class _SpecialityListState extends State<SpecialityList> {
           .map((doc) {
         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
 
-        // Access the availability field
+        // access availability field
         Map<String, dynamic> availability = doctorData['availability'] ?? {
           'weekday': '',
-          'time': '', // Assuming a default time of 0 if not specified
+          'time': '',
         };
 
-        // Extract 'weekday' and 'time' from the availability map
         List<dynamic> weekdays =
         availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
         List<dynamic> time =
         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
-        // Access fields from the document with null checks
+
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
@@ -125,7 +114,7 @@ class _SpecialityListState extends State<SpecialityList> {
         String email = (doctorData['email'] is String) ? doctorData['email'] : '';
         String city=(doctorData['city'] is String) ? doctorData['city'] : '';
 
-        // Create the availability map here
+        // availability map
         Map<String, dynamic> doctorAvailability = {
           'weekday': weekdays,
           'time': time,
@@ -148,10 +137,10 @@ class _SpecialityListState extends State<SpecialityList> {
       })
           .where((doctor) {
         if (citydrp != null && citydrp.isNotEmpty) {
-          // Check both city and spec_category if the city is selected
+          // check both city and spec_category if the city is selected
           return doctor.speciality.contains(specCategory) && doctor.city.contains(citydrp);
         } else {
-          // Check only spec_category if the city is not selected
+          // check only spec_category if the city is not selected
           return doctor.speciality.contains(specCategory);
         }
       })
@@ -181,16 +170,15 @@ class _SpecialityListState extends State<SpecialityList> {
       appBar: AppBar(
         backgroundColor:Colors.blueAccent.shade700,
         iconTheme: IconThemeData(
-          color: Colors.white, // Change the color to your desired color
+          color: Colors.white,
         ),
         title:Container(
           // width:260,
           width: MediaQuery.of(context).size.width/2,
-          // decoration: BoxDecoration(border: Border.all(color:Colors.black,width: 1.0,),borderRadius: BorderRadius.circular(10.0)),
           height:40,
           padding: EdgeInsets.all(3.0),
           child: Center(
-            child: Text(widget.category!,
+            child: Text(widget.category,
               style: TextStyle(
                   fontSize: 25,
                   color: Colors.white,
@@ -214,7 +202,7 @@ class _SpecialityListState extends State<SpecialityList> {
                         future: fetchDoctors(widget.category),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator()); // Display a loading indicator while fetching data.
+                            return Center(child: CircularProgressIndicator());
                           } else if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
                           } else {
@@ -222,8 +210,6 @@ class _SpecialityListState extends State<SpecialityList> {
                             if (doctors.isEmpty) {
                               return Container(child: Center(child: Text('No matching doctors found.')));
                             }
-
-
                             return ListView.builder(
                               physics: NeverScrollableScrollPhysics(),
                               shrinkWrap: true,

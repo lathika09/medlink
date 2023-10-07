@@ -1,16 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/sign_up.dart';
-// import 'package:medlink/views/patient/MainPage.dart';
-import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/signup.dart';
-import 'package:medlink/views/doctor/screens/home_doc.dart';
-
-// import '../Welcome.dart';
-// import '../splash/splash_screen.dart';
 
 
 class LoginPage_Doc extends StatefulWidget {
@@ -62,7 +55,7 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                       style: TextStyle(fontWeight: FontWeight.bold,fontSize: 33),
                     ),
                     const SizedBox(height:8,),
-                    Text("Login to your account",
+                    Text("Login to your Doctor account",
                       style: TextStyle(fontSize: 16, color: Colors.grey[800],),
                     ),
                   ],

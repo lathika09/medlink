@@ -1,12 +1,9 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:medlink/constant/image_string.dart';
-
 
 class DocDetails extends StatefulWidget {
   const DocDetails({Key? key}) : super(key: key);
-
   @override
   State<DocDetails> createState() => _DocDetailsState();
 }
@@ -76,7 +73,6 @@ final String email=args['email'];
                       backgroundColor: Colors.blueAccent.shade700,
                     ),
                     onPressed: () {
-                      // Navigator.of(context).pushNamed("booking_Page");
                       Navigator.of(context).pushReplacementNamed(
                         "booking_Page",
                         arguments: {
@@ -168,13 +164,10 @@ class _AboutDoctorState extends State<AboutDoctor> {
     final String hospital = args['hospital'];
     final String address = args['address'];
     final String experience = args['experience'];
-    final String email = args['email'];
-    final Map<String, dynamic> availability = args['availability'];
+    // final String email = args['email'];
+    // final Map<String, dynamic> availability = args['availability'];
     // List<int> weekdays = availability['weekday'] ?? [];
     // List<String> time = availability['time'] ?? [];
-
-
-
 
     return Container(
       width: double.infinity,
@@ -264,14 +257,11 @@ class _AboutDoctorState extends State<AboutDoctor> {
 //
 class DoctorInfo extends StatelessWidget {
   DoctorInfo({Key? key,required this.data,required this.info}) : super(key: key);
-
   final String data;
   final String info;
 
   @override
   Widget build(BuildContext context) {
-
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,

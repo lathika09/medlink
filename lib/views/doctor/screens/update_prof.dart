@@ -5,9 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../constant/image_string.dart';
+
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({Key? key}) : super(key: key);
-
   @override
   State<UpdateProfile> createState() => _UpdateProfileState();
 }
@@ -47,7 +48,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
     MultiSelectItem<String>('Sunday', 'Sunday'),
   ];
 
-  // List<int> selectedSlotIntegers = [];
   List<String> selectedSlot = [];
   List<MultiSelectItem<String>> timeItems = [
     MultiSelectItem<String>('7:00 AM', '7:00 AM'),
@@ -77,11 +77,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
   final TextEditingController _bio= TextEditingController();
   final TextEditingController _add= TextEditingController();
   final TextEditingController _hos= TextEditingController();
-  final TextEditingController _time= TextEditingController();
-  final TextEditingController _week= TextEditingController();
 
   bool isEditing = false;
-  Map<String, dynamic> doctorData = {}; // Store the doctor's data
+  Map<String, dynamic> doctorData = {};
 
 
 // Fetch doctor data from Firestore based on the email
@@ -93,14 +91,15 @@ class _UpdateProfileState extends State<UpdateProfile> {
       final snapshot = await FirebaseFirestore.instance.collection("doctor").where("email", isEqualTo: email).get();
       if (snapshot.docs.isNotEmpty) {
         setState(() {
-          doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
+          doctorData = snapshot.docs.first.data();//as Map<String, dynamic>
           final List<dynamic> time = (doctorData["availability"] != null && doctorData["availability"]["time"] != null)  ? List.from(doctorData["availability"]["time"]): <dynamic>[];
           final List<dynamic> weekdays = (doctorData["availability"] != null && doctorData["availability"]["weekday"] != null) ? List.from(doctorData["availability"]["weekday"]) : <dynamic>[];
           print(weekdays);
-          // Convert weekday integers to weekday strings
-          selectedWeekdayIntegers = weekdays.cast<int>(); // Cast the list to List<int>
+          // converting weekday integers to weekday strings
+          selectedWeekdayIntegers = weekdays.cast<int>(); // cast the list to List<int>
           selectedWeekdays = weekdays.map((intVal) => dayValueToName[intVal] ?? '').toList();
           print(doctorData);
+
           // Set the text controllers with the fetched data
           _name.text = doctorData["name"] ?? "";
           _exp.text = doctorData["experience"] ?? "";
@@ -110,9 +109,9 @@ class _UpdateProfileState extends State<UpdateProfile> {
           _bio.text = doctorData["description"] ?? "";
           _add.text = doctorData["address"] ?? "";
           _hos.text = doctorData["hospital"] ?? "";
-          // _time.text = time.toString();
+
           selectedSlot=time.cast<String>();
-          // _week.text = weekdays;
+
         });
       }
     } catch (e) {
@@ -132,10 +131,23 @@ class _UpdateProfileState extends State<UpdateProfile> {
         final imageUrl = await storageReference.getDownloadURL();
         print('Image uploaded to Firebase Storage: $imageUrl');
 
-        // Now you can save this URL in your Firestore or wherever you store user data.
-        await FirebaseFirestore.instance.collection('doctor').doc(Email).update({
-          'prof_image': imageUrl,
-        });
+        final querySnap =await FirebaseFirestore.instance.collection('doctor').where("email", isEqualTo: Email).get();
+        // await FirebaseFirestore.instance.collection('doctor').doc(Email).update({
+        //   'prof_image': imageUrl,
+        // });
+
+        if (querySnap.docs.isNotEmpty) {
+          // Get the first document found
+          final doctorDocument = querySnap.docs.first;
+
+          // Update the document with the new data
+          await doctorDocument.reference.update({
+            'prof_image': imageUrl,
+          });
+        }
+        else {
+          print("No document found with email: $Email");
+        }
 
         print('Image URL saved in Firestore.');
       });
@@ -181,8 +193,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String? email = arguments?['email'] as String?;
+
     fetchDoctorData();
     loadProfileImage();
 
@@ -214,7 +225,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
             color: Colors.white,
           ),
           title:Center(
-            child: Text("MediWise",
+            child: Text(appname,
               style: TextStyle(
                   fontSize: 30,
                   color: Colors.white,
@@ -223,9 +234,10 @@ class _UpdateProfileState extends State<UpdateProfile> {
           ),
           elevation: 24.0,
           actions: <Widget>[IconButton(
-            icon: Icon(Icons.edit,size: 30,color: Colors.white,),
+            icon: Icon(Icons.refresh,size: 30,color: Colors.white,),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
+              loadProfileImage();
             },
           ),
           ],
@@ -306,7 +318,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                           ),
                         ),
                         AbsorbPointer(
-                          absorbing: !isEditing,
+                          absorbing: !isEditing,//used to eanable editing
                           child: MultiSelectDialogField(
                             items: timeItems,
 
@@ -320,7 +332,6 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
                               });
                             },
-
                           ),
                         ),
                       ],
@@ -437,6 +448,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
     final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final String? email = arguments?['email'] as String?;
     print("LATHIKA : ${selectedWeekdayIntegers}");
+
     // Update the Firestore document with new values
     final updatedData = {
       "name": _name.text,
@@ -454,15 +466,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
     };
 
     try {
-      // Query Firestore to find the document based on the doctor's email
+      // find the document based on the doctor's email
       final querySnapshot = await FirebaseFirestore.instance
           .collection("doctor")
           .where("email", isEqualTo: email)
           .get();
 
-      // Check if a document with the email exists
       if (querySnapshot.docs.isNotEmpty) {
-        // Get the first document found (assuming there's only one matching email)
+        // Get the first document found
         final doctorDoc = querySnapshot.docs.first;
 
         // Update the document with the new data
@@ -472,18 +483,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
         setState(() {
           isEditing = false;
         });
-
-        // Show a success message or navigate to another screen
       } else {
-        // Handle the case where no document with the email is found
         print("No document found with email: $email");
       }
     } catch (e) {
-      // Handle errors
       print("Error updating document: $e");
     }
   }
-  // Define TextStyles for both enabled and disabled states
+  // textStyles for both enabled and disabled states
   final enabledTextStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w500,
@@ -492,7 +499,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   final disabledTextStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w500,
-    color: Colors.black54, // You can change the color for disabled state
+    color: Colors.black54,
   );
 
 
@@ -513,7 +520,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
             obscureText: false,
             controller:controller,
             enabled: isEditing,
-            maxLines: null, // Allows for unlimited lines
+            maxLines: null,
             keyboardType: TextInputType.multiline,
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),

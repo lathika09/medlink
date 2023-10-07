@@ -1,11 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
-import 'package:medlink/views/patient/NotificationPage.dart';
-import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -47,21 +44,18 @@ class _HomePageState extends State<HomePage> {
       List<DoctorData> doctors = querySnapshot.docs.map((doc) {
         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
 
-        // Access the availability field
+        // to access the availability field so default ytakrn
         Map<String, dynamic> availability = doctorData['availability'] ?? {
           'weekday': '',
-          'time': '',// Assuming a default time of 0 if not specified
+          'time': '',
         };
 
-        // Extract 'weekday' and 'time' from the availability map
-        // List<dynamic> weekdays = List<dynamic>.from(availability['weekday'] ?? []);
-        // List<dynamic> time = List<dynamic>.from(availability['time'] ?? []);
         List<dynamic> weekdays =
         availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
         List<dynamic> time =
         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
-        // Access fields from the document with null checks
+        // to access fields from the document with null checks
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
@@ -72,7 +66,7 @@ class _HomePageState extends State<HomePage> {
         String email = (doctorData['email'] is String) ? doctorData['email'] : '';
         String city = (doctorData['city'] is String) ? doctorData['city'] : '';
         String pemail =(patientData['email'] is String) ? patientData['email'] : '';
-        // Create the availability map here
+        //  availability map in doc
         Map<String, dynamic> doctorAvailability = {
           'weekday': weekdays,
           'time': time,
@@ -108,13 +102,10 @@ class _HomePageState extends State<HomePage> {
           .collection('patients')
           .where('email', isEqualTo: widget.pemail)
           .get();
-
       if (query.docs.isEmpty) {
-        return []; // No patient found with the given email
+        return [];
       }
-
       final patientId = query.docs.first.id;
-
 
       QuerySnapshot appointmentsQuery = await FirebaseFirestore.instance
           .collection('patients')
@@ -132,7 +123,7 @@ class _HomePageState extends State<HomePage> {
         String status = (appointData['status'] is String) ? appointData['status'] : '';
         Timestamp? appointment_date = (appointData['appointment_date'] is Timestamp) ? appointData['appointment_date'] : null;
         String formattedDate = '';
-        String pemail =(patientData['email'] is String) ? patientData['email'] : '';
+        // String pemail =(patientData['email'] is String) ? patientData['email'] : '';
 
         if (appointment_date != null) {
           DateTime dateTime = appointment_date.toDate();
@@ -160,32 +151,28 @@ class _HomePageState extends State<HomePage> {
           appointment.status == "Cancel")
           .toList();
 
-
-      // Handle cancelled appointments
+      //  cancelled appointments
       for (final doc in appointmentsQuery.docs) {
         Map<String, dynamic> appointData = doc.data() as Map<String, dynamic>;
         String status = (appointData['status'] is String) ? appointData['status'] : '';
         print("gjhk : $status");
 
         if (status == "Cancel") {
-          // Calculate the date 1 minute from now
+          // for 1 min can chnge it later
           const int delayMilliseconds = 1 * 60 * 1000;
-          // final oneMinuteFromNow = DateTime.now().add(Duration(milliseconds: delayMilliseconds));
-
 
           Future.delayed(Duration(milliseconds: delayMilliseconds), () async {
-            // Print a message before deletion
             print("Deleting appointment with ID ${doc.id}");
 
-            // Delete the document from the patient's subcollection
+            // delete from the patient's subcollection
             await doc.reference.delete();
 
-            // Delete the document from the appointment collection
+            // delete from the appointment collection
             final appointmentCollection = FirebaseFirestore.instance.collection('appointments');
             await appointmentCollection.doc(doc.id).delete();
 
-            // Delete the document from the doctor's subcollection by doctor name
-            final doctorName = doc['doctor_name'] as String; // Replace with your doctor name field name
+            // delete doc from the doctor's subcollection by doctor name
+            final doctorName = doc['doctor_name'] as String;
             final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
             final doctorSnapshot = await doctorQuery.get();
             for (final doctorDoc in doctorSnapshot.docs) {
@@ -194,80 +181,76 @@ class _HomePageState extends State<HomePage> {
               print("Deleted from doctor's subcollection");
             }
 
-            // Print a message after deletion
             print("Deleted appointment with ID ${doc.id}");
-            // Remove the deleted appointment from the 'appointments' list
+
             setState(() {
               appointments.removeWhere((appointment) => appointment.id == doc.id);
             });
           });
         }
       }
-
-
       return validAppointments;
-
     }//try
     catch (e) {
       print('Error fetching doctors: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
-
   }
+
+  //delete if time passed
   Future<void> deletePastAppointments() async {
     final now = DateTime.now();
-    final collection = FirebaseFirestore.instance.collection('appointments'); // Replace with your Firestore collection name
-
+    //Appointment collection
+    final collection = FirebaseFirestore.instance.collection('appointments');
     final querySnapshot = await collection.get();
 
     for (final doc in querySnapshot.docs) {
-      final appointmentDate = doc['appointment_date'] as Timestamp; // Replace with your date field name
-      final scheduleTime = doc['schedule_time'] as String; // Replace with your time field name
-      final patientName = doc['patient_name'] as String; // Replace with your patient name field name
-      final doctorName = doc['doctor_name'] as String; // Replace with your doctor name field name
+      final appointmentDate = doc['appointment_date'] as Timestamp;
+      final scheduleTime = doc['schedule_time'] as String;
+      final patientName = doc['patient_name'] as String;
+      final doctorName = doc['doctor_name'] as String;
 
       final appointmentDateTime = appointmentDate.toDate();
-      final scheduleTimeParts = scheduleTime.split(' ');
+      final scheduleTimeParts = scheduleTime.split(' ');//it is string 09:00 pm so we get 09:00 from this
       final time=scheduleTimeParts[0];
       print("Datetime now :${DateTime.now()}");
       final appointmentDateTimeWithTime = DateTime(
         appointmentDateTime.year,
         appointmentDateTime.month,
         appointmentDateTime.day,
-        int.parse(time.split(':')[0]), // Extract the hour from the time string
-        int.parse(time.split(':')[1]), // Extract the minute from the time string
+        int.parse(time.split(':')[0]), //09
+        int.parse(time.split(':')[1]), //00
       );
 
       if (appointmentDateTimeWithTime.isBefore(now)) {
-        // Calculate the delay in milliseconds (10 minutes)
+        // delete after this time
         const int delayMilliseconds = 1 * 60 * 1000;
-
-        // Delay the deletion by 10 minutes
         await Future.delayed(Duration(milliseconds: delayMilliseconds));
 
-        // Query the patient and doctor collections to find matching documents
+        // patient and doctor collections to find matching documents
         final patientQuery = FirebaseFirestore.instance.collection('patients').where('name', isEqualTo: patientName);
-        final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
-
         final patientSnapshot = await patientQuery.get();
+
+        final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
         final doctorSnapshot = await doctorQuery.get();
 
-        // Delete the document from the main collection
+        // delete the document from appoint collection
         await doc.reference.delete();
 
-        // Delete the document from the patient's subcollection
+        // dlete the document from the patient subcollection
         for (final patientDoc in patientSnapshot.docs) {
           final patientRef = patientDoc.reference.collection('appointments').doc(doc.id);
           await patientRef.delete();
         }
 
-        // Delete the document from the doctor's subcollection
+        // delete the document from the doctor subcollection
         for (final doctorDoc in doctorSnapshot.docs) {
           final doctorRef = doctorDoc.reference.collection('appointments').doc(doc.id);
           await doctorRef.delete();
         }
       }
     }
+    getAppointments();
   }
 
 
@@ -283,8 +266,6 @@ class _HomePageState extends State<HomePage> {
         if (city != null && city.isNotEmpty && !cities.contains(city)) {
           cities.add(city);
         }
-
-
       });
       print(cities);
       return cities;
@@ -309,15 +290,11 @@ class _HomePageState extends State<HomePage> {
     fetchPatientData();
     fetchCities();
     deletePastAppointments();
-  //   getAppointments();
   }
 
-  // Define the colors and ratio for blending
   final color1 = Colors.tealAccent.shade400;
   final color2 = Colors.tealAccent.shade700;
-  // final color3 = Colors.greenAccent.shade400;
-  final ratio = 0.5; // Adjust this ratio to control the mixture
-
+  final ratio = 0.5;
   get mixedColor => Color.lerp(color1, color2, ratio);
 
   String? valueChoose;
@@ -342,17 +319,16 @@ class _HomePageState extends State<HomePage> {
       'icon':FontAwesomeIcons.teeth,
       'category':'Dentist',
     },
+    {
+      'icon':FontAwesomeIcons.bone,
+      'category':'Orthopedic',
+    },
   ];
   Future<void> refreshData() async {
     try {
-      // Fetch updated doctor and appointment data
       List<DoctorData> doctors = await fetchDoctors();
       List<AppointmentData> appointments = await getAppointments();
-
-      // Update the state to trigger a rebuild with the new data
       setState(() {
-        // Update your data variables with the new data
-        // For example:
         doctors = doctors;
         appointments = appointments;
       });
@@ -361,9 +337,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   @override
-
   Widget build(BuildContext context) {
     print("homepage");
     String pemail =(patientData['email'] is String) ? patientData['email'] : '';
@@ -373,12 +347,12 @@ class _HomePageState extends State<HomePage> {
       appBar:AppBar(
         backgroundColor:Colors.blueAccent.shade700,
         iconTheme: IconThemeData(
-          color: Colors.white, // Change the color to your desired color
+          color: Colors.white,
         ),
         title:Center(
-          child: Text("MediWise",
+          child: Text(appname,
             style: TextStyle(
-                fontSize: 30,
+                fontSize: 30, // fontSize:17* MediaQuery.textScaleFactorOf(context),
                 color: Colors.white,
                 fontWeight: FontWeight.bold),
           ),
@@ -396,16 +370,12 @@ class _HomePageState extends State<HomePage> {
             },
           ),
         ],
-
-
       ),
       body:SafeArea(
         child: SingleChildScrollView(
           // physics: AlwaysScrollableScrollPhysics(),
           child:Container(
-
             child:Column(
-
               children: [
                 Container(
                   height: 50,
@@ -414,10 +384,10 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3), // Shadow color
-                        spreadRadius: 3, // Spread radius
-                        blurRadius: 5, // Blur radius
-                        offset: Offset(0, 2), // Offset of the shadow
+                        color: Colors.black.withOpacity(0.3),
+                        spreadRadius: 3,
+                        blurRadius: 5,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
@@ -428,17 +398,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(child: Icon(Icons.location_on,size: 28,color: Colors.black,)),
-
                       Container(
                         // width:260,
                         width: MediaQuery.of(context).size.width/2,
-                        // decoration: BoxDecoration(border: Border.all(color:Colors.black,width: 1.0,),borderRadius: BorderRadius.circular(10.0)),
                         height:40,
                         padding: EdgeInsets.all(3.0),
                         child: DropdownButton(
                           elevation: 0,
                           menuMaxHeight: 300,
-
                           hint: Text("Select City "),
                           dropdownColor: Colors.green.shade50,
                           icon: Icon(Icons.arrow_drop_down),
@@ -467,7 +434,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(width: 20,),
                       IconButton(
-                        //'docsearch'
                           onPressed: (){
                             Navigator.pushNamed(
                               context,
@@ -495,16 +461,15 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text("Category",
                             style: TextStyle(
-                                fontSize: 24,
+                                fontSize:24,
                                 fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                       SizedBox(height: 10,),
                       SizedBox(
-                        height: 80,
+                        height: MediaQuery.of(context).size.height/9,
                         child: ListView(
-                          // physics: AlwaysScrollableScrollPhysics(),
                           // physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,
@@ -532,7 +497,6 @@ class _HomePageState extends State<HomePage> {
                                             color:Colors.indigo.shade900,
                                             fontWeight: FontWeight.bold),
                                       ),
-
                                   ],
                                 ),),
                               ),
@@ -558,8 +522,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10,),
-                      // AppointmentData(pemail: widget.pemail!),
+                      SizedBox(height: 8,),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
@@ -568,7 +531,7 @@ class _HomePageState extends State<HomePage> {
                             future: getAppointments(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return CircularProgressIndicator(); // Display a loading indicator while fetching data.
+                                return CircularProgressIndicator();
                               } else if (snapshot.hasError) {
                                 return Text('Error: ${snapshot.error}');
                               } else {
@@ -583,10 +546,10 @@ class _HomePageState extends State<HomePage> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.3), // Shadow color
-                                            spreadRadius: 3, // Spread radius
-                                            blurRadius: 5, // Blur radius
-                                            offset: Offset(0, 2), // Offset of the shadow
+                                            color: Colors.black.withOpacity(0.3),
+                                            spreadRadius: 3,
+                                            blurRadius: 5,
+                                            offset: Offset(0, 2),
                                           ),
                                         ],
                                       ),
@@ -596,13 +559,12 @@ class _HomePageState extends State<HomePage> {
                                 }
 
                                 return ListView.builder(
-                                  // physics: AlwaysScrollableScrollPhysics(),
-                                  physics: NeverScrollableScrollPhysics(),//by adding this scroll is working properly now as it has listview
+                                  physics: NeverScrollableScrollPhysics(),//by adding this scroll is listview working properly
                                   shrinkWrap: true,
                                   itemCount: appointments.length,
                                   itemBuilder: (context, index) {
                                     return Container(
-                                      margin: EdgeInsets.symmetric(vertical: 12),
+                                      margin: EdgeInsets.symmetric(vertical: 8),
                                       child: appointments[index],
                                     );
                                   },
@@ -624,7 +586,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10,),
+                      // SizedBox(height: ,),
                       //doctor card
                       Column(
                         children: [
@@ -632,15 +594,14 @@ class _HomePageState extends State<HomePage> {
                             future: fetchDoctors(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return CircularProgressIndicator(); // Display a loading indicator while fetching data.
+                                return CircularProgressIndicator();
                               } else if (snapshot.hasError) {
                                 return Text('Error: ${snapshot.error}');
                               } else {
                                 List<DoctorData> doctors = snapshot.data ?? [];
 
                                 return ListView.builder(
-                                  // physics: AlwaysScrollableScrollPhysics(),
-                                  physics: NeverScrollableScrollPhysics(),//by adding this scroll is working properly now as it has listview
+                                  physics: NeverScrollableScrollPhysics(),
                                   shrinkWrap: true,
                                   itemCount: doctors.length,
                                   itemBuilder: (context, index) {
@@ -708,7 +669,6 @@ class DoctorData extends StatefulWidget {
 }
 
 class _DoctorDataState extends State<DoctorData> {
-  // Define the colors and ratio for blending
   final color1 = Colors.white;
   final color2 = Colors.greenAccent.shade100;
   final ratio = 0.5;
@@ -766,132 +726,135 @@ class _DoctorDataState extends State<DoctorData> {
     String specialtiesString = widget.speciality.join(', ');
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-      height: 210,
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 13),
+      // height: 210,
       child: GestureDetector(
         child: Card(
           elevation: 5,
           color: mixednewColor,
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(
-                        left: 10, right: 10, top: 15, bottom: 10),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
-                      child: Container(
-                        height: 90.0,
-                        width: 85.0,
-                        color:Colors.transparent,
-                        child:CircleAvatar(
-                          radius: 60,
-                          backgroundImage: _profileImageUrl != null
-                              ? NetworkImage(_profileImageUrl!)
-                              :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, bottom: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Container(
+                          height: 80.0,
+                          width: 80.0,
+                          color:Colors.transparent,
+                          child:CircleAvatar(
+                            radius: 60,
+                            backgroundImage: _profileImageUrl != null
+                                ? NetworkImage(_profileImageUrl!)
+                                :NetworkImage("https://st4.depositphotos.com/19795498/22606/v/450/depositphotos_226060300-stock-illustration-medical-icon-man-doctor-with.jpg"),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Flexible(
-                    child: Padding(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    width:
-                                    MediaQuery.of(context).size.width *
-                                        0.4,
-                                    child: Text(
-                                      widget.name,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                    Flexible(
+                      child: Padding(
+                        padding:
+                        EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width:
+                                      MediaQuery.of(context).size.width *
+                                          0.4,
+                                      child: Text(
+                                        widget.name,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        softWrap: true,
                                       ),
-                                      softWrap: true,
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width:
-                                    MediaQuery.of(context).size.width *
-                                        0.46,
-                                    child: Text(
-                                      specialtiesString,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.normal,
+                                    SizedBox(
+                                      width:
+                                      MediaQuery.of(context).size.width *
+                                          0.46,
+                                      child: Text(
+                                        specialtiesString,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                        softWrap: true,
                                       ),
-                                      softWrap: true,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  MaterialButton(
-                    onPressed: () {},
-                    child: Icon(
-                      Icons.chat,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    color: Colors.blueAccent.shade700,
-                    minWidth: MediaQuery.of(context).size.width/6,
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent.shade700,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        'booking_Page',
-                        arguments: {
-                          'name': widget.name,
-                          'speciality': specialtiesString,
-                          'qualification': widget.qualification,
-                          'hospital': widget.hospital,
-                          'address': widget.address,
-                          'experience': widget.experience,
-                          'description': widget.description,
-                          'email': widget.email,
-                          'pemail':widget.pemail,
-
-                        },
-                      );
-                    },
-                    child: Text(
-                      "Book Appointment",
-                      style: TextStyle(
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    MaterialButton(
+                      onPressed: () {},
+                      child: Icon(
+                        Icons.chat,
                         color: Colors.white,
-                        fontSize: 18,
+                        size: 30,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      color: Colors.blueAccent.shade700,
+                      minWidth: MediaQuery.of(context).size.width/6,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent.shade700,
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          'booking_Page',
+                          arguments: {
+                            'name': widget.name,
+                            'speciality': specialtiesString,
+                            'qualification': widget.qualification,
+                            'hospital': widget.hospital,
+                            'address': widget.address,
+                            'experience': widget.experience,
+                            'description': widget.description,
+                            'email': widget.email,
+                            'pemail':widget.pemail,
+
+                          },
+                        );
+                      },
+                      child: Text(
+                        "Book Appointment",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
         onTap: () {
@@ -950,7 +913,7 @@ class _AppointmentDataState extends State<AppointmentData> {
     } catch (e) {
       print('Error getting profile image URL: $e');
       setState(() {
-        _profileImageUrl = null; // Handle the error by setting _profileImageUrl to null.
+        _profileImageUrl = null;
       });
     }
     print("PROFILE: $_profileImageUrl");
@@ -971,12 +934,11 @@ class _AppointmentDataState extends State<AppointmentData> {
           final demail = docData['email'];
           final List<String> speciality = (docData['speciality'] is List) ? List<String>.from(docData['speciality']) : [];
 
-print("HELLO ALL : ${demail}");//remove
           if (demail != null) {
             loadProfileImage(demail);
           }
           print("DOCDATA : $demail");
-          specialitiesString = speciality.join(', ');//remove
+          specialitiesString = speciality.join(', ');
         });
       }
     } catch (e) {
@@ -1034,9 +996,7 @@ print("HELLO ALL : ${demail}");//remove
                       SizedBox(
                         width: MediaQuery.of(context).size.width/1.6,
                         child: Text(specialitiesString ?? 'Loading...',style: TextStyle(color: Colors.black54,fontSize: 15,fontWeight: FontWeight.bold,),
-                          // overflow: TextOverflow.ellipsis,
                           softWrap: true,
-                          // maxLines: 1,
                         ),
                       )
                     ],
@@ -1044,22 +1004,19 @@ print("HELLO ALL : ${demail}");//remove
                 ],
               ),
               SizedBox(height: 25,),
-              //Shedule details
+              //Schedule details
               Container(
                 decoration: BoxDecoration(
-                  // color: Colors.blueAccent.shade100,
                   color:Colors.blue.shade50,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2), // Shadow color
-                      spreadRadius: 2, // Spread radius
-                      blurRadius: 4, // Blur radius
-                      offset: Offset(0, 2), // Offset of the shadow
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: Offset(0, 2),
                     ),
-                  ],
-
-                ),
+                  ],),
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 child: Row(
@@ -1092,14 +1049,12 @@ print("HELLO ALL : ${demail}");//remove
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2), // Shadow color
-                        spreadRadius: 2, // Spread radius
-                        blurRadius: 4, // Blur radius
-                        offset: Offset(0, 2), // Offset of the shadow
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
                       ),
-                    ],
-
-                  ),
+                    ],),
                   child: Text(
                             widget.status =="Request"
                             ? 'Request send'
@@ -1110,165 +1065,15 @@ print("HELLO ALL : ${demail}");//remove
                                 : 'Status : ${widget.status}',
                     style: TextStyle(color: Colors.white,fontSize: 19,fontWeight: FontWeight.bold),),
                 ),
-
               ),
-
-
             ],
           ),
         ),
       ),
-
-    );
-
-  }
-  }
-
-
-// class AppointmentData extends StatefulWidget {
-//   const AppointmentData({Key? key,required this.pemail}) : super(key: key);
-// final String pemail;
-//   @override
-//   State<AppointmentData> createState() => _AppointmentDataState();
-// }
-//
-// class _AppointmentDataState extends State<AppointmentData> {
-//
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//   }
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//
-//
-//   }
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       width: double.infinity,
-//       decoration: BoxDecoration(
-//         color:Colors.greenAccent.shade200,
-//         borderRadius: BorderRadius.circular(10),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.3), // Shadow color
-//             spreadRadius: 3, // Spread radius
-//             blurRadius: 5, // Blur radius
-//             offset: Offset(0, 2), // Offset of the shadow
-//           ),
-//         ],
-//       ),
-//       child: Material(
-//         color: Colors.transparent,
-//         child: Padding(padding: const EdgeInsets.all(20),
-//           child: Column(
-//             children: [
-//               Row(
-//                 children: [
-//                   const CircleAvatar(
-//                     backgroundImage: AssetImage(dc_prof),
-//                   ),
-//                   const SizedBox(width:10,),
-//                   Column(
-//                     mainAxisAlignment: MainAxisAlignment.center,
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children:const [
-//                       Text("Dr Ajay Kumar",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.bold,),),
-//                       SizedBox(height: 2,),
-//                       Text("Dental",style: TextStyle(color: Colors.black54,fontSize: 16,fontWeight: FontWeight.bold,),)
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//               SizedBox(height: 25,),
-//               //Shedule details
-//               ScheduleData(),
-//               SizedBox(height: 25,),
-//               //ACTION BUTTON
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Expanded(child: ElevatedButton(
-//                     style:ElevatedButton.styleFrom(backgroundColor: Colors.redAccent,),
-//                     onPressed: (){},
-//                     child: Text("Cancel",style: TextStyle(color: Colors.white,fontSize: 17),),
-//                   ),
-//                   ),
-//                   SizedBox(width: 20,),
-//                   Expanded(child: ElevatedButton(
-//                     style:ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent,),
-//                     onPressed: (){},
-//                     child: Text("Completed",style: TextStyle(color: Colors.white,fontSize: 17),),
-//                   ),
-//                   ),
-//                 ],
-//               )
-//
-//
-//             ],
-//           ),
-//         ),
-//       ),
-//
-//     );
-//   }
-// }
-
-
-
-
-
-class ScheduleData extends StatelessWidget {
-  ScheduleData({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        // color: Colors.blueAccent.shade100,
-        color:Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2), // Shadow color
-            spreadRadius: 2, // Spread radius
-            blurRadius: 4, // Blur radius
-            offset: Offset(0, 2), // Offset of the shadow
-          ),
-        ],
-
-      ),
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(Icons.calendar_month_sharp,color: Colors.black,size: 16,),
-          SizedBox(width: 4,),
-          Text(
-            'Monday,11/28/2022',
-            style: const TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width:15,),
-          Icon(Icons.access_alarm_rounded,color: Colors.black,size: 16,),
-          SizedBox(width: 4,),
-          Flexible(child: Text('2:00 PM',style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),),
-          ),
-        ],
-      ),
-
     );
   }
 }
 
-
-
-//Navbar
 
 class NavBar extends StatefulWidget {
   const NavBar({Key? key,required this.user_name,required this.user_email}) : super(key: key);
@@ -1289,7 +1094,7 @@ class _NavBarState extends State<NavBar> {
           UserAccountsDrawerHeader(
             accountName:  Text(widget.user_name!,
               style: TextStyle(
-                fontSize: 30, // Font size
+                fontSize: 30,
                 fontWeight: FontWeight.bold,),
             ),
             accountEmail: Text(widget.user_email!,
@@ -1374,39 +1179,42 @@ class _ImageSliderState extends State<ImageSlider> {
   int myCurrentIndex=0;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CarouselSlider(
-            items: myitems,
-            options: CarouselOptions(
-              autoPlay: true,
-              height: 200,
-              autoPlayCurve: Curves.fastOutSlowIn,
-              autoPlayAnimationDuration: const Duration(milliseconds: 800),
-              autoPlayInterval: const Duration(seconds: 2),
-              enlargeCenterPage: true,
-              aspectRatio: 2.0,
-              onPageChanged: (index,reason){
-                setState(() {
-                  myCurrentIndex=index;
-                });
-              },
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 2),
+      child: Column(
+        children: [
+          CarouselSlider(
+              items: myitems,
+              options: CarouselOptions(
+                autoPlay: true,
+                height: 200,
+                autoPlayCurve: Curves.fastOutSlowIn,
+                autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                autoPlayInterval: const Duration(seconds: 2),
+                enlargeCenterPage: true,
+                aspectRatio: 2.0,
+                onPageChanged: (index,reason){
+                  setState(() {
+                    myCurrentIndex=index;
+                  });
+                },
 
-            ),
-        ),
-        AnimatedSmoothIndicator(
-          activeIndex: myCurrentIndex,
-          count: myitems.length,
-          effect:WormEffect(
-            dotHeight: 8,
-            dotWidth: 8,
-            spacing: 10,
-            activeDotColor: Colors.blue.shade700,
-            dotColor: Colors.grey.shade200,
-            paintStyle: PaintingStyle.fill,
-        ),
-      )
-      ],
+              ),
+          ),
+          AnimatedSmoothIndicator(
+            activeIndex: myCurrentIndex,
+            count: myitems.length,
+            effect:WormEffect(
+              dotHeight: 8,
+              dotWidth: 8,
+              spacing: 10,
+              activeDotColor: Colors.blue.shade700,
+              dotColor: Colors.grey.shade200,
+              paintStyle: PaintingStyle.fill,
+          ),
+        )
+        ],
+      ),
     );
   }
 }

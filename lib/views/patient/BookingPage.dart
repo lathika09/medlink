@@ -26,6 +26,9 @@ class _BookingPageState extends State<BookingPage> {
   bool _isWeekend=false;
   bool _dateSelected=false;
   bool _timeSelected=false;
+  bool _isToday = false;
+
+
   Map<String, dynamic> patientData = {};
   Future<void> fetchPatientData(String pemail) async {
     try {
@@ -252,7 +255,7 @@ class _BookingPageState extends State<BookingPage> {
                   )
                   );
                 },
-                disable :_timeSelected && _dateSelected ? false: true,
+                disable :_timeSelected && _dateSelected && !_isToday ? false : true,
               ),
             ),
           )
@@ -292,13 +295,16 @@ class _BookingPageState extends State<BookingPage> {
           _currentDay=selectedDay;
           _focusDay=focusedDay;
           _dateSelected=true;
+          // check if selected day is today
+          final now = DateTime.now();
+          _isToday = selectedDay.year == now.year &&
+              selectedDay.month == now.month &&
+              selectedDay.day == now.day;
+
           if(doctorWeekdays.contains(selectedDay.weekday)){
             _isWeekend=true;
             _timeSelected=false;
             _currentIndex=null;
-
-
-
           }
           else{
             _isWeekend=false;
@@ -310,24 +316,19 @@ class _BookingPageState extends State<BookingPage> {
   }
   final CollectionReference appointmentsCollection = FirebaseFirestore.instance.collection('appointments');
 
-  // Create a reference to the doctor's appointments subcollection
+  //reference to the doctor appointments subcollection
   final CollectionReference doctorAppointmentsCollection =
   FirebaseFirestore.instance.collection('doctor').doc('email').collection('appointments');
 
 
-// Create a reference to the patient's appointments subcollection
+//reference to the patient appointments subcollection
   final CollectionReference patientAppointmentsCollection =
   FirebaseFirestore.instance.collection('patients').doc('pemail').collection('appointments');
 
-// Inside your _BookingPageState class
-
   void storeAppointmentDetails() async {
-    // Check if the required fields are selected
-    if (!_dateSelected || !_timeSelected) {// Handle the case where date and time are not selected.
+    if (!_dateSelected || !_timeSelected) {// not selected then
       return;
     }
-
-    // Create an appointment object with the relevant data
     Map<String, dynamic> appointmentData = {
       'appointment_date': _currentDay,
       'schedule_time':selectedHour,
@@ -335,23 +336,9 @@ class _BookingPageState extends State<BookingPage> {
       'patient_name': patientData['name'],
       'status': "Request",
     };
-    // Map<String, dynamic> updatedData = {
-    //   "appointments":{
-    //     'appointment_date': _currentDay,
-    //     'schedule_time':selectedHour,
-    //     'doctor_name': doctorInfo['name'],
-    //     'patient_name': patientData['name'],
-    //     'status': "Request",
-    //   }
-    // };
 
     try {
-      // Add the appointment data to Firestore
-      // await appointmentsCollection.add(appointmentData);
       DocumentReference appointmentDocRef = await appointmentsCollection.add(appointmentData);
-
-      // await doctorAppointmentsCollection.add(appointmentData);
-
       final doctorQuerySnapshot = await FirebaseFirestore.instance
           .collection("doctor")
           .where("email", isEqualTo: doctorInfo['email'])
@@ -375,14 +362,8 @@ class _BookingPageState extends State<BookingPage> {
       } else {
         print("No patient document found with email: ${patientData['email']}");
       }
-
-      // Show a success message or navigate to a success screen
-      // (You can customize this part based on your application logic)
-
     } catch (e) {
-      // Handle any errors that occur during Firestore data addition
       print("Error adding appointment: $e");
-      // You can display an error message or take appropriate action here.
     }
   }
 
