@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
             // delete from the patient's subcollection
             await doc.reference.delete();
 
-            // delete from the appointment collection
+            // delete from the appointments
             final appointmentCollection = FirebaseFirestore.instance.collection('appointments');
             await appointmentCollection.doc(doc.id).delete();
 

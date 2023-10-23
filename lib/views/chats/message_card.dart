@@ -202,7 +202,7 @@ Widget greenMessage(){
                         .then((value) {
                       Navigator.pop(context);
 
-                      Dialogs.showSnackbar(context, 'Text Copied!');
+                      Dialogs.showSnackbar(context, 'Text Copied!!');
                     });
                   })
                   :

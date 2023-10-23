@@ -262,7 +262,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                               children: [
                                 Container(
                                   // width: 75,
-                                  // height: 75,
+                                  // height: same,
                                   padding: EdgeInsets.symmetric(vertical: 5.0,),
                                   color:Colors.transparent,
                                   child: Icon(Icons.message,size: 50,color: Colors.black,),

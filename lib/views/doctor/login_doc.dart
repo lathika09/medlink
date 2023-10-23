@@ -5,7 +5,6 @@ import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/sign_up.dart';
 import 'package:medlink/views/patient/signup.dart';
 
-
 class LoginPage_Doc extends StatefulWidget {
   const LoginPage_Doc({Key? key}) : super(key: key);
 

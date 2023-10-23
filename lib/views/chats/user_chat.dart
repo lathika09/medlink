@@ -2,9 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/date_utils.dart';
 import 'package:medlink/views/chats/chat_screen.dart';
-
 import 'model/message.dart';
-import 'model/user.dart';
 
 
 class UserCard extends StatefulWidget {
@@ -73,7 +71,7 @@ class _UserCardState extends State<UserCard> {
   }
   @override
   Widget build(BuildContext context) {
-    String? userId = patientData?["id"] ?? doctorData?["id"];
+    String? userId = patientData["id"] ?? doctorData["id"];
 
 
     return (widget.chatId != null && widget.doctorId != null && widget.patientId != null && userId != null)
@@ -87,11 +85,11 @@ class _UserCardState extends State<UserCard> {
             context,
             MaterialPageRoute(
               builder: (context) => ChatScreen(
-                chat_id: widget.chatId!,
-                doc_id: widget.doctorId!,
-                pat_id: widget.patientId!,
+                chat_id: widget.chatId,
+                doc_id: widget.doctorId,
+                pat_id: widget.patientId,
                 userId: userId,
-                Name: widget.doctorName!,
+                Name: widget.doctorName,
               ),
             ),
           );
@@ -135,88 +133,6 @@ class _UserCardState extends State<UserCard> {
       ),
     )
         : Container();
-
-
   }
 }
 
-//
-// class UserCard extends StatefulWidget {
-//   final ChatUser doctorId;
-//   const UserCard({Key? key,required this.doctorId,required this.patientId}) : super(key: key);
-//   @override
-//   State<UserCard> createState() => _UserCardState();
-//
-// }
-//
-// class _UserCardState extends State<UserCard> {
-//
-//   Map<String, dynamic> patientData = {};
-//   Future<void> fetchPatientData() async {
-//     try {
-//       final snapshot = await FirebaseFirestore.instance.collection("patients").where("id", isEqualTo: widget.pat_id).get();
-//       if (snapshot.docs.isNotEmpty) {
-//         setState(() {
-//           patientData = snapshot.docs.first.data() as Map<String, dynamic>;
-//           print(patientData['name']);
-//         });
-//       }
-//     } catch (e) {
-//       print("Error fetching doctor data: $e");
-//     }
-//   }
-//   Map<String, dynamic> doctorData = {};
-//   Future<void> fetchDoctorData() async {
-//     try {
-//       final snapshot = await FirebaseFirestore.instance.collection("doctor").where("id", isEqualTo: widget.doc_id).get();
-//       if (snapshot.docs.isNotEmpty) {
-//         setState(() {
-//           doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
-//           print(doctorData['name']);
-//           print("PRINT THIS : ${doctorData['id']}");
-//         });
-//       }
-//     } catch (e) {
-//       print("Error fetching doctor data: $e");
-//     }
-//   }
-//   Future<String?> getChatId(String patientId, String doctorId) async {
-//     String? chatId;
-//     try {
-//       final query = await FirebaseFirestore.instance
-//           .collection('chats')
-//           .where('participants.patientId', isEqualTo: patientId)
-//           .where('participants.doctorId', isEqualTo: doctorId)
-//           .get();
-//
-//       if (query.docs.isNotEmpty) {
-//         chatId = query.docs[0].id;
-//       }
-//     } catch (e) {
-//       print('Error fetching chatId: $e');
-//     }
-//     return chatId;
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       margin: EdgeInsets.symmetric(horizontal:MediaQuery.of(context).size.width*0.04,vertical: 4),
-//       elevation: 0.5,
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-//       child: InkWell(
-//         onTap: (){
-//           Navigator.push(
-//               context,
-//               MaterialPageRoute(builder: (context) =>ChatScreen(chat_id: '', doc_id: '', pat_id: '',))
-//           );
-//           },
-//         child: ListTile(
-//           leading: CircleAvatar(child: Icon(Icons.person),),
-//           title: Text(widget.doctor_user.name,style: TextStyle(color: Colors.black,fontSize: 18),),
-//           subtitle: Text("Last user message",maxLines: 1,),
-//           trailing: Text("12:00 PM",style: TextStyle(color: Colors.black54),),
-//         ),
-//       ),
-//     );
-//   }
-// }

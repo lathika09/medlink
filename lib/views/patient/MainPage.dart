@@ -1,9 +1,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:medlink/constant/image_string.dart';
-import 'package:medlink/views/patient/AppointmentPage.dart';
-import 'package:medlink/views/patient/NotificationPage.dart';
 import 'package:medlink/views/patient/home.dart';
 
 
@@ -11,7 +8,7 @@ import '../chats/main_screen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key,required this.pemail}) : super(key: key);
-final String pemail;
+  final String pemail;
 
 
   @override
@@ -49,7 +46,6 @@ class _MainPageState extends State<MainPage> {
         }),
         children: <Widget> [
           HomePage(pemail: widget.pemail),
-          // AppointmentPage(),
           MainChatScreen(pemail: widget.pemail!),
         ],
       ),

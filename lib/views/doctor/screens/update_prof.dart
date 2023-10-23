@@ -486,7 +486,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         // Update the document with the new data
         await doctorDoc.reference.update(updatedData);
 
-        // Disable editing mode after saving
+        // Disable editing mode after save
         setState(() {
           isEditing = false;
         });

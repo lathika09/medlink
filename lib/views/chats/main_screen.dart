@@ -1,16 +1,10 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medlink/constant/image_string.dart';
-import 'package:medlink/views/chats/api.dart';
 import 'package:medlink/views/chats/user_chat.dart';
-
 import '../patient/MainPage.dart';
-import 'model/user.dart';
+
 
 class MainChatScreen extends StatefulWidget {
   MainChatScreen({Key? key,required this.pemail}) : super(key: key);

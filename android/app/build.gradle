@@ -32,7 +32,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.example.medlink"
-    compileSdkVersion 33  //flutter.compileSdkVersion
+    compileSdkVersion 33  //flutter.compileSdkVersio
     ndkVersion flutter.ndkVersion
 
     compileOptions {

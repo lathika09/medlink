@@ -1,13 +1,8 @@
-import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../../../constant/image_string.dart';
 import '../../chats/user_chat.dart';
-import '../../patient/MainPage.dart';
 import 'home_doc.dart';
 
 class MainChatScreenDoc extends StatefulWidget {
@@ -31,17 +26,17 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
       if (patientSnapshot.exists) {
         return patientSnapshot.get('name') as String;
       } else {
-        return ''; // Handle the case when the patient document does not exist
+        return '';
       }
     } catch (e) {
       print('Error fetching patient name: $e');
-      return ''; // Handle the error as needed
+      return '';
     }
   }
 
 
   Future<List<UserCard>> fetchChatsForDoctor(String doctorId) async {
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    final FirebaseFirestore _firestore= FirebaseFirestore.instance;
 
     try {
       QuerySnapshot querySnapshot = await _firestore
