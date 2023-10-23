@@ -166,7 +166,14 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
       if (email != null) {
         uploadImageToFirebaseStorage(imageFile, email);
+        // final imageUrl = await getProfileImageUrl(email!);
+        // if (imageUrl != null) {
+        //   setState(() {
+        //     _profileImageUrl = imageUrl;
+        //   });
+        // }
       }
+
     }
   }
 
@@ -264,7 +271,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                         onPressed:() async{
                           print("pressed");
                           _onImagePickerButtonPressed();
-                          loadProfileImage();
+                          // loadProfileImage();
                         },
                         icon: Icon(Icons.add_a_photo),
                         iconSize: 30,

@@ -3,6 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/chats/chat_screen.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,8 +20,7 @@ final String? pemail;
 }
 
 class _HomePageState extends State<HomePage> {
-
-
+//patient self
   Map<String, dynamic> patientData = {};
   Future<void> fetchPatientData() async {
     try {
@@ -29,13 +29,19 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           patientData = snapshot.docs.first.data() as Map<String, dynamic>;
           print(patientData['name']);
-          print("PRINT THIS : ${widget.pemail}");
+          print("PRINT THIS : ${patientData['id']}");
         });
       }
     } catch (e) {
       print("Error fetching doctor data: $e");
     }
   }
+
+
+
+
+
+//doctor list
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<List<DoctorData>> fetchDoctors() async {
     try {
@@ -56,6 +62,8 @@ class _HomePageState extends State<HomePage> {
         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
         // to access fields from the document with null checks
+        String id = (doctorData['id'] is String) ? doctorData['id'] : '';
+
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
@@ -74,6 +82,7 @@ class _HomePageState extends State<HomePage> {
 
         return DoctorData(
           route: 'doc_details',
+          id:id,
           name: name,
           speciality: speciality,
           qualification: qualification,
@@ -637,6 +646,7 @@ class DoctorData extends StatefulWidget {
   DoctorData({
     Key? key,
     required this.route,
+    required this.id,
     required this.name,
     required this.speciality,
     required this.qualification,
@@ -651,6 +661,7 @@ class DoctorData extends StatefulWidget {
   }) : super(key: key);
 
   final String route;
+  final String id;
   final String name;
   final List<String> speciality;
   final String qualification;
@@ -674,6 +685,41 @@ class _DoctorDataState extends State<DoctorData> {
   final ratio = 0.5;
   get mixednewColor => Color.lerp(color1, color2, ratio);
 
+  //chat collection
+  Future<String?> createChat(String patientId, String doctorId) async {
+    try {
+      QuerySnapshot existingChats = await FirebaseFirestore.instance.collection('chats')
+          .where('participants.patientId', isEqualTo: patientId)
+          .where('participants.doctorId', isEqualTo: doctorId)
+          .get();
+
+      if (existingChats.docs.isNotEmpty) {
+        String existingChatId = existingChats.docs[0].id;
+        return existingChatId;
+      }
+      else {
+        Map<String, dynamic> chatData = {
+          'participants': {
+            'patientId': patientId,
+            'doctorId': doctorId,
+          },
+          'created_at': FieldValue.serverTimestamp(),
+        };
+
+        DocumentReference docRef = await FirebaseFirestore.instance.collection('chats').add(chatData);
+        String docId = docRef.id;
+        await docRef.update({'id': docId});
+
+        return docId;
+      }
+    } catch (e) {
+      print('Error creating or checking chat document: $e');
+      return null; // Return null to indicate an error
+    }
+  }
+
+
+
   Map<String, dynamic> patientData = {};
   Future<void> fetchPatientData() async {
     try {
@@ -688,6 +734,22 @@ class _DoctorDataState extends State<DoctorData> {
       print("Error fetching doctor data: $e");
     }
   }
+  Map<String, dynamic> doctorData = {};
+  Future<void> fetchDoctorData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("doctor").where("email", isEqualTo: widget.email).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(doctorData['name']);
+          print("PRINT THIS : ${doctorData['id']}");
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+
 
 
   //DOC IMAGE
@@ -719,6 +781,9 @@ class _DoctorDataState extends State<DoctorData> {
   void initState() {
     super.initState();
     loadProfileImage();
+    fetchPatientData();
+    fetchDoctorData();
+
   }
 
   @override
@@ -809,7 +874,28 @@ class _DoctorDataState extends State<DoctorData> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     MaterialButton(
-                      onPressed: () {},
+                      onPressed: ()async {
+                        String? chatId = await createChat(patientData['id'],doctorData['id']);
+                        if (chatId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                chat_id: chatId,
+                                doc_id: doctorData['id'],
+                                pat_id: patientData['id'],
+                                userId: patientData['id'], Name: doctorData['name'],
+                              ),
+                            ),
+                          );
+                        }
+
+                        // Navigator.push(context,
+                        //     MaterialPageRoute(builder:
+                        //         (context)=>ChatScreen(chat_id:chatId!,doc_id:doctorData['id'],pat_id:patientData['id'])
+                        // ));
+
+                      },
                       child: Icon(
                         Icons.chat,
                         color: Colors.white,

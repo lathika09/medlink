@@ -2,8 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medlink/views/doctor/login_doc.dart';
 import 'package:medlink/views/patient/AppointmentPage.dart';
+import '../../chats/main_screen.dart';
 import '../../patient/NotificationPage.dart';
+import 'main_chat_screen_doc.dart';
 
 class HomePage_doc extends StatefulWidget {
   const HomePage_doc({Key? key,required this.email}) : super(key: key);
@@ -29,6 +32,43 @@ class _HomePage_docState extends State<HomePage_doc> {
           backgroundColor:Colors.blueAccent.shade700,
           iconTheme: IconThemeData(
             color: Colors.white,
+          ),
+          leading: IconButton(
+              onPressed: (){showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text("Logout Confirmation"),
+                    content: Text("Are you sure you want to log out?"),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          // User confirmed, log out and navigate to login page
+                          Navigator.of(context).pop(); // Close the dialog
+                          // Perform logout logic here
+                          // You can use Navigator to navigate to the login page
+                          Navigator.pushReplacement( context,
+                              MaterialPageRoute(builder: (context) =>LoginPage_Doc()),
+                          );
+                        },
+                        child: Text("Yes"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          // User canceled, simply close the dialog
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("No"),
+                      ),
+                    ],
+                  );
+                },
+              );
+              },
+            icon: Icon(
+              Icons.logout,
+              size: 20,
+            ),
           ),
           title:Center(
             child: Text(
@@ -231,13 +271,18 @@ class _HomePage_docState extends State<HomePage_doc> {
                               ],),
                           ),
                           onTap: (){
-                            Navigator.pushNamed(
-                              context,
-                              'doc_profile',
-                              arguments: {
-                                'email': widget.email, //doctor email
-                              },
-                            );
+                            if (widget.email != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => MainChatScreenDoc(email: widget.email)),
+                              );
+                            }
+                            // Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //     builder: (context) =>MainChatScreenDoc(email: widget.email),
+                            //     )
+                            // );
                           },
                         ),
                       ),

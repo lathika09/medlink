@@ -293,7 +293,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           children: [
                             Row(
                               children: [
-                                // Display doctor avatar or image here
                                 CircleAvatar(
                                   backgroundColor: Colors.blue,
                                     backgroundImage:NetworkImage("https://static.thenounproject.com/png/5034901-200.png"),
@@ -444,7 +443,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                                     // Close the dialog
                                                     Navigator.of(context).pop();
 
-                                                    // Handle the logic for confirming the appointment
                                                     await updateAppointmentStatus(
                                                       _schedule['appointment_id'],
                                                       _schedule['patient_name'],

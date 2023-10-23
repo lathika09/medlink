@@ -272,7 +272,7 @@ class SignupPage extends StatelessWidget {
                   //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                   TextButton(
                     onPressed: (){
-                      Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage()));
+                      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>LoginPage()));
                     },
                     child: const Text("Login",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                     ),
@@ -288,19 +288,36 @@ class SignupPage extends StatelessWidget {
     );
   }
 
+  // void addUserToFirestore(String name, String email, String phoneNumber) async {
+  //   CollectionReference patients = FirebaseFirestore.instance.collection('patients');
+  //
+  //   await patients.add({
+  //     'id':
+  //     'name': name,
+  //     'email': email,
+  //     'phoneNumber': phoneNumber,
+  //   }).then((DocumentReference document) {
+  //     print('Document added with ID: ${document.id}');
+  //   }).catchError((error) {
+  //     print('Error adding document: $error');
+  //   });
+  // }
   void addUserToFirestore(String name, String email, String phoneNumber) async {
     CollectionReference patients = FirebaseFirestore.instance.collection('patients');
 
-    await patients.add({
+    // Add the document without specifying the ID
+    DocumentReference docRef = await patients.add({
       'name': name,
       'email': email,
       'phoneNumber': phoneNumber,
-    }).then((DocumentReference document) {
-      print('Document added with ID: ${document.id}');
-    }).catchError((error) {
-      print('Error adding document: $error');
     });
+
+    // Set the 'id' field to the same value as the Firestore document ID
+    await docRef.set({'id': docRef.id}, SetOptions(merge: true));
+
+    print('Document added with ID: ${docRef.id}');
   }
+
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(

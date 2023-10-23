@@ -50,7 +50,7 @@ class _MainPageState extends State<MainPage> {
         children: <Widget> [
           HomePage(pemail: widget.pemail),
           // AppointmentPage(),
-          MainChatScreen(),
+          MainChatScreen(pemail: widget.pemail!),
         ],
       ),
       bottomNavigationBar: ClipRRect(

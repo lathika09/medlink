@@ -61,6 +61,7 @@ class _DoctorListState extends State<DoctorList> {
           List<dynamic> time =
           availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
+          String id = (doctorData['id'] is String) ? doctorData['id'] : '';
 
           String name = (doctorData['name'] is String) ? doctorData['name'] : '';
           List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
@@ -80,6 +81,7 @@ class _DoctorListState extends State<DoctorList> {
 
           return DoctorData(
             route: 'doc_details',
+            id: id,
             name: name,
             speciality: speciality,
             qualification: qualification,

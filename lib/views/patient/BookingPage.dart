@@ -5,11 +5,8 @@ import 'package:medlink/views/patient/doctor_details.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:lottie/lottie.dart';
 
-import 'MainPage.dart';
-
 class BookingPage extends StatefulWidget {
   const BookingPage({Key? key}) : super(key: key);
-
   @override
   State<BookingPage> createState() => _BookingPageState();
 }
@@ -43,8 +40,9 @@ class _BookingPageState extends State<BookingPage> {
       print("Error fetching doctor data: $e");
     }
   }
-  Map<String, dynamic> doctorInfo = {};
 
+
+  Map<String, dynamic> doctorInfo = {};
   Future<void> fetchDoctorInfo(String email) async {
     try {
       final snapshot = await FirebaseFirestore.instance.collection("doctor").where("email", isEqualTo: email).get();
@@ -52,15 +50,14 @@ class _BookingPageState extends State<BookingPage> {
         setState(() {
           doctorInfo = snapshot.docs.first.data() as Map<String, dynamic>;
           print(doctorInfo['name']);
-
-
-
         });
       }
     } catch (e) {
       print("Error fetching doctor data: $e");
     }
   }
+
+
   // Function to fetch the doctor's weekday array
   Future<void> fetchDoctorWeekdays(String email) async {
     try {
@@ -73,8 +70,6 @@ class _BookingPageState extends State<BookingPage> {
           // doctor = snapshot.docs.first.data() as Map<String, dynamic>;
           doctorWeekdays = List<int>.from(snapshot.docs.first["availability"]["weekday"] ?? []);
           availableTimes = List<String>.from(snapshot.docs.first["availability"]["time"] ?? []);
-
-
         });
       }
     } catch (e) {
@@ -86,6 +81,7 @@ class _BookingPageState extends State<BookingPage> {
   void initState() {
     super.initState();
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -99,22 +95,11 @@ class _BookingPageState extends State<BookingPage> {
 
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-
     final Map<String, dynamic> args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
     final String? pemail = args['pemail'] as String?;
     //final String? email = args['email'] as String?;
-
-    final Map<String, dynamic> availability = args['availability'] ?? {
-      'weekday': '',  // Default value for 'weekday'
-      'time': '',      // Default value for 'time'
-    };
-    // List<dynamic> weekdays =availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
-    // List<dynamic> time =availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
-
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -156,8 +141,6 @@ class _BookingPageState extends State<BookingPage> {
           ):SliverGrid(
               delegate:SliverChildBuilderDelegate((context, index){
                 print("INDEX ISS :$index");
-                //int hour = index + 9; // Calculate the hour (e.g., 9 AM, 10 AM, ...)
-                //       bool isAvailable = availability['time'] == hour && (!availability['weekday'].contains(selectedDay.weekday));
                 if (index < availableTimes.length) {
                   String hour = availableTimes[index];
                   return InkWell(
@@ -192,11 +175,9 @@ class _BookingPageState extends State<BookingPage> {
                   );
 
                 } else {
-                  // Return an empty container for slots beyond the available times
                   return Container();
                 }
               },
-                // Set the childCount to the number of available times
                 childCount: availableTimes.length,
               ),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -316,12 +297,12 @@ class _BookingPageState extends State<BookingPage> {
   }
   final CollectionReference appointmentsCollection = FirebaseFirestore.instance.collection('appointments');
 
-  //reference to the doctor appointments subcollection
+  //reference to doctor appointments subcollection
   final CollectionReference doctorAppointmentsCollection =
   FirebaseFirestore.instance.collection('doctor').doc('email').collection('appointments');
 
 
-//reference to the patient appointments subcollection
+//reference to patient appointments subcollection
   final CollectionReference patientAppointmentsCollection =
   FirebaseFirestore.instance.collection('patients').doc('pemail').collection('appointments');
 
@@ -398,37 +379,3 @@ class Button extends StatelessWidget {
     );
   }
 }
-// Navigator.push(context,MaterialPageRoute(builder: (context)=>AppointmentBooked()));
-// showModalBottomSheet(context: context, builder: ((context){
-//   return Column(
-//     mainAxisAlignment: MainAxisAlignment.center,
-//     children: [
-//       SizedBox(height: 20,),
-//       Expanded(
-//         flex: 3,
-//         child: Lottie.asset("assets/success.json"),
-//       ),
-//       Container(
-//         width: double.infinity,
-//         alignment: Alignment.center,
-//         child: Text("Successfully Booked",style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
-//       ),
-//       Spacer(),
-//       Padding(padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
-//         child: Button(
-//             width: double.infinity,
-//             title: "Back to Home.",
-//             disable: false,
-//             onPressed: ()=>Navigator.of(context).pushNamed('main')),
-//       ),
-//     ],
-//   );
-//
-// }));
-
-
-
-
-
-
-

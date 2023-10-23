@@ -306,7 +306,7 @@ class SignupPage_Doc extends StatelessWidget {
                   //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                   TextButton(
                     onPressed: (){
-                      Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));
+                      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));
                     },
                     child: const Text("Login",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                     ),
@@ -323,18 +323,19 @@ class SignupPage_Doc extends StatelessWidget {
   void addUserToFirestore(String name, String email, String phoneNumber,String med,String password) async {
     CollectionReference doctor= FirebaseFirestore.instance.collection('doctor');
 
-    await doctor.add({
+    DocumentReference docRef =await doctor.add({
       'name': name,
       'email': email,
       'phoneno': phoneNumber,
       'medical_lic':med,
       'password':password
-    }).then((DocumentReference document) {
-      print('Document added with ID: ${document.id}');
-    }).catchError((error) {
-      print('Error adding document: $error');
     });
+    // Set the 'id' field to the same value as the Firestore document ID
+    await docRef.set({'id': docRef.id}, SetOptions(merge: true));
+
+    print('Document added with ID: ${docRef.id}');
   }
+
 
   void _showErrorDialog(BuildContext context, String errorMessage) {
     showDialog(

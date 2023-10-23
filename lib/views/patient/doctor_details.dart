@@ -275,7 +275,7 @@ class DoctorInfo extends StatelessWidget {
           ),
         ),
         SizedBox(
-          width: MediaQuery.of(context).size.width*0.47,
+          width: MediaQuery.of(context).size.width*0.4,//0.47
           child: Text(info,
             style: TextStyle(color: Colors.black87,fontSize: 16,fontWeight: FontWeight.w600),
             softWrap: true,
