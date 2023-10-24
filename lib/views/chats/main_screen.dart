@@ -1,9 +1,17 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medlink/constant/image_string.dart';
+import 'package:medlink/views/chats/model/patient.dart';
 import 'package:medlink/views/chats/user_chat.dart';
 import '../patient/MainPage.dart';
+import 'api.dart';
 
 
 class MainChatScreen extends StatefulWidget {
@@ -52,7 +60,9 @@ class _MainChatScreenState extends State<MainChatScreen> {
 
         String chatId = doc.id;
         String doctorId = chatData['participants']['doctorId'] ?? '';
+
         String doctorName = await getDoctorName(doctorId);
+
 
         chats.add(UserCard(
           chatId: chatId,
@@ -123,14 +133,52 @@ class _MainChatScreenState extends State<MainChatScreen> {
   //   }
   // }
 
+   Future<void> updateActiveStatus(bool isOnline,PatientModel patient,) async {
+
+
+     FirebaseFirestore.instance.collection("patients").doc(patient.id).update({
+       'is_online': isOnline,
+       'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+       'push_token': patient.pushToken,
+     });
+  }
   @override
   void initState() {
     super.initState();
     fetchPatientData();
+    // PatientModel me=PatientModel(
+    //     phoneNumber: patientData['phoneNumber'],
+    //     name: patientData['name'],
+    //     id: patientData['id'],
+    //     lastActive: patientData['last_active'],
+    //     isOnline: patientData['is_online'],
+    //     email: patientData['email'],
+    //     pushToken: patientData['push_token']
+    // );
+    //
+    // SystemChannels.lifecycle.setMessageHandler((message) {
+    //   log('Message: $message');
+    //
+    //   if (me!= null) {
+    //     if (message.toString().contains('resume')) {
+    //       updateActiveStatus(true,me);
+    //     }
+    //     if (message.toString().contains('pause')) {
+    //       updateActiveStatus(false,me);
+    //     }
+    //   }
+    //   // else{
+    //   //   updateActiveStatus(false,personalId!,widget.patientId,widget.doctorId);
+    //   // }
+    //
+    //   return Future.value(message);
+    //
+    // });
     // updateDoctorFCMToken(widget.pemail);
   }
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: ()=>FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -140,12 +188,13 @@ class _MainChatScreenState extends State<MainChatScreen> {
               color: Colors.white,
             ),
             leading: IconButton(
-                onPressed: (){
+                onPressed: () async {
                   // Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) =>MainPage(pemail: widget.pemail)),
                   );
+                  // await FirebaseAuth.instance.signOut();
                 },
                 icon: const Icon(
                   Icons.arrow_back,
@@ -161,12 +210,16 @@ class _MainChatScreenState extends State<MainChatScreen> {
             ),
 
           ),
-          body: patientData['id'] != null
+          body:
+
+          patientData['id'] != null
               ?Column(
             children: [
               FutureBuilder<List<UserCard>>(
                 future: fetchChatsForPatient(patientData["id"]), // Replace patientId with the actual patient ID
+                // future: FirebaseFirestore.instance.collection("doctor").snapshots(),
                 builder: (context, snapshot) {
+
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Padding(
                       padding: const EdgeInsets.all(12.0),
@@ -177,11 +230,13 @@ class _MainChatScreenState extends State<MainChatScreen> {
                   } else {
                     List<UserCard> userCards = snapshot.data ?? [];
 
+
                     return ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: userCards.length,
                       itemBuilder: (context, index) {
+                        log("object :${userCards[index]}");
                         return userCards[index];// Render each userCard widget here.
                       },
                     );

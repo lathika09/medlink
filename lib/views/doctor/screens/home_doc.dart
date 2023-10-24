@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,6 +23,14 @@ class _HomePage_docState extends State<HomePage_doc> {
   final ratio = 0.7;
   get mixedColor => Color.lerp(color1, color2, ratio);
 
+
+  //await FirebaseAuth.instance.signOut();
+  @override
+  void initState() {
+    super.initState();
+    // await FirebaseAuth.instance.signOut();
+    // updateDoctorFCMToken(widget.pemail);
+  }
   @override
   Widget build(BuildContext context) {
     // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -42,14 +51,15 @@ class _HomePage_docState extends State<HomePage_doc> {
                     content: Text("Are you sure you want to log out?"),
                     actions: <Widget>[
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // User confirmed, log out and navigate to login page
                           Navigator.of(context).pop(); // Close the dialog
                           // Perform logout logic here
                           // You can use Navigator to navigate to the login page
                           Navigator.pushReplacement( context,
-                              MaterialPageRoute(builder: (context) =>LoginPage_Doc()),
+                              MaterialPageRoute(builder: (context) => LoginPage_Doc()),
                           );
+                          await FirebaseAuth.instance.signOut();
                         },
                         child: Text("Yes"),
                       ),

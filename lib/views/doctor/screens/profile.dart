@@ -11,217 +11,189 @@ import 'package:medlink/constant/utils.dart';
 import 'package:medlink/views/doctor/login_doc.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
-final usersCollection = FirebaseFirestore.instance.collection('doctor');
-void fetchUserData(String userEmail) async {
-  final snapshot = await usersCollection.where('email', isEqualTo: userEmail).get();
-  if (snapshot.docs.isNotEmpty) {
-    final userData = snapshot.docs.first.data();
-    // Pass `userData` to the home screen for displaying data
 
-    print("done ${userData}");
-  } else {
-
-  }
-}
-void fetchDoctorData() async {
-  final String doctorId = 'your_doctor_id'; // Replace with the actual document ID or path
-  final DocumentReference doctorReference = FirebaseFirestore.instance.collection('doctors').doc(doctorId);
-
-  try {
-    final DocumentSnapshot doctorSnapshot = await doctorReference.get();
-
-    if (doctorSnapshot.exists) {
-      final Map<String, dynamic> doctorData = doctorSnapshot.data() as Map<String, dynamic>;
-      // Now you have the doctor's data in the doctorData map
-
-      // You can access the fields like this:
-      final String doctorName = doctorData['name'];
-      final String doctorSpecialty = doctorData['specialty'];
-      // Add similar lines for other fields
-
-      // Use the doctor data as needed
-    } else {
-      // Handle the case where the document doesn't exist
-      print('Doctor document does not exist.');
-    }
-  } catch (e) {
-    // Handle any errors that occur during the fetch process
-    print('Error fetching doctor data: $e');
-  }
-}
-
-class ProfileSetting extends StatefulWidget {
-  const ProfileSetting({Key? key}) : super(key: key);
+class PatientListPage extends StatefulWidget {
+  const PatientListPage({Key? key}) : super(key: key);
 
   @override
-  State<ProfileSetting> createState() => _ProfileSettingState();
-
+  State<PatientListPage> createState() => _PatientListPageState();
 }
 
-class _ProfileSettingState extends State<ProfileSetting> {
-
-  Uint8List? image;
-
-  void selectedImage() async {
-    Uint8List img = await pickImage(ImageSource.gallery);
-    if (img != null) {
-      // Convert the image data to a base64-encoded string
-      String base64Image = base64Encode(img);
-
-      // Update the user's document in Firestore with the image
-      final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      final String? email = args?['email'] as String?;
-
-      if (email != null) {
-        // final userDoc = FirebaseFirestore.instance.collection('doctor').doc(email);
-        // final docSnapshot = await userDoc.get();
-        final snapshot = await usersCollection.where('email', isEqualTo: email).get();
-        if (snapshot.docs.isNotEmpty) {
-          final docSnapshot = snapshot.docs.first;
-          final docData =docSnapshot.data()as Map<String, dynamic>;
-          try {
-            print(docData);
-            docData['prof_image']=base64Image;
-            await docSnapshot.reference.update(docData);
-            print('Document updated successfully.');
+class _PatientListPageState extends State<PatientListPage> {
 
 
-            // Update the UI to display the selected image
-            setState(() {
-              image = img;
-            });
-          } catch (error) {
-            print('Error updating profile image: $error');
-            // Handle the error as needed
-          }
-
-          print("done ${docSnapshot}");
-        } else {
-          print('Document does not exist.');
-
-        }
-
-
-
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    final String? email = args?['email'] as String?;
-
-    if (args != null) {
-      print(args);
-      final usersCollection = FirebaseFirestore.instance.collection('doctor');
-      void fetchUserData(String userEmail) async {
-        final snapshot = await usersCollection.where('email', isEqualTo: userEmail).get();
-        if (snapshot.docs.isNotEmpty) {
-          final userData = snapshot.docs.first.data();
-          // Pass `userData` to the home screen for displaying data
-
-          print("done ${userData}");
-        } else {
-
-        }
-      }
-      fetchUserData(email!);
-
-    }
-
     return Scaffold(
-        appBar:AppBar(
-          backgroundColor:Colors.blueAccent.shade700,
-          iconTheme: IconThemeData(
-            color: Colors.white,
+      appBar:AppBar(
+        backgroundColor:Colors.blueAccent.shade700,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+        ),
+        title:Center(
+          child: Text(appname,
+            style: TextStyle(
+                fontSize: 30,
+                color: Colors.white,
+                fontWeight: FontWeight.bold),
           ),
-          title:Center(
-            child: Text("MediWise",
-              style: TextStyle(
-                  fontSize: 30,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
-            ),
-          ),
+        ),
           elevation: 24.0,
           actions: <Widget>[IconButton(
-            icon: Icon(Icons.edit,size: 30,color: Colors.white,),
+            icon: Icon(Icons.refresh,size: 30,color: Colors.blueAccent.shade700,),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
             },
-          ),
-          ],
-        ),
-        body:SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(height: 20,),
-              Center(
-                child: Stack(
-                  // alignment: AlignmentDirectional.topStart,
-                  // fit: StackFit.expand,
-                  children: [
-                    image!=null?CircleAvatar(
-                        radius: 60,
-                        backgroundImage:MemoryImage(image!),
-                    ):
+          ),]
 
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundImage:NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"),
-                    ),
-                    Positioned(
-                        child: IconButton(
-                            onPressed: selectedImage,
-                            icon: Icon(Icons.add_a_photo),
-                          iconSize: 30,
-                          color: Colors.black,
-                        ),
-                      bottom: -1,
-                      left: 80,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10,),
-              Container(
-                width: MediaQuery.of(context).size.width/1.05,
-                // height: ,
-                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 18.0),
-                decoration: BoxDecoration(
-                  color:Colors.greenAccent,
-                  borderRadius: BorderRadius.circular(30.0),    // Bottom-left corner
+      ),
+      body: SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              child:
+              Column(
+                children: [
+                  FutureBuilder<List<PatientData>>(
+                    future: null,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error: ${snapshot.error}');
+                      } else {
+                        // List<DoctorData> doctors = snapshot.data ?? [];
 
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3), // Shadow color
-                      spreadRadius: 3, // Spread radius
-                      blurRadius: 5, // Blur radius
-                      offset: Offset(0, 20), // Offset of the shadow
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Name : ",
-                      style: TextStyle(color: Colors.black,fontSize: 21,fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
+                        return ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          // itemCount: doctors.length,
+                          // itemBuilder: (context, index) {
+                          //   return doctors[index];
+                          // },
+                          itemCount: 6,
+                          itemBuilder: (context, index) {
 
+                            },
+                        );
+                      }
+                    },
+                  ),
+                ],
               )
+            ),
 
-
-
-
-            ],
-          ),
-        )
+      )),
     );
   }
-
 }
+
+
+
+class PatientData extends StatefulWidget {
+  const PatientData({Key? key, required this.id, required this.phoneNumber, required this.name, required this.lastActive, required this.isOnline, required this.email, required this.pushToken}) : super(key: key);
+  final String id;
+  final String phoneNumber;
+  final String name;
+
+  final String lastActive;
+  final bool isOnline;
+  final String email;
+  final String pushToken;
+
+  @override
+  State<PatientData> createState() => _PatientDataState();
+}
+
+class _PatientDataState extends State<PatientData> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
+
+// class PatientListPage extends StatefulWidget {
+//   const PatientListPage({Key? key}) : super(key: key);
+//
+//   @override
+//   State<PatientListPage> createState() => _PatientListPageState();
+// }
+//
+// class _PatientListPageState extends State<PatientListPage> {
+//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+//   Future<List<PatientData>> fetchDoctors() async {
+//     try {
+//       QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
+//
+//       List<PatientData> doctors = querySnapshot.docs.map((doc) {
+//         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
+//
+//         // to access the availability field so default ytakrn
+//         Map<String, dynamic> availability = doctorData['availability'] ?? {
+//           'weekday': '',
+//           'time': '',
+//         };
+//
+//         List<dynamic> weekdays =
+//         availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
+//         List<dynamic> time =
+//         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
+//
+//         // to access fields from the document with null checks
+//         String id = (doctorData['id'] is String) ? doctorData['id'] : '';
+//
+//         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
+//         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
+//         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
+//         String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
+//         String address = (doctorData['address'] is String) ? doctorData['address'] : '';
+//         String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
+//         String description = (doctorData['description'] is String) ? doctorData['description'] : '';
+//         String email = (doctorData['email'] is String) ? doctorData['email'] : '';
+//         String city = (doctorData['city'] is String) ? doctorData['city'] : '';
+//         String pemail =(patientData['email'] is String) ? patientData['email'] : '';
+//         //  availability map in doc
+//         Map<String, dynamic> doctorAvailability = {
+//           'weekday': weekdays,
+//           'time': time,
+//         };
+//
+//         return DoctorData(
+//           route: 'doc_details',
+//           id:id,
+//           name: name,
+//           speciality: speciality,
+//           qualification: qualification,
+//           hospital: hospital,
+//           address: address,
+//           experience: experience,
+//           description: description,
+//           availability: doctorAvailability,
+//           email:email,
+//           city: city,
+//           pemail:pemail,
+//         );
+//       }).toList();
+//
+//       return doctors;
+//     } catch (e) {
+//       print('Error fetching doctors: $e');
+//       return []; // Return an empty list or handle the error as needed.
+//     }
+//   }
+//   @override
+//   Widget build(BuildContext context) {
+//     return const Placeholder();
+//   }
+// }

@@ -1,11 +1,14 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medlink/views/chats/api.dart';
 import 'package:medlink/views/chats/model/message.dart';
+import '../../constant/date_utils.dart';
 import 'message_card.dart';
 
 
@@ -23,6 +26,9 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+
+  String? _profileImageUrl;
+  String? lastActiveString;
 
   //PATIENT INFO STORED
   Map<String, dynamic> patientData = {};
@@ -57,6 +63,26 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Map<String, dynamic> receiverData = {};
+  Future<void> fetchUserData(String userId,String pat_id,String docId) async {
+    try {
+      print("object   userid : $userId");
+      String collectionName = userId == pat_id ? 'doctor' : 'patients';
+      String receiverId = userId == pat_id ? docId : pat_id;
+      // final snapshotDoc= await FirebaseFirestore.instance.collection("doctor").where("id", isEqualTo: widget.userId).get();
+      final snapshotPat= await FirebaseFirestore.instance.collection(collectionName).where("id", isEqualTo: receiverId).get();
+
+      if (snapshotPat.docs.isNotEmpty) {
+        setState(() {
+          receiverData = snapshotPat.docs.first.data() as Map<String, dynamic>;
+        });
+      }
+      print("hiiiiii${receiverData['name']}");
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+
 
   // Send MESSAGE AND STORE IN FIRESTORE
   Future<void> sendMessage(String chatRoomId, String senderId,String toId, String message,Type type) async {
@@ -75,11 +101,27 @@ class _ChatScreenState extends State<ChatScreen> {
     final ref = FirebaseFirestore.instance.collection('chats/$chatRoomId/messages/');
 
     try {
-      await ref.doc(time).set(messageData.toJson()).then((value) =>APIs.sendPushNotification(chatRoomId,senderId,toId,type == Type.text ? message : 'Image'));
+
+      // String newtoId= senderId == widget.pat_id ?  widget.doc_id:widget.pat_id;
+      await ref.doc(time).set(messageData.toJson()).then((value) =>APIs.sendPushNotification(chatRoomId,senderId,widget.pat_id,widget.doc_id,type == Type.text ? message : 'Image'));
     }
     catch (e) {
       print('Error sending message: $e');
     }
+    // String collectionName = senderId == widget.pat_id ?'patients' : 'doctor' ;
+    //
+    // final ref1 = FirebaseFirestore.instance.collection(collectionName);
+    //
+    // try {
+    //   await ref1.doc(senderId).update(
+    //       {
+    //         'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+    //       })
+    //   ;
+    // }
+    // catch (e) {
+    //   print('Error last_active: $e');
+    // }
   }
 
   // ALL MSG DISPLAY
@@ -106,20 +148,96 @@ class _ChatScreenState extends State<ChatScreen> {
     await sendMessage(chatId,senderId,toId, imageUrl,Type.image);
   }
 
+
+  Future<void> loadProfileImage() async {
+    final DocumentSnapshot dataDoc= await APIs.getReceiverInfo(widget.userId, widget.pat_id,widget.doc_id, );
+
+    final imageUrl = await APIs.getProfileImageUrl(dataDoc['email']!);
+    if (imageUrl != null) {
+      setState(() {
+        _profileImageUrl = imageUrl;
+        print("PROFILE found");
+      });
+    }
+    print("PROFILE not found ");
+  }
+
+  Future<void> callLastActiveString(String userId,String docId,String patId) async {
+
+    final lastActivecall=await APIs.getLastActiveString(widget.userId, widget.doc_id, widget.pat_id,);
+    if (lastActivecall != null) {
+      setState(() {
+        lastActiveString =lastActivecall;
+        print("lastActivecalled");
+      });
+    }
+    print("lastActivecall not ");
+  }
+
+  Future<void> updateActiveStatus(bool isOnline,String userId,String patientId,String doc_id) async {
+    String collectionName = userId == patientId ? 'patients' : 'doctor';
+    final DocumentSnapshot dataDoc= await APIs.getUserInfo(userId, patientId);
+    print("In update active");
+
+    FirebaseFirestore.instance.collection(collectionName).doc(userId).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+      'push_token':  APIs.getSelfPushToken(userId,  patientId),
+    });
+  }
+
   List<Message> list = [];
   final textController=TextEditingController();
+
 
   @override
   void initState() {
     super.initState();
     fetchPatientData();
     fetchDoctorData();
+    loadProfileImage();
+    fetchUserData(widget.userId,widget.pat_id,widget.doc_id);
+    print("vhxgbxjhbkxjhx");
     APIs.updateFirebaseMessagingToken(widget.userId, widget.pat_id);
+    // APIs.getPushToken(widget.userId, widget.pat_id);
+
+    // callLastActiveString(widget.userId,widget.doc_id,widget.pat_id);
+    print("STATUS OF ONLINE OR NOT ");
+
+    SystemChannels.lifecycle.setMessageHandler((message) async {
+      print('Message: $message');
+
+      if (widget.userId.isNotEmpty) {
+        if (message.toString().contains('resume')) {
+          await updateActiveStatus(true,widget.userId,widget.pat_id,widget.doc_id);
+        }
+        if (message.toString().contains('pause')) {
+          await updateActiveStatus(false,widget.userId,widget.pat_id,widget.doc_id);
+        }
+      }
+      // else{
+      //   updateActiveStatus(false,personalId!,widget.patientId,widget.doctorId);
+      // }
+
+      return Future.value(message);
+
+    });
+
+
+
+
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+  }
+
 
   bool  _isUploading=false;
   @override
   Widget build(BuildContext context) {
+    print("hiiiguiii${receiverData['last_active']}");
     return GestureDetector(
       onTap: ()=>FocusScope.of(context).unfocus(),
       child: SafeArea(
@@ -128,29 +246,57 @@ class _ChatScreenState extends State<ChatScreen> {
               automaticallyImplyLeading: false,
               flexibleSpace: InkWell(
                 onTap: (){},
-                child:Row(
-                      children: [
-                        IconButton(
-                            onPressed: (){
-                              Navigator.pop(context);
-                              // Navigator.pushReplacement( context,
-                              //   MaterialPageRoute(builder: (context) =>MainChatScreenDoc(email: widget.email),),
-                              // );
-                            },
-                            icon: const Icon(Icons.arrow_back,color: Colors.black,)),
-                        CircleAvatar(child: Icon(Icons.person)),
-                        SizedBox(width: 10,),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(widget.Name,style: TextStyle(fontSize: 16,color: Colors.black,fontWeight: FontWeight.w500),),
-                            SizedBox(height: 2,),
-                            Text("Last seen not available",style: TextStyle(fontSize: 13,color: Colors.black54,),),
-                          ],
-                        )
-                      ],
-                    ),
+                child:Container(
+                  color: Colors.blueAccent.shade700,
+                  padding: EdgeInsets.symmetric(vertical: 4,horizontal: 0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: (){
+                            Navigator.pop(context);
+                            // Navigator.pushReplacement( context,
+                            //   MaterialPageRoute(builder: (context) =>MainChatScreenDoc(email: widget.email),),
+                            // );
+                          },
+                          icon: const Icon(Icons.arrow_back,color: Colors.white,)),
+                      CircleAvatar(
+                        radius: MediaQuery.of(context).size.width*0.09,
+                        child: _profileImageUrl != null
+                          ? ClipOval(
+                        child: Image.network(
+                          _profileImageUrl!,
+                        ),
+                      )
+                          : Icon(
+                        Icons.person,
+                      ),),
+                      SizedBox(width: 10,),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.Name,style: TextStyle(fontSize: 16,color: Colors.white,fontWeight: FontWeight.w500),),
+                          SizedBox(height: 2,),
+
+                          // Text("Last seen not available",style: TextStyle(fontSize: 13,color: Colors.grey.shade300,),),
+                          Text(
+
+                            receiverData['last_active'] !=null  ? receiverData['is_online']
+                                  ? 'Online'
+                                  : MyDateUtil.getLastActiveTime(
+                                  context: context,
+                                  lastActive: receiverData['last_active'])
+                                      : "Last seen not available ",
+                            style: const TextStyle(
+                                fontSize: 13, color: Color.fromARGB(255, 234, 245, 255)),
+                              ),
+
+                        ],
+                      )
+                    ],
+                  ),
+
+                ),
               ),
             ),
             backgroundColor: Color.fromARGB(255, 234, 248, 255),
@@ -251,7 +397,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   setState(() => _isUploading = false);
                                 }
                               },
-                                  icon:Icon(Icons.image,color: Colors.blueAccent,)),
+                                  icon:Icon(Icons.image,color: Colors.blueAccent.shade400,)),
 
                               //camera
                               IconButton(onPressed: () async {
@@ -275,7 +421,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                   setState(() => _isUploading = false);
                                 }
                               },
-                                  icon:Icon(Icons.camera_alt,color: Colors.blueAccent,)),
+                                  icon:Icon(Icons.camera_alt,color: Colors.blueAccent.shade400,)),
                               SizedBox(width: MediaQuery.of(context).size.width*0.02,),
                             ],
                           ),
@@ -302,7 +448,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         minWidth:0,
                         padding: EdgeInsets.only(top: 10,bottom: 10,right: 5,left: 10),
                         shape: CircleBorder(),
-                        color: Colors.green,
+                        color: Colors.greenAccent.shade700,
                         child: Icon(Icons.send,color: Colors.white,size: 28,),
                       )
                     ],

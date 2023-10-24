@@ -192,7 +192,7 @@ class SignupPage_Doc extends StatelessWidget {
                               ),
                             ),
                             prefixIcon: Icon(
-                              Icons.phone,
+                              Icons.medical_information,
                               color: Color(0xFFBDBDBD), // Adjust the color as needed
                             ),
                           ),
@@ -328,7 +328,10 @@ class SignupPage_Doc extends StatelessWidget {
       'email': email,
       'phoneno': phoneNumber,
       'medical_lic':med,
-      'password':password
+      'password':password,
+      "push_token":"",
+      "is_online":false,
+      "last_active":"",
     });
     // Set the 'id' field to the same value as the Firestore document ID
     await docRef.set({'id': docRef.id}, SetOptions(merge: true));

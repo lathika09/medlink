@@ -77,9 +77,93 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
+
+  Map<String, dynamic> selfData = {};
+  Future<void> fetchSelfData() async {
+    try {
+      Map<String, dynamic> selfData = {};
+      final Map<String, dynamic> args =
+      ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      final String? pemail = args['pemail'] as String?;
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: pemail).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          selfData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(selfData['name']);
+          print("PRINT THIS : ${selfData['id']}");
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+
+  Future<void> addPatientToDoctorSubcollection() async {
+    try {
+      final Map<String, dynamic> args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      final String? pemail = args['pemail'] as String?;
+      final String? email = args['email'] as String?;
+
+      // Step 1: Retrieve the doctor's document ID using their email
+      final doctorQuery = await FirebaseFirestore.instance
+          .collection('doctor') // Replace with your doctor's collection name
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (doctorQuery.docs.isEmpty) {
+        print('Doctor not found with email: $email');
+        return;
+      }
+
+      final doctorDocument = doctorQuery.docs.first;
+      final doctorId = doctorDocument.id;
+
+      // Step 2: Create a reference to the "patients" subcollection within the doctor's document
+      final doctorPatientsCollection = FirebaseFirestore.instance.collection('doctor/$doctorId/patients');
+
+      // Step 3: Check if the patient already exists in the subcollection
+      final existingPatientQuery = await doctorPatientsCollection.doc(pemail).get();
+
+      if (existingPatientQuery.exists) {
+        print('Patient already exists in the doctor\'s subcollection.');
+        return; // Skip adding the patient again
+      }
+
+      // Step 4: Fetch patient data
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: pemail!).get();
+      if (snapshot.docs.isNotEmpty) {
+        final selfData = snapshot.docs.first.data() as Map<String, dynamic>;
+
+        // Add any patient-specific data you need here
+        final patientData = {
+          'email': pemail,
+          'patientId': selfData['id'],
+          'name': selfData['name'],
+          // Add more fields if needed
+        };
+
+        // Step 5: Add the patient to the doctor's subcollection
+        await doctorPatientsCollection.doc(pemail).set(patientData);
+
+        // Step 6: Add the patient document ID as a field in the patient's document
+        await doctorPatientsCollection.doc(pemail).update({
+          'id': pemail, // Use the email as the ID, or you can use another unique identifier
+          // Add any other fields you need
+        });
+
+        print('Patient added to doctor\'s subcollection.');
+      } else {
+        print('Patient data not found for email: $pemail');
+      }
+    } catch (e) {
+      print('Error adding patient to doctor subcollection: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    fetchSelfData();
   }
 
   @override
@@ -99,7 +183,7 @@ class _BookingPageState extends State<BookingPage> {
   Widget build(BuildContext context) {
     final Map<String, dynamic> args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
     final String? pemail = args['pemail'] as String?;
-    //final String? email = args['email'] as String?;
+    final String? email = args['email'] as String?;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -193,6 +277,7 @@ class _BookingPageState extends State<BookingPage> {
                 title:"Make Appointment",
                 onPressed:(){
                   storeAppointmentDetails();
+                  addPatientToDoctorSubcollection();
                   showModalBottomSheet(context: context, builder: ((context) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,

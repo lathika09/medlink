@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medlink/constant/date_utils.dart';
 import 'package:medlink/views/chats/chat_screen.dart';
+import 'api.dart';
 import 'model/message.dart';
 
 
@@ -52,11 +56,42 @@ class _UserCardState extends State<UserCard> {
     }
   }
 
+
+  Future<void> updateActiveStatus(bool isOnline,String userId,String patientId,String doc_id) async {
+    String collectionName = userId == patientId ? 'patients' : 'doctor';
+    final DocumentSnapshot dataDoc= await APIs.getUserInfo(userId, patientId);
+
+    FirebaseFirestore.instance.collection(collectionName).doc(userId).update({
+      'is_online': isOnline,
+      'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
+      'push_token': dataDoc["push_token"],
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchPatientData();
     fetchDoctorData();
+    // String? personalId = patientData["id"] ?? doctorData["id"];
+    // SystemChannels.lifecycle.setMessageHandler((message) {
+    //   log('Message: $message');
+    //
+    //   if (personalId!= null) {
+    //     if (message.toString().contains('resume')) {
+    //       updateActiveStatus(true,personalId,widget.patientId,widget.doctorId);
+    //     }
+    //     if (message.toString().contains('pause')) {
+    //       updateActiveStatus(false,personalId,widget.patientId,widget.doctorId);
+    //     }
+    //   }
+    //   // else{
+    //   //   updateActiveStatus(false,personalId!,widget.patientId,widget.doctorId);
+    //   // }
+    //
+    //   return Future.value(message);
+    //
+    // });
 
 
   }

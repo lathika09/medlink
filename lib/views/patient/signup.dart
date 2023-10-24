@@ -310,6 +310,10 @@ class SignupPage extends StatelessWidget {
       'name': name,
       'email': email,
       'phoneNumber': phoneNumber,
+      "push_token":"",
+      "is_online":false,
+      "last_active":"",
+
     });
 
     // Set the 'id' field to the same value as the Firestore document ID

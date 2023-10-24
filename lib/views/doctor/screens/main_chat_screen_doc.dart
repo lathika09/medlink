@@ -14,6 +14,7 @@ class MainChatScreenDoc extends StatefulWidget {
 
 class _MainChatScreenDocState extends State<MainChatScreenDoc> {
 
+
   Future<String> getPatientName(String patientId) async {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -87,81 +88,15 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
     }
   }
 
-  // Future<void> updateDoctorFCMToken(String userEmail) async {
-  //   FirebaseMessaging fMessaging = FirebaseMessaging.instance;
-  //
-  //   // Request permission for push notifications
-  //   await fMessaging.requestPermission();
-  //
-  //   // Get the Firebase Messaging token
-  //   String? fcmToken = await fMessaging.getToken();
-  //
-  //   if (fcmToken != null) {
-  //     // Update the FCM token for the doctor identified by their email
-  //     final CollectionReference doctorsCollection = FirebaseFirestore.instance.collection('doctor');
-  //
-  //     // Update the FCM token for the doctor with the specified email
-  //     await doctorsCollection
-  //         .where('email', isEqualTo: userEmail)
-  //         .get()
-  //         .then((querySnapshot) {
-  //       if (querySnapshot.docs.isNotEmpty) {
-  //         final doctorDoc = querySnapshot.docs.first;
-  //
-  //         // Update the FCM token field in the doctor document
-  //         doctorDoc.reference.update({'push_token': fcmToken}).then((_) {
-  //           print('FCM Token updated for doctor with email $userEmail');
-  //         }).catchError((error) {
-  //           print('Error updating FCM token: $error');
-  //         });
-  //       } else {
-  //         print('Doctor with email $userEmail not found');
-  //       }
-  //     }).catchError((error) {
-  //       print('Error querying doctor: $error');
-  //     });
-  //   } else {
-  //     print('Failed to get FCM token');
-  //   }
-  // }
 
-  // Future<void> updateActiveStatus(String email, bool isOnline) async {
-  //   QuerySnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
-  //       .collection("doctor")
-  //       .where('email', isEqualTo: email)
-  //       .get();
-  //   if (snapshot.docs.isNotEmpty) {
-  //     final userRef = snapshot.docs.first.reference;
-  //
-  //     await userRef.update({
-  //       'is_online': isOnline,
-  //       'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
-  //     });
-  //     print("Data updated");
-  //   } else {
-  //     print("User not found");
-  //   }
-  // }
   @override
   void initState() {
     super.initState();
     fetchDoctorData();
+    // fetchUserData();
     // updateDoctorFCMToken(widget.email);
 
-    // SystemChannels.lifecycle.setMessageHandler((message) {
-    //   log('Message: $message');
-    //
-    //   if (widget.email != null) {
-    //     if (message.toString().contains('resume')) {
-    //       updateActiveStatus(widget.email, true);
-    //     }
-    //     if (message.toString().contains('pause')) {
-    //       updateActiveStatus(widget.email, false);
-    //     }
-    //   }
-    //
-    //   return Future.value(message);
-    // });
+
   }
   @override
   Widget build(BuildContext context) {
@@ -173,26 +108,35 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
             iconTheme: IconThemeData(
               color: Colors.white,
             ),
-            leading: IconButton(
-                onPressed: (){
-                  // Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) =>HomePage_doc(email: widget.email)),
-                  );
-                },
-                icon: const Icon(
-                  Icons.arrow_back,
-                  size:20,
-                  color: Colors.white,)
-            ),
+            // leading: IconButton(
+            //     onPressed: (){
+            //       // Navigator.pop(context);
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(builder: (context) =>HomePage_doc(email: widget.email)),
+            //       );
+            //     },
+            //     icon: const Icon(
+            //       Icons.arrow_back,
+            //       size:20,
+            //       color: Colors.white,)
+            // ),
 
-            title:Text(appname,
-              style: TextStyle(
-                  fontSize: 30,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold),
+            title:Center(
+              child: Text(appname,
+                style: TextStyle(
+                    fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
+              ),
             ),
+            elevation: 24.0,
+            actions: <Widget>[IconButton(
+          icon: Icon(Icons.refresh,size: 30,color: Colors.blueAccent.shade700,),
+        onPressed: () {
+          // Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
+        },
+      ),]
 
           ),
           body: doctorData['id'] != null

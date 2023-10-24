@@ -21,7 +21,8 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()=>FocusScope.of(context).unfocus(),
+      onTap: () async {FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,

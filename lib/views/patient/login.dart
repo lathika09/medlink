@@ -12,10 +12,15 @@ class LoginPage extends StatelessWidget {
   final TextEditingController login_email = TextEditingController();
   final TextEditingController login_pswd = TextEditingController();
 
+
   @override
+
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()=>FocusScope.of(context).unfocus(),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+
+      },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,

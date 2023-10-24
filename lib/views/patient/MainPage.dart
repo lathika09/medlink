@@ -1,4 +1,5 @@
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/views/patient/home.dart';
@@ -28,6 +29,8 @@ class _MainPageState extends State<MainPage> {
   final ratio = 0.5; // Adjust this ratio to control the mixture
 
   get mixedColor => Color.lerp(color1, color2, ratio);
+
+
 
   @override
   Widget build(BuildContext context) {
