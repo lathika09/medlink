@@ -12,19 +12,70 @@ import 'package:medlink/views/doctor/login_doc.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
 
-class PatientListPage extends StatefulWidget {
-  const PatientListPage({Key? key}) : super(key: key);
+import '../../chats/chat_screen.dart';
+import 'main_chat_screen_doc.dart';
 
+class PatientListPage extends StatefulWidget {
+  const PatientListPage({Key? key, required this.dEmail}) : super(key: key);
+final String dEmail;
   @override
   State<PatientListPage> createState() => _PatientListPageState();
 }
 
 class _PatientListPageState extends State<PatientListPage> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  Future<List<PatientData>> fetchPatientsForDoctor(String doctorId) async {
+    try {
+      // Reference the doctor's subcollection of patients
+      CollectionReference doctorPatientsCollection = _firestore.collection('doctor/$doctorId/patients');
+
+      QuerySnapshot querySnapshot = await doctorPatientsCollection.get();
+
+      List<PatientData> patients = querySnapshot.docs.map((doc) {
+        Map<String, dynamic> patientData = doc.data() as Map<String, dynamic>;
+
+        // Access fields from the document with null checks
+        String id = (patientData['id'] is String) ? patientData['id'] : '';
+        String name = (patientData['name'] is String) ? patientData['name'] : '';
+        String email = (patientData['email'] is String) ? patientData['email'] : '';
+        // Add more fields as needed
+
+        return PatientData(
+          id: id,
+          name: name,
+          email: email,
+          docEmail: widget.dEmail,
+          // Add more fields here to match your PatientData class.
+        );
+      }).toList();
+
+      return patients;
+    } catch (e) {
+      print('Error fetching patients: $e');
+      return []; // Return an empty list or handle the error as needed.
+    }
+  }
+  Map<String, dynamic> doctorData = {};
+  Future<void> fetchDoctorData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("doctor").where("email", isEqualTo: widget.dEmail).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(doctorData['name']);
+          print("PRINT THIS : ${doctorData['id']}");
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    fetchDoctorData();
   }
 
   @override
@@ -58,27 +109,28 @@ class _PatientListPageState extends State<PatientListPage> {
               child:
               Column(
                 children: [
+                  if (doctorData['id'] != null)
                   FutureBuilder<List<PatientData>>(
-                    future: null,
+                    future: fetchPatientsForDoctor(doctorData['id']!),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return CircularProgressIndicator();
+                        return  Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
-                        // List<DoctorData> doctors = snapshot.data ?? [];
+                        List<PatientData> patients = snapshot.data ?? [];
 
                         return ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
-                          // itemCount: doctors.length,
-                          // itemBuilder: (context, index) {
-                          //   return doctors[index];
-                          // },
-                          itemCount: 6,
+                          itemCount: patients.length,
                           itemBuilder: (context, index) {
+                            return patients[index];
+                          },
 
-                            },
                         );
                       }
                     },
@@ -95,30 +147,258 @@ class _PatientListPageState extends State<PatientListPage> {
 
 
 class PatientData extends StatefulWidget {
-  const PatientData({Key? key, required this.id, required this.phoneNumber, required this.name, required this.lastActive, required this.isOnline, required this.email, required this.pushToken}) : super(key: key);
+  const PatientData({Key? key, required this.id, required this.name, required this.email, required this.docEmail}) : super(key: key);
   final String id;
-  final String phoneNumber;
   final String name;
 
-  final String lastActive;
-  final bool isOnline;
   final String email;
-  final String pushToken;
+
+  final String docEmail;
 
   @override
   State<PatientData> createState() => _PatientDataState();
 }
 
 class _PatientDataState extends State<PatientData> {
+  Future<String?> createChat(String patientId, String doctorId) async {
+    try {
+      QuerySnapshot existingChats = await FirebaseFirestore.instance.collection('chats')
+          .where('participants.patientId', isEqualTo: patientId)
+          .where('participants.doctorId', isEqualTo: doctorId)
+          .get();
+
+      if (existingChats.docs.isNotEmpty) {
+        String existingChatId = existingChats.docs[0].id;
+        return existingChatId;
+      }
+      else {
+        Map<String, dynamic> chatData = {
+          'participants': {
+            'patientId': patientId,
+            'doctorId': doctorId,
+          },
+          'created_at': FieldValue.serverTimestamp(),
+        };
+
+        DocumentReference docRef = await FirebaseFirestore.instance.collection('chats').add(chatData);
+        String docId = docRef.id;
+        await docRef.update({'id': docId});
+
+        return docId;
+      }
+    } catch (e) {
+      print('Error creating or checking chat document: $e');
+      return null; // Return null to indicate an error
+    }
+  }
+
+
+
+  Map<String, dynamic> patientData = {};
+  Future<void> fetchPatientData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: widget.email).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          patientData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(patientData['name']);
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
+  Map<String, dynamic> doctorData = {};
+  Future<void> fetchDoctorData() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection("doctor").where("email", isEqualTo: widget.docEmail).get();
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          doctorData = snapshot.docs.first.data() as Map<String, dynamic>;
+          print(doctorData['name']);
+          print("PRINT THIS : ${doctorData['id']}");
+        });
+      }
+    } catch (e) {
+      print("Error fetching doctor data: $e");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    fetchDoctorData();
+    fetchPatientData();
   }
-
+  final color1 = Colors.white;
+  final color2 = Colors.greenAccent.shade400;
+  final ratio = 0.5;
+  get mixednewColor => Color.lerp(color1, color2, ratio);
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 13),
+      // height: 210,
+      child: GestureDetector(
+        child: Card(
+          elevation: 5,
+          color: Colors.greenAccent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, bottom: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Container(
+                          height: MediaQuery.of(context).size.width*0.15,
+                          width: MediaQuery.of(context).size.width*0.15,
+                          color:Colors.transparent,
+                          child:CircleAvatar(
+                            backgroundColor: Colors.blue,
+                            radius:MediaQuery.of(context).size.width*0.09,//60
+                            child:Icon(Icons.person,color:Colors.white,size: MediaQuery.of(context).size.width*0.09,),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Flexible(
+                      child: Padding(
+                        padding:
+                        EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width:
+                                  MediaQuery.of(context).size.width *
+                                      0.4,
+                                  child: Text(
+                                    widget.name,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    softWrap: true,
+                                  ),
+                                ),
+
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal:18.0),
+                      child: MaterialButton(
+                        onPressed: ()async {
+                          String? chatId = await createChat(patientData['id'],doctorData['id']);
+                          if (chatId != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChatScreen(
+                                  chat_id: chatId,
+                                  doc_id: doctorData['id'],
+                                  pat_id: patientData['id'],
+                                  userId: doctorData['id'],
+                                  Name: patientData['name'],
+                                ),
+                              ),
+                            );
+                          }
+
+                          // Navigator.push(context,
+                          //     MaterialPageRoute(builder:
+                          //         (context)=>ChatScreen(chat_id:chatId!,doc_id:doctorData['id'],pat_id:patientData['id'])
+                          // ));
+
+                        },
+                        child: Icon(
+                          Icons.chat,
+                          color: Colors.white,
+                          size: 30,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        color: Colors.blue,
+                        minWidth: MediaQuery.of(context).size.width/6,
+                      ),
+                    ),
+                  ],
+                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                //   children: [
+                //     MaterialButton(
+                //       onPressed: ()async {
+                //         String? chatId = await createChat(patientData['id'],doctorData['id']);
+                //         if (chatId != null) {
+                //           Navigator.push(
+                //             context,
+                //             MaterialPageRoute(
+                //               builder: (context) => ChatScreen(
+                //                 chat_id: chatId,
+                //                 doc_id: doctorData['id'],
+                //                 pat_id: patientData['id'],
+                //                 userId: patientData['id'], Name: doctorData['name'],
+                //               ),
+                //             ),
+                //           );
+                //         }
+                //
+                //         // Navigator.push(context,
+                //         //     MaterialPageRoute(builder:
+                //         //         (context)=>ChatScreen(chat_id:chatId!,doc_id:doctorData['id'],pat_id:patientData['id'])
+                //         // ));
+                //
+                //       },
+                //       child: Icon(
+                //         Icons.chat,
+                //         color: Colors.white,
+                //         size: 30,
+                //       ),
+                //       shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(12.0),
+                //       ),
+                //       color: Colors.blueAccent.shade700,
+                //       minWidth: MediaQuery.of(context).size.width/6,
+                //     ),
+                //
+                //   ],
+                // ),
+              ],
+            ),
+          ),
+        ),
+        onTap: () async {
+          String? chatId = await createChat(patientData['id'],doctorData['id']);
+          if (chatId != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatScreen(
+                  chat_id: chatId,
+                  doc_id: doctorData['id'],
+                  pat_id: patientData['id'],
+                  userId: doctorData['id'],
+                  Name: patientData['name'],
+                ),
+              ),
+            );
+          }
+        },
+      ),
+    );
   }
 }
 

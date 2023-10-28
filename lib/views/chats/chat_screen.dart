@@ -176,13 +176,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> updateActiveStatus(bool isOnline,String userId,String patientId,String doc_id) async {
     String collectionName = userId == patientId ? 'patients' : 'doctor';
-    final DocumentSnapshot dataDoc= await APIs.getUserInfo(userId, patientId);
+    // final DocumentSnapshot dataDoc= await APIs.getUserInfo(userId, patientId);
     print("In update active");
 
     FirebaseFirestore.instance.collection(collectionName).doc(userId).update({
       'is_online': isOnline,
       'last_active': DateTime.now().millisecondsSinceEpoch.toString(),
-      'push_token':  APIs.getSelfPushToken(userId,  patientId),
+      'push_token': await APIs.getSelfPushToken(userId,patientId),
     });
   }
 
@@ -223,15 +223,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
     });
 
-
-
-
   }
+
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+
   }
+
 
 
   bool  _isUploading=false;

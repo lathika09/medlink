@@ -53,6 +53,8 @@ dependencies:
   emoji_picker_flutter: ^1.6.2
   firebase_messaging: ^14.7.1
   http: ^0.13.3
+  printing: ^5.11.0
+  pdf: ^3.10.4
 #  (1.1.0
   flutter_notification_channel: ^2.0.0
   gallery_saver: ^2.3.2

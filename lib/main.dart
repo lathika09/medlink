@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
       routes: {
         'doc_details':(context)=>const DocDetails(),
         "booking_Page":(context)=>const BookingPage(),
-        // 'doc_profile':(context)=>const ProfileSetting(),
+        // 'doc_profile':(context)=>const PatientListPage(),
         'update_prof':(context)=>const UpdateProfile(),
         'welcome':(context)=>const WelcomePage(),
         'docsearch':(context)=>const DoctorList(),

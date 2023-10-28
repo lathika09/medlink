@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/views/doctor/login_doc.dart';
+import 'package:medlink/views/doctor/screens/profile.dart';
 import 'package:medlink/views/patient/AppointmentPage.dart';
 import '../../chats/main_screen.dart';
 import '../../patient/NotificationPage.dart';
@@ -25,12 +26,14 @@ class _HomePage_docState extends State<HomePage_doc> {
 
 
   //await FirebaseAuth.instance.signOut();
+
   @override
   void initState() {
     super.initState();
     // await FirebaseAuth.instance.signOut();
     // updateDoctorFCMToken(widget.pemail);
   }
+
   @override
   Widget build(BuildContext context) {
     // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -188,12 +191,12 @@ class _HomePage_docState extends State<HomePage_doc> {
                               ],),
                           ),
                           onTap: (){
-                            Navigator.pushNamed(
+
+                            Navigator.push(
                               context,
-                              'doc_profile',
-                              arguments: {
-                                'email': widget.email,
-                              },
+                              MaterialPageRoute(
+                                builder: (context) =>PatientListPage(dEmail: widget.email!,),
+                              ),
                             );
                           },
                         ),

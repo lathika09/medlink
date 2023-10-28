@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medlink/views/patient/doctor_details.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:lottie/lottie.dart';
+import 'package:intl/intl.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({Key? key}) : super(key: key);
@@ -134,11 +135,16 @@ class _BookingPageState extends State<BookingPage> {
       if (snapshot.docs.isNotEmpty) {
         final selfData = snapshot.docs.first.data() as Map<String, dynamic>;
 
+
+        final now = DateTime.now();
+        final formattedDateTime = DateFormat('yyyy-MM-dd').format(now);
+
         // Add any patient-specific data you need here
         final patientData = {
           'email': pemail,
           'patientId': selfData['id'],
           'name': selfData['name'],
+          'createdAt':formattedDateTime,
           // Add more fields if needed
         };
 
