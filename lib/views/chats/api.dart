@@ -10,8 +10,6 @@ import 'package:http/http.dart';
 class APIs {
 
   static FirebaseAuth auth = FirebaseAuth.instance;
-  // to return current user
-  static User get user => auth.currentUser!;
 
   static Future<String?> getProfileImageUrl(String userEmail) async {
     try {
@@ -37,15 +35,13 @@ class APIs {
           .get();
 
       if (snap.docs.isNotEmpty) {
-        // Extract the "lastActive" as a string from the first document in the query result
         String lastActiveString = snap.docs[0]['last_active'] as String;
         return lastActiveString;
       } else {
-        // The document with the specified criteria was not found
         return null;
       }
     } catch (e) {
-      // Handle any potential errors that may occur during the query
+
       print('Error retrieving last active timestamp: $e');
       return null;
     }
@@ -54,7 +50,7 @@ class APIs {
 
 //Future<DocumentSnapshot<Map<String, dynamic>>>
   static Stream<QuerySnapshot<Map<String, dynamic>>> getUserInfolist(String userId, String patientId,String docId) {
-    // Define the collection to query based on the condition
+
     String collectionName = userId == patientId ? 'doctor' : 'patients';
     String receiverId = userId == patientId ? 'docId' : 'patientId';
 
@@ -75,9 +71,8 @@ class APIs {
 
       return documentSnapshot;
     } catch (e) {
-      // Handle any errors that may occur during the document retrieval
       print('Error getting user info: $e');
-      throw e; // Optionally, rethrow the error for higher-level error handling
+      throw e;
     }
 
   }
@@ -93,9 +88,8 @@ class APIs {
 
       return documentSnapshot;
     } catch (e) {
-      // Handle any errors that may occur during the document retrieval
       print('Error getting user info: $e');
-      throw e; // Optionally, rethrow the error for higher-level error handling
+      throw e;
     }
 
   }
@@ -103,7 +97,7 @@ class APIs {
 // for accessing Firebase Messaging (Push Notification)
   static FirebaseMessaging fMessaging = FirebaseMessaging.instance;
 
-// Function to get and update Firebase Messaging Token for a specific user by email
+// Function to get and update firebase essaging tken for a specific user by email
   static Future<void> updateFirebaseMessagingToken(String userId, String patientId) async {
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
@@ -194,26 +188,21 @@ class APIs {
     }
   }
 // for sending push notification
-
   static Future<void> sendPushNotification(
       String chatId,String userId,String patientId,String docId,String msg) async {
     try {
-      // Retrieve the push token of the 'toId' (patientId)
+
       String toPushToken = await APIs.getPushToken(userId,patientId,docId);
 print("push TOKEN : ${toPushToken}");
-      // Retrieve the name of 'userId'
+
       String fromName = await APIs.getUserName(userId,patientId);
       final body = {
         "to": toPushToken,
         "notification": {
-          "title": fromName, //our name should be send
+          "title": fromName,
           "body": msg,
           "android_channel_id": "chats"
         },
-
-  // "data": {
-  //   "some_data": "User ID: ${userId}",
-  // },
       };
       print("BODY : ${body}");
 
@@ -243,7 +232,7 @@ print("push TOKEN : ${toPushToken}");
       return querySnapshot.docs.first.id;
     } else {
       return null;
-      //String? docId = await getDocIdByEmail('johndoe@example.com');
+
     }
   }
 }

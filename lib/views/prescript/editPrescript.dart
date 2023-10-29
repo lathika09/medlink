@@ -92,32 +92,6 @@ class _EditPrescriptState extends State<EditPrescript> {
     fetchPatientData();
     fetchPrescriptrData(widget.doctorId,widget.pemail);
 
-//     Map<String, dynamic> medicinesMap = widget.docid['medicines'];
-//     List<String> medicineKeys = medicinesMap.keys.toList();
-//
-// // Create a list of TextEditingControllers for medicine keys
-//     List<TextEditingController> medicineKeyControllers = [];
-//     List<TextEditingController> medicineValueControllers = [];
-//
-//     for (String key in medicineKeys) {
-//       TextEditingController keyController = TextEditingController(text: key);
-//       medicineKeyControllers.add(keyController);
-//
-//       TextEditingController valueController = TextEditingController(text: medicinesMap[key]);
-//       medicineValueControllers.add(valueController);
-//     }
-//
-// // Now you can access the keys and values using these controllers
-//     for (int i = 0; i < medicineKeyControllers.length; i++) {
-//       TextEditingController keyController = medicineKeyControllers[i];
-//       TextEditingController valueController = medicineValueControllers[i];
-//
-//       String medicineKey = keyController.text;
-//       String medicineValue = valueController.text;
-//
-//       print("Medicine Key: $medicineKey");
-//       print("Medicine Value: $medicineValue");
-//     }
 
   }
   @override
@@ -233,7 +207,6 @@ class _EditPrescriptState extends State<EditPrescript> {
                           style: TextStyle(fontSize: 18),
                           controller: docName,
                           maxLines: null,
-                          // keyboardType: TextInputType.number,
                           decoration: InputDecoration(
 
                             hintText: 'Doctor Name',
@@ -265,7 +238,6 @@ class _EditPrescriptState extends State<EditPrescript> {
                           style: TextStyle(fontSize: 18),
                           controller: pemail,
                           maxLines: null,
-                          // keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             hintText: 'Patient Email',
                           ),
@@ -347,8 +319,6 @@ class _EditPrescriptState extends State<EditPrescript> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      // DateTime now = DateTime.now();
-                      // String formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
                       CollectionReference ref = FirebaseFirestore.instance.collection('doctor/${widget.doctorId}/patients/${widget.pemail}/prescriptions');
                       final  presc_data={
                         'patientId':pid.text,
@@ -404,19 +374,12 @@ class _EditPrescriptState extends State<EditPrescript> {
                     ),),
                     );
                   });
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => PrescribeReport(
-                  //       docid: widget.docid, medicines: widget.docid['medicines'],
-                  //     ),
-                  //   ),
-                  // );
+
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "Make Report",
+                    "Create PDF",
                     style: TextStyle(
                       fontSize: 24,
                       color: Color.fromARGB(255, 251, 251, 251),

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/views/prescript/addPrescript.dart';
 
+import '../doctor/screens/profile.dart';
 import 'editPrescript.dart';
 
 class MainPrescript extends StatefulWidget {
@@ -53,7 +54,7 @@ class _MainPrescriptState extends State<MainPrescript> {
   }
   Future<List<PrescriptionData>> fetchPrescriptionsForPatient(String doctorId,String patientEmail) async {
     try {
-      // Reference the patient's subcollection of prescriptions
+
       CollectionReference patientPrescriptionsCollection = FirebaseFirestore.instance.collection('doctor/$doctorId/patients/$patientEmail/prescriptions');
 
       QuerySnapshot querySnapshot = await patientPrescriptionsCollection.get();
@@ -61,7 +62,6 @@ class _MainPrescriptState extends State<MainPrescript> {
       List<PrescriptionData> prescriptions = querySnapshot.docs.map((doc) {
         Map<String, dynamic> prescriptionData = doc.data() as Map<String, dynamic>;
 
-        // Access fields from the document with null checks
         String doctorId = (prescriptionData['doctorId'] is String) ? prescriptionData['doctorId'] : '';
         String doctorName = (prescriptionData['doctorName'] is String) ? prescriptionData['doctorName'] : '';
 
@@ -72,8 +72,6 @@ class _MainPrescriptState extends State<MainPrescript> {
         Map<String, dynamic> medicines = (prescriptionData['medicines'] is Map) ? prescriptionData['medicines'] : {};
         String time = (prescriptionData['time'] is String) ? prescriptionData['time'] : '';
 
-        // Add more fields as needed
-
         return PrescriptionData(
           doctorId: doctorId,
           doctorName: doctorName,
@@ -81,16 +79,15 @@ class _MainPrescriptState extends State<MainPrescript> {
           patientName:patientName,
           patientEmail:patientEmail,
           medicines: medicines,
-
           time: time,
-          // Add more fields here to match your PrescriptionData class.
+
         );
       }).toList();
 
       return prescriptions;
     } catch (e) {
       print('Error fetching prescriptions: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
   }
 
@@ -100,8 +97,8 @@ class _MainPrescriptState extends State<MainPrescript> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _usersStream =
-    FirebaseFirestore.instance.collection('doctor/${widget.doctorId}/patients/${widget.patientEmail}/prescriptions').snapshots();
+    // final Stream<QuerySnapshot> _usersStream =
+    // FirebaseFirestore.instance.collection('doctor/${widget.doctorId}/patients/${widget.patientEmail}/prescriptions').snapshots();
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent.shade700,
@@ -116,7 +113,13 @@ class _MainPrescriptState extends State<MainPrescript> {
         ),
       ),
       appBar: AppBar(
-        leading: IconButton(onPressed: (){}, icon:Icon(Icons.arrow_back,color: Colors.white,)),
+        leading: IconButton(
+            onPressed: (){
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) =>PatientListPage(dEmail: widget.doctorEmail)));
+
+        },
+            icon:Icon(Icons.arrow_back,color: Colors.white,)),
         backgroundColor: Colors.blueAccent.shade700,//Color.fromARGB(255, 0, 11, 133)
         title: Text('Prescription List ',style: TextStyle(color: Colors.white,fontSize: 24),),
       ),
@@ -178,39 +181,22 @@ class _PrescriptionDataState extends State<PrescriptionData> {
 
   Future<DocumentSnapshot> fetchPrescriptionDocumentForPatient(String doctorId,String patientEmail, String prescriptionId) async {
     try {
-      // Reference the patient's subcollection of prescriptions and get the specific prescription document
+
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .doc('doctor/$doctorId/patients/$patientEmail/prescriptions/$prescriptionId')
           .get();
 
       if (documentSnapshot.exists) {
-        return documentSnapshot; // Return the DocumentSnapshot if it exists.
+        return documentSnapshot;
       } else {
-        throw Exception('Prescription document not found'); // Handle the case when the document doesn't exist.
+        throw Exception('Prescription document not found');
       }
     } catch (e) {
       print('Error fetching prescription document: $e');
-      throw e; // Re-throw the error or handle it as needed.
+      throw e;
     }
   }
 
-  // Map<String, dynamic> prescriptionDocument = {};
-  // Future<void> fetchPrescribeData(String doctorId,String patientEmail, String prescriptionId) async {
-  //   try {
-  //     final snapshot = await  fetchPrescriptionDocumentForPatient(doctorId, patientEmail, prescriptionId);
-  //     if (snapshot.exists) {
-  //       setState(() {
-  //         prescriptionDocument = snapshot.data() as Map<String, dynamic>;
-  //         print(prescriptionDocument['patientName']);
-  //         print("PRINT THIS : ${prescriptionDocument['id']}");
-  //       });
-  //     }
-  //   } catch (e) {
-  //     print("Error fetching doctor data: $e");
-  //   }
-  // }
-
-//fetchPrescriptionDocumentForPatient(widget.doctorId, widget.patientEmail, widget.time),
   @override
   void initState() {
     super.initState();
@@ -292,75 +278,3 @@ class _PrescriptionDataState extends State<PrescriptionData> {
 
 
 
-// StreamBuilder(
-// stream: _usersStream,
-// builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-// if (snapshot.hasError) {
-// return Text("something is wrong");
-// }
-// if (snapshot.connectionState == ConnectionState.waiting) {
-// return Center(
-// child: CircularProgressIndicator(),
-// );
-// }
-// if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-// return Container(
-// decoration: BoxDecoration(
-// borderRadius: BorderRadius.circular(12),
-// ),
-// child: ListView.builder(
-// itemCount: snapshot.data!.docs.length,
-// itemBuilder: (_, index) {
-// return GestureDetector(
-// onTap: () {
-// Navigator.pushReplacement(
-// context,
-// MaterialPageRoute(
-// builder: (_) => EditPrescript(
-// docid: snapshot.data!.docs[index],
-// doctorId: widget.doctorId,
-// pemail: widget.patientEmail,
-// )),
-// );
-// },
-// child: Column(
-// children: [
-// SizedBox(
-// height: 4,
-// ),
-// Padding(
-// padding: EdgeInsets.only(
-// left: 3,
-// right: 3,
-// ),
-// child: ListTile(
-// shape: RoundedRectangleBorder(
-// borderRadius: BorderRadius.circular(10),
-// side: BorderSide(
-// color: Colors.black,
-// ),
-// ),
-// title: Text(
-// snapshot.data!.docChanges[index].doc['time'],
-// style: TextStyle(
-// fontSize: 20,
-// ),
-// ),
-// contentPadding: EdgeInsets.symmetric(
-// vertical: 12,
-// horizontal: 16,
-// ),
-// ),
-// ),
-// ],
-// ),
-// );
-// },
-// ),
-// );
-// }
-// else{
-// return CircularProgressIndicator();
-// }
-// },
-// ),

@@ -138,7 +138,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       "Patient Name :",
-                      style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
+                      style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.black87),
                     ),
                   ),
                   Flexible(
@@ -146,6 +146,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                       padding: const EdgeInsets.all(4.0),
                       child: TextField(
                         controller: pname,
+                        style: TextStyle(fontSize: 18),
                         maxLines: null,
                         // keyboardType: TextInputType.number,
                         decoration: InputDecoration(
@@ -157,9 +158,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 15,
-            ),
+
 
             Container(
               decoration: BoxDecoration(border: Border.all()),
@@ -169,7 +168,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       "Doctor Name :",
-                      style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
+                      style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.black87),
                     ),
                   ),
                   Flexible(
@@ -178,7 +177,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                       child: TextField(
                         controller: docName,
                         maxLines: null,
-                        // keyboardType: TextInputType.number,
+                        style: TextStyle(fontSize: 18),
                         decoration: InputDecoration(
                           hintText: 'Doctor Name',
                         ),
@@ -196,7 +195,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       "Diagnosis :",
-                      style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.black87),
+                      style: TextStyle(fontSize: 18,fontWeight: FontWeight.w500,color: Colors.black87),
                     ),
                   ),
                   Flexible(
@@ -205,7 +204,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                       child: TextField(
                         controller: diagnosis,
                         maxLines: null,
-                        // keyboardType: TextInputType.number,
+                        style: TextStyle(fontSize: 18),
                         decoration: InputDecoration(
                           hintText: 'Diagnosis',
                         ),
@@ -283,7 +282,6 @@ class _AddPrescriptState extends State<AddPrescript> {
               }).toList(),
             ),
 
-            // Use a Column at the end to add the "Add Medicine" button
               ElevatedButton(
                 onPressed: () {
                   setState(() {

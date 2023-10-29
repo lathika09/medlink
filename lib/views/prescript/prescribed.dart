@@ -114,15 +114,6 @@ class _PrescribeReportState extends State<PrescribeReport> {
                 child:  pw.Column(
                   mainAxisAlignment: pw.MainAxisAlignment.start,
                   children: [
-                    // pw.Flexible(
-                    //   child: pw.SvgImage(
-                    //     svg: _logo,
-                    //     height: 100,
-                    //   ),
-                    // ),
-                    // pw.SizedBox(
-                    //   height: 20,
-                    // ),
                     pw.Center(
                       child: pw.Text(
                         'PRESCRIPTION',

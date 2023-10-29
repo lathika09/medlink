@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
       List<DoctorData> doctors = querySnapshot.docs.map((doc) {
         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
 
-        // to access the availability field so default ytakrn
+
         Map<String, dynamic> availability = doctorData['availability'] ?? {
           'weekday': '',
           'time': '',
@@ -62,7 +62,6 @@ class _HomePageState extends State<HomePage> {
         List<dynamic> time =
         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
 
-        // to access fields from the document with null checks
         String id = (doctorData['id'] is String) ? doctorData['id'] : '';
 
         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
@@ -101,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       return doctors;
     } catch (e) {
       print('Error fetching doctors: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
   }
 
@@ -334,7 +333,7 @@ class _HomePageState extends State<HomePage> {
       'category':'Orthopedic',
     },
     {
-      'icon':FontAwesomeIcons.bone,
+      'icon': FontAwesomeIcons.personFalling,
       'category':'Gastroenterologist',
     },
   ];

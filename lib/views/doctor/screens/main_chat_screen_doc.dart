@@ -53,7 +53,7 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
         String chatId = doc.id;
         String patientId = chatData['participants']['patientId'] ?? '';
         String pName = await getPatientName(patientId);
-        // You can also fetch patient name using a similar approach as with doctors
+
 
         chats.add(UserCard(
           chatId: chatId,
@@ -61,14 +61,14 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
           patientId: patientId,
           doctorName: pName,
           usermail: widget.email,
-          // Other properties for UserCard
+
         ));
       }
 
       return chats;
     } catch (e) {
       print('Error fetching chats for doctor: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
   }
 
@@ -108,19 +108,6 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
             iconTheme: IconThemeData(
               color: Colors.white,
             ),
-            // leading: IconButton(
-            //     onPressed: (){
-            //       // Navigator.pop(context);
-            //       Navigator.push(
-            //         context,
-            //         MaterialPageRoute(builder: (context) =>HomePage_doc(email: widget.email)),
-            //       );
-            //     },
-            //     icon: const Icon(
-            //       Icons.arrow_back,
-            //       size:20,
-            //       color: Colors.white,)
-            // ),
 
             title:Center(
               child: Text(appname,
@@ -169,8 +156,6 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
             ],
           )
               : Container(),
-
-
       ),
     );
   }

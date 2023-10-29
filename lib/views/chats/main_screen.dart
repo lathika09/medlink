@@ -1,17 +1,13 @@
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/chats/model/patient.dart';
 import 'package:medlink/views/chats/user_chat.dart';
 import '../patient/MainPage.dart';
-import 'api.dart';
+
 
 
 class MainChatScreen extends StatefulWidget {
@@ -35,11 +31,11 @@ class _MainChatScreenState extends State<MainChatScreen> {
       if (doctorSnapshot.exists) {
         return doctorSnapshot.get('name') as String;
       } else {
-        return ''; // Handle the case when the doctor document does not exist
+        return '';
       }
     } catch (e) {
       print('Error fetching doctor name: $e');
-      return ''; // Handle the error as needed
+      return '';
     }
   }
 
@@ -76,7 +72,7 @@ class _MainChatScreenState extends State<MainChatScreen> {
       return chats;
     } catch (e) {
       print('Error fetching chats for patient: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
   }
 

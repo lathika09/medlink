@@ -137,10 +137,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
         // });
 
         if (querySnap.docs.isNotEmpty) {
-          // Get the first document found
           final doctorDocument = querySnap.docs.first;
-
-          // Update the document with the new data
           await doctorDocument.reference.update({
             'prof_image': imageUrl,
           });
@@ -194,7 +191,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
   @override
   void initState() {
     super.initState();
-
+    loadProfileImage();
   }
 
   @override
@@ -256,15 +253,18 @@ class _UpdateProfileState extends State<UpdateProfile> {
               SizedBox(height: 22,),
               Center(
                 child: Stack(
-                  // alignment: AlignmentDirectional.topStart,
-                  // fit: StackFit.expand,
                   children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundImage: _profileImageUrl != null
-                          ? NetworkImage(_profileImageUrl!)
-                          :NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"), // Provide a default image
+                    GestureDetector(
+                      onTap: (){
+                        loadProfileImage();
+                      },
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _profileImageUrl != null
+                            ? NetworkImage(_profileImageUrl!)
+                            :NetworkImage("https://www.pngitem.com/pimgs/m/421-4212266_transparent-default-avatar-png-default-avatar-images-png.png"), // Provide a default image
 
+                      ),
                     ),
                     Positioned(
                       child: IconButton(

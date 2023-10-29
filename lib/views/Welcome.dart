@@ -66,7 +66,7 @@ class WelcomePage extends StatelessWidget {
                             minWidth:double.infinity,
                             height: 50,
                             onPressed:(){
-                              Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage()));//FOR PATIENTS
+                              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>LoginPage()));//FOR PATIENTS
                               // Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage(pemail: "lathikakotian091@gmail.com")));
                             },
                           color: Colors.blue[600],
@@ -88,7 +88,7 @@ class WelcomePage extends StatelessWidget {
                           minWidth:double.infinity,
                           height: 50,
                           onPressed:(){
-                            Navigator.push(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
+                            Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>LoginPage_Doc()));//FOR  DOCTOR BUTTON GO TO HOMEPAGE
                           },
                           color: Colors.blue[600],
                           shape: RoundedRectangleBorder(

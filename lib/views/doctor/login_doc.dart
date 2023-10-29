@@ -5,6 +5,8 @@ import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/sign_up.dart';
 import 'package:medlink/views/patient/signup.dart';
 
+import '../Welcome.dart';
+
 class LoginPage_Doc extends StatefulWidget {
   const LoginPage_Doc({Key? key}) : super(key: key);
 
@@ -32,7 +34,10 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
 
           backgroundColor: Colors.white,
           leading: IconButton(
-              onPressed: (){Navigator.pop(context);},
+              onPressed: (){
+                Navigator.pop(context);
+                Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>WelcomePage()));
+                },
               icon: const Icon(
                 Icons.arrow_back_ios,
                 size:20,
@@ -152,7 +157,6 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                                   MaterialPageRoute(builder: (context) =>HomePage_doc(email: login_email.text)),
                                 );
 
-
                               }
                               );
                             }
@@ -229,7 +233,7 @@ class _LoginPage_DocState extends State<LoginPage_Doc> {
                       //Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),),
                       TextButton(
                         onPressed: (){
-                          Navigator.push(context,MaterialPageRoute(builder: (context)=>SignupPage_Doc()));
+                          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context)=>SignupPage_Doc()));
                         },
                         child: const Text("Sign up",style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18),
                         ),

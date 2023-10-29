@@ -6,6 +6,8 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:intl/intl.dart';
 
+import 'MainPage.dart';
+
 class BookingPage extends StatefulWidget {
   const BookingPage({Key? key}) : super(key: key);
   @override
@@ -59,7 +61,7 @@ class _BookingPageState extends State<BookingPage> {
   }
 
 
-  // Function to fetch the doctor's weekday array
+  // functn to fetch the doctor weekday array
   Future<void> fetchDoctorWeekdays(String email) async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -105,9 +107,9 @@ class _BookingPageState extends State<BookingPage> {
       final String? pemail = args['pemail'] as String?;
       final String? email = args['email'] as String?;
 
-      // Step 1: Retrieve the doctor's document ID using their email
+
       final doctorQuery = await FirebaseFirestore.instance
-          .collection('doctor') // Replace with your doctor's collection name
+          .collection('doctor')
           .where('email', isEqualTo: email)
           .get();
 
@@ -119,18 +121,17 @@ class _BookingPageState extends State<BookingPage> {
       final doctorDocument = doctorQuery.docs.first;
       final doctorId = doctorDocument.id;
 
-      // Step 2: Create a reference to the "patients" subcollection within the doctor's document
+
       final doctorPatientsCollection = FirebaseFirestore.instance.collection('doctor/$doctorId/patients');
 
-      // Step 3: Check if the patient already exists in the subcollection
       final existingPatientQuery = await doctorPatientsCollection.doc(pemail).get();
 
       if (existingPatientQuery.exists) {
         print('Patient already exists in the doctor\'s subcollection.');
-        return; // Skip adding the patient again
+        return;
       }
 
-      // Step 4: Fetch patient data
+
       final snapshot = await FirebaseFirestore.instance.collection("patients").where("email", isEqualTo: pemail!).get();
       if (snapshot.docs.isNotEmpty) {
         final selfData = snapshot.docs.first.data() as Map<String, dynamic>;
@@ -139,7 +140,7 @@ class _BookingPageState extends State<BookingPage> {
         final now = DateTime.now();
         final formattedDateTime = DateFormat('yyyy-MM-dd').format(now);
 
-        // Add any patient-specific data you need here
+
         final patientData = {
           'email': pemail,
           'patientId': selfData['id'],
@@ -151,10 +152,9 @@ class _BookingPageState extends State<BookingPage> {
         // Step 5: Add the patient to the doctor's subcollection
         await doctorPatientsCollection.doc(pemail).set(patientData);
 
-        // Step 6: Add the patient document ID as a field in the patient's document
+
         await doctorPatientsCollection.doc(pemail).update({
-          'id': pemail, // Use the email as the ID, or you can use another unique identifier
-          // Add any other fields you need
+          'id': pemail,
         });
 
         print('Patient added to doctor\'s subcollection.');
@@ -309,13 +309,14 @@ class _BookingPageState extends State<BookingPage> {
                               title: "Click here.",
                               disable: false,
                               onPressed: () {
-                                // Navigator.pushReplacement(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) => MainPage(pemail: pemail!),
-                                //   ),
-                                // );
                                 Navigator.pop(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MainPage(pemail: pemail!),
+                                  ),
+                                );
+
 
                               }
                           ),
@@ -388,17 +389,16 @@ class _BookingPageState extends State<BookingPage> {
   }
   final CollectionReference appointmentsCollection = FirebaseFirestore.instance.collection('appointments');
 
-  //reference to doctor appointments subcollection
+
   final CollectionReference doctorAppointmentsCollection =
   FirebaseFirestore.instance.collection('doctor').doc('email').collection('appointments');
 
 
-//reference to patient appointments subcollection
   final CollectionReference patientAppointmentsCollection =
   FirebaseFirestore.instance.collection('patients').doc('pemail').collection('appointments');
 
   void storeAppointmentDetails() async {
-    if (!_dateSelected || !_timeSelected) {// not selected then
+    if (!_dateSelected || !_timeSelected) {
       return;
     }
     Map<String, dynamic> appointmentData = {

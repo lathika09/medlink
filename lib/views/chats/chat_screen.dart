@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -380,7 +379,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                                 final List<XFile> images = await picker.pickMultiImage(imageQuality: 70);
 
-                                // sending image one by one
+                                // sending image one
                                 for (var i in images) {
                                   log('Image Path: ${i.path}');
                                   setState(() => _isUploading = true);

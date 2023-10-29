@@ -1,20 +1,9 @@
-import 'dart:typed_data';
-import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-
 import 'package:medlink/constant/image_string.dart';
-import 'package:medlink/constant/utils.dart';
-import 'package:medlink/views/doctor/login_doc.dart';
-import 'package:medlink/views/doctor/screens/home_doc.dart';
-import 'package:medlink/views/doctor/screens/update_prof.dart';
 import 'package:medlink/views/prescript/mainPrescript.dart';
-
 import '../../chats/chat_screen.dart';
-import 'main_chat_screen_doc.dart';
+
 
 class PatientListPage extends StatefulWidget {
   const PatientListPage({Key? key, required this.dEmail}) : super(key: key);
@@ -28,7 +17,6 @@ class _PatientListPageState extends State<PatientListPage> {
 
   Future<List<PatientData>> fetchPatientsForDoctor(String doctorId) async {
     try {
-      // Reference the doctor's subcollection of patients
       CollectionReference doctorPatientsCollection = _firestore.collection('doctor/$doctorId/patients');
 
       QuerySnapshot querySnapshot = await doctorPatientsCollection.get();
@@ -36,25 +24,22 @@ class _PatientListPageState extends State<PatientListPage> {
       List<PatientData> patients = querySnapshot.docs.map((doc) {
         Map<String, dynamic> patientData = doc.data() as Map<String, dynamic>;
 
-        // Access fields from the document with null checks
         String id = (patientData['id'] is String) ? patientData['id'] : '';
         String name = (patientData['name'] is String) ? patientData['name'] : '';
         String email = (patientData['email'] is String) ? patientData['email'] : '';
-        // Add more fields as needed
 
         return PatientData(
           id: id,
           name: name,
           email: email,
           docEmail: widget.dEmail,
-          // Add more fields here to match your PatientData class.
         );
       }).toList();
 
       return patients;
     } catch (e) {
       print('Error fetching patients: $e');
-      return []; // Return an empty list or handle the error as needed.
+      return [];
     }
   }
   Map<String, dynamic> doctorData = {};
@@ -266,7 +251,7 @@ class _PatientDataState extends State<PatientData> {
     fetchPatientData();
   }
   final color1 = Colors.white;
-  final color2 = Colors.greenAccent.shade400;
+  final color2 = Colors.blue.shade100;
   final ratio = 0.5;
   get mixednewColor => Color.lerp(color1, color2, ratio);
   @override
@@ -276,10 +261,10 @@ class _PatientDataState extends State<PatientData> {
       // height: 210,
       child: GestureDetector(
         child: Card(
-          elevation: 5,
-          color: Colors.greenAccent,
+          elevation: 10,
+          color: Colors.blue.shade50,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               children: [
                 Row(
@@ -295,7 +280,7 @@ class _PatientDataState extends State<PatientData> {
                           width: MediaQuery.of(context).size.width*0.15,
                           color:Colors.transparent,
                           child:CircleAvatar(
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.blueAccent,
                             radius:MediaQuery.of(context).size.width*0.09,//60
                             child:Icon(Icons.person,color:Colors.white,size: MediaQuery.of(context).size.width*0.09,),
                           ),
@@ -350,12 +335,6 @@ class _PatientDataState extends State<PatientData> {
                               ),
                             );
                           }
-
-                          // Navigator.push(context,
-                          //     MaterialPageRoute(builder:
-                          //         (context)=>ChatScreen(chat_id:chatId!,doc_id:doctorData['id'],pat_id:patientData['id'])
-                          // ));
-
                         },
                         child: Icon(
                           Icons.chat,
@@ -365,52 +344,12 @@ class _PatientDataState extends State<PatientData> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
-                        color: Colors.blue,
+                        color: Colors.blueAccent,
                         minWidth: MediaQuery.of(context).size.width/6,
                       ),
                     ),
                   ],
                 ),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                //   children: [
-                //     MaterialButton(
-                //       onPressed: ()async {
-                //         String? chatId = await createChat(patientData['id'],doctorData['id']);
-                //         if (chatId != null) {
-                //           Navigator.push(
-                //             context,
-                //             MaterialPageRoute(
-                //               builder: (context) => ChatScreen(
-                //                 chat_id: chatId,
-                //                 doc_id: doctorData['id'],
-                //                 pat_id: patientData['id'],
-                //                 userId: patientData['id'], Name: doctorData['name'],
-                //               ),
-                //             ),
-                //           );
-                //         }
-                //
-                //         // Navigator.push(context,
-                //         //     MaterialPageRoute(builder:
-                //         //         (context)=>ChatScreen(chat_id:chatId!,doc_id:doctorData['id'],pat_id:patientData['id'])
-                //         // ));
-                //
-                //       },
-                //       child: Icon(
-                //         Icons.chat,
-                //         color: Colors.white,
-                //         size: 30,
-                //       ),
-                //       shape: RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(12.0),
-                //       ),
-                //       color: Colors.blueAccent.shade700,
-                //       minWidth: MediaQuery.of(context).size.width/6,
-                //     ),
-                //
-                //   ],
-                // ),
               ],
             ),
           ),
@@ -422,99 +361,8 @@ class _PatientDataState extends State<PatientData> {
               builder: (context) => MainPrescript(patientEmail: widget.email, doctorId: doctorData['id'], doctorEmail: widget.docEmail)
             ),
           );
-          // String? chatId = await createChat(patientData['id'],doctorData['id']);
-          // if (chatId != null) {
-          //   Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => ChatScreen(
-          //         chat_id: chatId,
-          //         doc_id: doctorData['id'],
-          //         pat_id: patientData['id'],
-          //         userId: doctorData['id'],
-          //         Name: patientData['name'],
-          //       ),
-          //     ),
-          //   );
-          // }
         },
       ),
     );
   }
 }
-
-
-// class PatientListPage extends StatefulWidget {
-//   const PatientListPage({Key? key}) : super(key: key);
-//
-//   @override
-//   State<PatientListPage> createState() => _PatientListPageState();
-// }
-//
-// class _PatientListPageState extends State<PatientListPage> {
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   Future<List<PatientData>> fetchDoctors() async {
-//     try {
-//       QuerySnapshot querySnapshot = await _firestore.collection('doctor').get();
-//
-//       List<PatientData> doctors = querySnapshot.docs.map((doc) {
-//         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
-//
-//         // to access the availability field so default ytakrn
-//         Map<String, dynamic> availability = doctorData['availability'] ?? {
-//           'weekday': '',
-//           'time': '',
-//         };
-//
-//         List<dynamic> weekdays =
-//         availability['weekday'] is List ? List<dynamic>.from(availability['weekday']) : [];
-//         List<dynamic> time =
-//         availability['time'] is List ? List<dynamic>.from(availability['time']) : [];
-//
-//         // to access fields from the document with null checks
-//         String id = (doctorData['id'] is String) ? doctorData['id'] : '';
-//
-//         String name = (doctorData['name'] is String) ? doctorData['name'] : '';
-//         List<String> speciality = (doctorData['speciality'] is List) ? List<String>.from(doctorData['speciality']) : [];
-//         String qualification = (doctorData['qualification'] is String) ? doctorData['qualification'] : '';
-//         String hospital = (doctorData['hospital'] is String) ? doctorData['hospital'] : '';
-//         String address = (doctorData['address'] is String) ? doctorData['address'] : '';
-//         String experience = (doctorData['experience'] is String) ? doctorData['experience'] : '';
-//         String description = (doctorData['description'] is String) ? doctorData['description'] : '';
-//         String email = (doctorData['email'] is String) ? doctorData['email'] : '';
-//         String city = (doctorData['city'] is String) ? doctorData['city'] : '';
-//         String pemail =(patientData['email'] is String) ? patientData['email'] : '';
-//         //  availability map in doc
-//         Map<String, dynamic> doctorAvailability = {
-//           'weekday': weekdays,
-//           'time': time,
-//         };
-//
-//         return DoctorData(
-//           route: 'doc_details',
-//           id:id,
-//           name: name,
-//           speciality: speciality,
-//           qualification: qualification,
-//           hospital: hospital,
-//           address: address,
-//           experience: experience,
-//           description: description,
-//           availability: doctorAvailability,
-//           email:email,
-//           city: city,
-//           pemail:pemail,
-//         );
-//       }).toList();
-//
-//       return doctors;
-//     } catch (e) {
-//       print('Error fetching doctors: $e');
-//       return []; // Return an empty list or handle the error as needed.
-//     }
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }

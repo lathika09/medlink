@@ -50,23 +50,21 @@ class _AppointmentPageState extends State<AppointmentPage> {
         const int delayMilliseconds = 1 * 60 * 1000;
         await Future.delayed(Duration(milliseconds: delayMilliseconds));
 
-        // patient and doctor collections to find matching documents
         final patientQuery = FirebaseFirestore.instance.collection('patients').where('name', isEqualTo: patientName);
         final doctorQuery = FirebaseFirestore.instance.collection('doctor').where('name', isEqualTo: doctorName);
 
         final patientSnapshot = await patientQuery.get();
         final doctorSnapshot = await doctorQuery.get();
 
-        // Delete the document from the appoint collection
+        //to delete
         await doc.reference.delete();
 
-        // Delete the document from the patient's subcollection
+
         for (final patientDoc in patientSnapshot.docs) {
           final patientRef = patientDoc.reference.collection('appointments').doc(doc.id);
           await patientRef.delete();
         }
 
-        // Delete the document from the doctor's subcollection
         for (final doctorDoc in doctorSnapshot.docs) {
           final doctorRef = doctorDoc.reference.collection('appointments').doc(doc.id);
           await doctorRef.delete();
@@ -138,7 +136,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       final appointRef = appointmentSCollection.doc(appointmentId);
       await appointRef.update({'status': newStatus.toString()});
 
-      // Update the patient's appointment subcollection
+
       final patientQuery = await FirebaseFirestore.instance
           .collection('patients')
           .where('name', isEqualTo: patientName)
@@ -155,7 +153,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         }
       }
 
-      // Update the doctor's appointment subcollection
+
       final doctorQuery = await FirebaseFirestore.instance
           .collection('doctor')
           .where('email', isEqualTo: widget.email)
@@ -201,7 +199,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
               Text(
                 'Appointment Schedule',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               SizedBox(
                 height: 25,
@@ -235,7 +233,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                 });
                               },
                               child: Center(
-                                child: Text(filterStatus.name),
+                                child: Text(filterStatus.name,style: TextStyle(fontSize: 16),),
                               ),
                             ),
                           ),
@@ -246,7 +244,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     alignment: _alignment,
                     duration: const Duration(milliseconds: 200),
                     child: Container(
-                      width: 100,
+                      width: 110,
                       height: 40,
                       decoration: BoxDecoration(
                           color: Colors.blueAccent.shade700,
@@ -257,6 +255,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                            fontSize: 17,
                           ),
                         ),
                       ),
@@ -295,7 +294,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor: Colors.blue,
-                                    backgroundImage:NetworkImage("https://static.thenounproject.com/png/5034901-200.png"),
+                                    child: Icon(Icons.person,size: 26,),
+                                    // backgroundImage:NetworkImage("https://static.thenounproject.com/png/5034901-200.png"),
                                 ),
                                 SizedBox(
                                   width: 25,
@@ -304,7 +304,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                   _schedule['patient_name'],
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 19
                                   ),
                                 ),
 
@@ -343,7 +344,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                     _schedule['date'],
                                     style: const TextStyle(
                                         color: Colors.indigo,
-                                        fontSize: 15,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(

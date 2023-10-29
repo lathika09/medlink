@@ -55,10 +55,7 @@ class _HomePage_docState extends State<HomePage_doc> {
                     actions: <Widget>[
                       TextButton(
                         onPressed: () async {
-                          // User confirmed, log out and navigate to login page
-                          Navigator.of(context).pop(); // Close the dialog
-                          // Perform logout logic here
-                          // You can use Navigator to navigate to the login page
+                          Navigator.of(context).pop();
                           Navigator.pushReplacement( context,
                               MaterialPageRoute(builder: (context) => LoginPage_Doc()),
                           );
@@ -290,12 +287,6 @@ class _HomePage_docState extends State<HomePage_doc> {
                                 MaterialPageRoute(builder: (context) => MainChatScreenDoc(email: widget.email)),
                               );
                             }
-                            // Navigator.push(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //     builder: (context) =>MainChatScreenDoc(email: widget.email),
-                            //     )
-                            // );
                           },
                         ),
                       ),
