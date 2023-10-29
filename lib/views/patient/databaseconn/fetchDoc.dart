@@ -124,7 +124,7 @@ class _DoctorListState extends State<DoctorList> {
               color: Colors.white,
               fontSize: 22,
             ),),
-            dropdownColor: Colors.green.shade50,
+            dropdownColor: Colors.blue.shade50,
             icon: Icon(Icons.arrow_drop_down),
             iconSize: 26,
             isExpanded: true,
@@ -143,7 +143,7 @@ class _DoctorListState extends State<DoctorList> {
               return DropdownMenuItem(
 
                   value:valueItem,
-                  child:Text(valueItem)
+                  child:Text(valueItem,style: TextStyle(color: Colors.black),)
               );
             }).toList(),
           ),

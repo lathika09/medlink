@@ -11,6 +11,7 @@ import 'package:medlink/constant/utils.dart';
 import 'package:medlink/views/doctor/login_doc.dart';
 import 'package:medlink/views/doctor/screens/home_doc.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
+import 'package:medlink/views/prescript/mainPrescript.dart';
 
 import '../../chats/chat_screen.dart';
 import 'main_chat_screen_doc.dart';
@@ -77,6 +78,8 @@ class _PatientListPageState extends State<PatientListPage> {
     super.initState();
     fetchDoctorData();
   }
+  TextEditingController search_name = TextEditingController();
+  String searchText='';
 
   @override
   Widget build(BuildContext context) {
@@ -103,12 +106,38 @@ class _PatientListPageState extends State<PatientListPage> {
           ),]
 
       ),
-      body: SafeArea(
+      body:
+      SafeArea(
           child: SingleChildScrollView(
             child: Container(
               child:
               Column(
                 children: [
+                  Container(
+                      margin: EdgeInsets.symmetric(vertical: 10.0,horizontal: 15.0),
+                      // padding: EdgeInsets.symmetric(vertical: 2.0,horizontal: 20.0),
+                      child:  TextField(
+
+                        style:const TextStyle(fontSize: 19.0,fontWeight: FontWeight.w600,color: Colors.black),
+                        controller: search_name,
+                        onChanged: (value){
+                          setState(() {
+                            searchText=value;
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 5.0,horizontal: 20.0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide:const BorderSide(width: 0.8),
+                            ),
+                            hintText: "Search by Patient Name",
+                            // prefixIcon:const Icon(Icons.search,size:20.0,),
+                            suffixIcon: IconButton(onPressed: (){}, icon:const Icon(Icons.search,size: 20.0,))
+                        ),
+                      ),
+                  ),
                   if (doctorData['id'] != null)
                   FutureBuilder<List<PatientData>>(
                     future: fetchPatientsForDoctor(doctorData['id']!),
@@ -122,6 +151,12 @@ class _PatientListPageState extends State<PatientListPage> {
                         return Text('Error: ${snapshot.error}');
                       } else {
                         List<PatientData> patients = snapshot.data ?? [];
+                        patients = patients.where((patient) {
+
+                          bool nameMatches = searchText.isEmpty ||
+                              patient.name.toLowerCase().contains(searchText.toLowerCase());
+                          return nameMatches;
+                        }).toList();
 
                         return ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
@@ -381,21 +416,27 @@ class _PatientDataState extends State<PatientData> {
           ),
         ),
         onTap: () async {
-          String? chatId = await createChat(patientData['id'],doctorData['id']);
-          if (chatId != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ChatScreen(
-                  chat_id: chatId,
-                  doc_id: doctorData['id'],
-                  pat_id: patientData['id'],
-                  userId: doctorData['id'],
-                  Name: patientData['name'],
-                ),
-              ),
-            );
-          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainPrescript(patientEmail: widget.email, doctorId: doctorData['id'], doctorEmail: widget.docEmail)
+            ),
+          );
+          // String? chatId = await createChat(patientData['id'],doctorData['id']);
+          // if (chatId != null) {
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => ChatScreen(
+          //         chat_id: chatId,
+          //         doc_id: doctorData['id'],
+          //         pat_id: patientData['id'],
+          //         userId: doctorData['id'],
+          //         Name: patientData['name'],
+          //       ),
+          //     ),
+          //   );
+          // }
         },
       ),
     );

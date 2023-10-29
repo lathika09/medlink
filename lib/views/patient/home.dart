@@ -333,6 +333,10 @@ class _HomePageState extends State<HomePage> {
       'icon':FontAwesomeIcons.bone,
       'category':'Orthopedic',
     },
+    {
+      'icon':FontAwesomeIcons.bone,
+      'category':'Gastroenterologist',
+    },
   ];
   Future<void> refreshData() async {
     try {
@@ -615,7 +619,15 @@ class _HomePageState extends State<HomePage> {
                                   shrinkWrap: true,
                                   itemCount: doctors.length,
                                   itemBuilder: (context, index) {
-                                    return doctors[index];
+                                    final experienceString = doctors[index].experience;
+                                    final yearsOfExperience = int.tryParse(experienceString.split(' ')[0]) ?? 0;
+
+                                    if (yearsOfExperience > 10) {
+                                      return doctors[index];
+                                    } else {
+                                      // If the doctor's experience is not greater than 10 years, return an empty     .
+                                      return Container();
+                                    }
                                   },
                                 );
                               }
