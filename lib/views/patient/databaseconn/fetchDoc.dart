@@ -10,9 +10,7 @@ class DoctorList extends StatefulWidget {
 }
 
 class _DoctorListState extends State<DoctorList> {
-  // List listItem=[
-  //   "Mumbai","Delhi","Pune","Chennai"
-  // ];
+
 
   TextEditingController search_name = TextEditingController();
   String searchText='';

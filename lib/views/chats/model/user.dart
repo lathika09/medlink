@@ -99,7 +99,6 @@ class Availability {
     weekday = List.castFrom<dynamic, int>(json['weekday']);
     time = List.castFrom<dynamic, String>(json['time']);
   }
-
   Map<String, dynamic> toJson() {
     final _data = <String, dynamic>{};
     _data['weekday'] = weekday;

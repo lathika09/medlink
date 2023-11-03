@@ -240,7 +240,7 @@ class _BookingPageState extends State<BookingPage> {
                         _currentIndex = index;
                         selectedHour = availableTimes[index];
                         print("SELECTED : $selectedHour");
-                        // _time=_currentIndex;
+
                         _timeSelected = true;
                       });
                     },

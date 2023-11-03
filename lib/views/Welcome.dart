@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/doctor/login_doc.dart';
-import 'package:medlink/views/doctor/screens/home_doc.dart';
-import 'package:medlink/views/patient/MainPage.dart';
-import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/login.dart';
-import 'package:medlink/views/splash/splash_screen.dart';
+
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({Key? key}) : super(key: key);

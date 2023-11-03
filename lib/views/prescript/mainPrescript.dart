@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/views/prescript/addPrescript.dart';
-
 import '../doctor/screens/profile.dart';
 import 'editPrescript.dart';
 

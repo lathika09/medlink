@@ -16,7 +16,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   FilterStatus status = FilterStatus.Request;
   Alignment _alignment = Alignment.centerLeft;
 
-  // reference for appointment collection
+
   final CollectionReference appointmentCollection = FirebaseFirestore.instance.collection('appointments');
 
 
@@ -463,8 +463,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                         );
                                       },
                                       style: OutlinedButton.styleFrom(
-                                        backgroundColor: Colors.green,
-                                      ),
+                                        backgroundColor: Colors.green,),
                                       child: Text(
                                         'Confirm',
                                         style: TextStyle(color: Colors.white),

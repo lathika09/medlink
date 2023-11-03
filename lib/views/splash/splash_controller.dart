@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:medlink/views/Welcome.dart';
-import 'package:medlink/views/splash/splash_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:medlink/main.dart';
 
 
 class SplashScreenController extends GetxController {
@@ -14,7 +9,7 @@ class SplashScreenController extends GetxController {
 
   Future startAnimation() async {
     if (animate.value) {
-      return; // Animation already started, no need to proceed
+      return;
     }
     await Future.delayed(Duration(milliseconds: 100));
     animate.value=true;

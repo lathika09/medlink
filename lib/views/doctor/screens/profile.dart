@@ -89,7 +89,6 @@ class _PatientListPageState extends State<PatientListPage> {
               // Navigator.push(context, MaterialPageRoute(builder: (context) => UpdateProfile()),);
             },
           ),]
-
       ),
       body:
       SafeArea(

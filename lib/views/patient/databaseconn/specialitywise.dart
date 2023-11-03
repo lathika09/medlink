@@ -95,7 +95,7 @@ class _SpecialityListState extends State<SpecialityList> {
           .map((doc) {
         Map<String, dynamic> doctorData = doc.data() as Map<String, dynamic>;
 
-        // access availability field
+
         Map<String, dynamic> availability = doctorData['availability'] ?? {
           'weekday': '',
           'time': '',

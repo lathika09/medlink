@@ -26,7 +26,6 @@ class PatientModel {
     email = json['email'];
     pushToken = json['push_token'];
   }
-
   Map<String, dynamic> toJson() {
     final _data = <String, dynamic>{};
     _data['phoneNumber'] = phoneNumber;

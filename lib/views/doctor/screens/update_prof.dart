@@ -289,7 +289,7 @@ class _UpdateProfileState extends State<UpdateProfile> {
                 ),
                 child: Column(
                   children: [
-                    //name
+
                     buildTextField("Name :",_name),
                     SizedBox(height: 15,),
                     //spec
