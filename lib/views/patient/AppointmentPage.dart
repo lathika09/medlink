@@ -232,8 +232,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
                                   }
                                 });
                               },
-                              child: Center(
-                                child: Text(filterStatus.name,style: TextStyle(fontSize: 16),),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                                child: Text(filterStatus.name,style: TextStyle(fontSize: 16),textAlign: filterStatus.name == "Request"
+                                    ? TextAlign.left
+                                    : filterStatus.name == "Cancel"
+                                    ? TextAlign.right
+                                    : TextAlign.center,),
                               ),
                             ),
                           ),

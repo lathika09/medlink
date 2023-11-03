@@ -354,8 +354,8 @@ class SignupPage extends StatelessWidget {
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop();// Close the dialog
-                Navigator.push(
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
                 );

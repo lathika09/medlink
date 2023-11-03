@@ -309,8 +309,7 @@ class _AddPrescriptState extends State<AddPrescript> {
                  'time':formattedDate,
                  'medicines': medicines,};
                 await ref.doc(formattedDate).set(presc_data).whenComplete(() {
-                  Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => MainPrescript(patientEmail: widget.patientEmail, doctorId: widget.doctorId, doctorEmail: widget.doctorEmail,)));
+                  _showSuccessDialog(context,"Prescription Added");
                 });
               },
               child: Text('Save Prescription'),
@@ -318,6 +317,27 @@ class _AddPrescriptState extends State<AddPrescript> {
           ],
         ),
       ),
+    );
+  }
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Success'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (_) => MainPrescript(patientEmail: widget.patientEmail, doctorId: widget.doctorId, doctorEmail: widget.doctorEmail,)));
+              },
+            ),
+          ], 
+        );
+      },
     );
   }
 }

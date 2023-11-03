@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medlink/constant/image_string.dart';
-//import 'package:medlink/views/Welcome.dart';
 import 'package:medlink/views/splash/splash_controller.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -65,7 +64,7 @@ class SplashScreen extends StatelessWidget {
                 child:AnimatedOpacity(
                   duration: const Duration(milliseconds: 1000),
                   opacity: splashScreenController.animate.value ? 1 : 0,
-                  child:Image.asset(Splashbelow)
+                  child:Image.asset(Splashbelow,width: MediaQuery.of(context).size.width,)
                 ),
             ),
           ),
