@@ -34,5 +34,5 @@ class Message {
     return _data;
   }
 }
-//for msg type
+//for msg typ
 enum Type {text,image}

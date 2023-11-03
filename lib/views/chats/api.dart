@@ -232,7 +232,6 @@ print("push TOKEN : ${toPushToken}");
       return querySnapshot.docs.first.id;
     } else {
       return null;
-
     }
   }
 }

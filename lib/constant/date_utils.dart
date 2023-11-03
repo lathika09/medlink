@@ -72,7 +72,7 @@ class MyDateUtil {
     return 'Last seen on ${time.day} $month on $formattedTime';
   }
 
-  // get month name from month no. or index
+  // get month name from month no.
   static String _getMonth(DateTime date) {
     switch (date.month) {
       case 1:

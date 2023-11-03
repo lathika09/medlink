@@ -372,7 +372,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                     ),
                                   )
                               ),
-
                               //img gallery
                               IconButton(onPressed: () async {
                                 final ImagePicker picker = ImagePicker();

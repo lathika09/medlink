@@ -5,7 +5,6 @@ import 'package:flutter_notification_channel/flutter_notification_channel.dart';
 import 'package:flutter_notification_channel/notification_importance.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:medlink/views/Welcome.dart';
-import 'package:medlink/views/doctor/screens/profile.dart';
 import 'package:medlink/views/doctor/screens/update_prof.dart';
 import 'package:medlink/views/patient/BookingPage.dart';
 import 'package:medlink/views/patient/databaseconn/fetchDoc.dart';
@@ -42,7 +41,6 @@ class MyApp extends StatelessWidget {
       routes: {
         'doc_details':(context)=>const DocDetails(),
         "booking_Page":(context)=>const BookingPage(),
-        // 'doc_profile':(context)=>const PatientListPage(),
         'update_prof':(context)=>const UpdateProfile(),
         'welcome':(context)=>const WelcomePage(),
         'docsearch':(context)=>const DoctorList(),

@@ -5,8 +5,6 @@ import 'package:medlink/views/patient/MainPage.dart';
 import 'package:medlink/views/patient/home.dart';
 import 'package:medlink/views/patient/signup.dart';
 
-// import '../Welcome.dart';
-// import '../splash/splash_screen.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController login_email = TextEditingController();
@@ -144,13 +142,7 @@ class LoginPage extends StatelessWidget {
                               password: login_pswd.text,
                             ).then((value) {
                               Navigator.push(context,MaterialPageRoute(builder: (context)=>MainPage(pemail: login_email.text,)));
-                              // Navigator.pushNamed(
-                              //   context,
-                              //   'main',//MainPage
-                              //   arguments: {
-                              //     'email':login_email.text
-                              //   },
-                              // );
+
                             });
                           }
                           catch(error){

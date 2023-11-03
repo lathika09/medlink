@@ -2,14 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/src/get_utils/get_utils.dart';
 import 'package:medlink/views/doctor/login_doc.dart';
-import 'package:medlink/views/patient/home.dart';
-//import 'package:medlink/constant/image_string.dart';
 import 'package:medlink/views/patient/login.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../splash/splash_controller.dart';
 
-//import '../splash/splash_screen.dart';
 
 class SignupPage_Doc extends StatelessWidget {
   final TextEditingController _name = TextEditingController();

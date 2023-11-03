@@ -376,10 +376,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.refresh,size: 30,color: Colors.white,),
             onPressed: () {
               refreshData();
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => NotificationPage()),
-              // );
+
             },
           ),
         ],

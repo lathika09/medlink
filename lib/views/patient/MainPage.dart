@@ -1,5 +1,3 @@
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medlink/views/patient/home.dart';
@@ -22,21 +20,16 @@ class _MainPageState extends State<MainPage> {
   int currentPage=0;
   final PageController _page=PageController();
 
-  // Define the colors and ratio for blending
+
   final color1 = Colors.tealAccent.shade400;
   final color2 = Colors.tealAccent.shade700;
-  // final color3 = Colors.greenAccent.shade400;
-  final ratio = 0.5; // Adjust this ratio to control the mixture
-
+  final ratio = 0.5;
   get mixedColor => Color.lerp(color1, color2, ratio);
 
 
 
   @override
   Widget build(BuildContext context) {
-    // final Map<String, dynamic>? arguments = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    // final String? email = arguments?['email'] as String?;
-    // print(email!);
     print("mainpage");
 
     return Scaffold(

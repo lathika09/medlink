@@ -141,7 +141,6 @@ class _MainChatScreenDocState extends State<MainChatScreenDoc> {
                     return Text('Error: ${snapshot.error}');
                   } else {
                     List<UserCard> userCards = snapshot.data ?? [];
-
                     return ListView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,

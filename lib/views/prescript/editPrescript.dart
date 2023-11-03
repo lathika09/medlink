@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:medlink/views/prescript/prescribed.dart';
-
 import '../../constant/image_string.dart';
 import 'mainPrescript.dart';
 
@@ -91,7 +89,6 @@ class _EditPrescriptState extends State<EditPrescript> {
     fetchDoctorData();
     fetchPatientData();
     fetchPrescriptrData(widget.doctorId,widget.pemail);
-
 
   }
   @override
